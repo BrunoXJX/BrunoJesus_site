@@ -3,7 +3,7 @@ import helmet from "@fastify/helmet";
 import rateLimit from "@fastify/rate-limit";
 import type { FastifyInstance } from "fastify";
 
-import { env, getAllowedCorsOrigins } from "../config/env";
+import { env, getAllowedCorsOrigins, isProduction } from "../config/env";
 
 export async function registerSecurityMiddleware(app: FastifyInstance): Promise<void> {
   const allowedOrigins = new Set(getAllowedCorsOrigins());
@@ -45,6 +45,11 @@ export async function registerSecurityMiddleware(app: FastifyInstance): Promise<
   await app.register(cors, {
     origin: (origin, callback) => {
       if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (!isProduction && origin === "null") {
         callback(null, true);
         return;
       }

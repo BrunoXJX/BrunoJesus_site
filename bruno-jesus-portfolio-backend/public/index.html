@@ -3058,7 +3058,7 @@
           return configuredApiUrl.trim();
         }
 
-        return window.location.protocol === "file:" ? "" : "/api/contact";
+        return window.location.protocol === "file:" ? "http://localhost:3333/api/contact" : "/api/contact";
       })();
       const HERO_TAGLINE = "Automatizo o que os outros repetem.";
       const TERMINAL_TEXT = [
