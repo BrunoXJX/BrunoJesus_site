@@ -12,9 +12,12 @@ function setTestEnv(): void {
   process.env.DATABASE_URL =
     "postgresql://postgres:postgres@localhost:5432/bruno_portfolio_db?schema=public";
   process.env.FRONTEND_URL = "http://localhost:3333";
+  process.env.CORS_ORIGINS = "";
   process.env.RESEND_API_KEY = "replace_with_resend_api_key";
   process.env.CONTACT_RECEIVER_EMAIL = "bruno@example.com";
   process.env.CONTACT_FROM_EMAIL = "Portfolio Contact <onboarding@resend.dev>";
+  process.env.REQUEST_BODY_LIMIT_BYTES = "65536";
+  process.env.EMAIL_TIMEOUT_MS = "5000";
   process.env.RATE_LIMIT_CONTACT_MAX = "5";
   process.env.RATE_LIMIT_CONTACT_WINDOW_MINUTES = "10";
   process.env.RATE_LIMIT_GLOBAL_MAX = "100";
@@ -136,13 +139,13 @@ describe("Portfolio API", () => {
     expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
       success: false,
-      message: "Validation error."
+      message: "Erro de validação."
     });
     expect(response.json().errors).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           field: "email",
-          message: "Invalid email address."
+          message: "Endereço de email inválido."
         })
       ])
     );
@@ -166,13 +169,13 @@ describe("Portfolio API", () => {
     expect(response.statusCode).toBe(400);
     expect(response.json()).toMatchObject({
       success: false,
-      message: "Validation error."
+      message: "Erro de validação."
     });
     expect(response.json().errors).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           field: "message",
-          message: "Message must be at least 10 characters."
+          message: "A mensagem deve ter pelo menos 10 caracteres."
         })
       ])
     );
@@ -196,7 +199,7 @@ describe("Portfolio API", () => {
     expect(response.statusCode).toBe(201);
     expect(response.json()).toEqual({
       success: true,
-      message: "Message received successfully.",
+      message: "Mensagem recebida com sucesso.",
       data: {
         id: "contact_message_id"
       }

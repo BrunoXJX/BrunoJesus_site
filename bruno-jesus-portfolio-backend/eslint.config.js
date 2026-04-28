@@ -44,7 +44,8 @@ module.exports = [
     files: ["scripts/**/*.mjs"],
     languageOptions: {
       globals: {
-        console: "readonly"
+        console: "readonly",
+        process: "readonly"
       }
     }
   },

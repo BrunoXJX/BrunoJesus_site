@@ -6,6 +6,7 @@ import type {
   ContactSubmissionResult,
   PortfolioEmailPayload
 } from "../types/contact.types";
+import { env } from "../config/env";
 import type { EmailService } from "./email.service";
 
 interface ContactRecord extends Omit<PortfolioEmailPayload, "subject"> {
@@ -46,6 +47,22 @@ interface ContactServiceDependencies {
 
 function getEmailDomain(email: string): string {
   return email.split("@")[1] ?? "unknown";
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
+  let timeout: NodeJS.Timeout | undefined;
+
+  const timeoutPromise = new Promise<never>((_resolve, reject) => {
+    timeout = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${timeoutMs}ms.`));
+    }, timeoutMs);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+  });
 }
 
 export function createContactService({
@@ -95,8 +112,16 @@ export function createContactService({
       };
 
       const results = await Promise.allSettled([
-        emailService.sendPortfolioNotification(emailPayload),
-        emailService.sendVisitorConfirmation(emailPayload)
+        withTimeout(
+          emailService.sendPortfolioNotification(emailPayload),
+          env.EMAIL_TIMEOUT_MS,
+          "Portfolio notification email"
+        ),
+        withTimeout(
+          emailService.sendVisitorConfirmation(emailPayload),
+          env.EMAIL_TIMEOUT_MS,
+          "Visitor confirmation email"
+        )
       ]);
 
       let emailNotificationFailed = false;

@@ -49,7 +49,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
 
   const app = Fastify({
     logger: options.logger ?? createLoggerOptions(),
-    bodyLimit: 64 * 1024,
+    bodyLimit: env.REQUEST_BODY_LIMIT_BYTES,
     trustProxy: env.TRUST_PROXY
   });
 

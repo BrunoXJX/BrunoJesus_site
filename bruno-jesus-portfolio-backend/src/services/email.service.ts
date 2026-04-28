@@ -26,19 +26,19 @@ class ResendEmailService implements EmailService {
     const response = await this.client.emails.send({
       from: env.CONTACT_FROM_EMAIL,
       to: env.CONTACT_RECEIVER_EMAIL,
-      subject: `New portfolio contact - ${payload.name}`,
+      subject: `Novo contacto pelo portefólio - ${payload.name}`,
       text: [
-        "New message from Bruno Jesus Portfolio",
+        "Nova mensagem enviada pelo portefólio de Bruno Jesus",
         "",
-        `Name: ${payload.name}`,
+        `Nome: ${payload.name}`,
         `Email: ${payload.email}`,
-        `Subject: ${payload.subject}`,
+        `Assunto: ${payload.subject}`,
         "",
-        "Message:",
+        "Mensagem:",
         payload.message,
         "",
-        `Source: ${payload.source}`,
-        `Date: ${payload.createdAt.toISOString()}`
+        `Origem: ${payload.source}`,
+        `Data: ${payload.createdAt.toISOString()}`
       ].join("\n")
     });
 
@@ -60,15 +60,15 @@ class ResendEmailService implements EmailService {
     const response = await this.client.emails.send({
       from: env.CONTACT_FROM_EMAIL,
       to: payload.email,
-      subject: "Message received - Bruno Jesus",
+      subject: "Mensagem recebida - Bruno Jesus",
       text: [
-        `Hi ${payload.name},`,
+        `Olá ${payload.name},`,
         "",
-        "Thank you for reaching out through my portfolio.",
+        "Obrigado pela tua mensagem através do meu portefólio.",
         "",
-        "I received your message and will get back to you as soon as possible.",
+        "Recebi o teu contacto e vou responder assim que possível.",
         "",
-        "Best regards,",
+        "Cumprimentos,",
         "Bruno Jesus"
       ].join("\n")
     });

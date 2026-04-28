@@ -25,7 +25,7 @@ export function registerErrorMiddleware(app: FastifyInstance): void {
       error instanceof AppError
         ? error.message
         : statusCode >= 500
-          ? "Internal server error."
+          ? "Erro interno do servidor."
           : rawMessage;
 
     app.log.error(
@@ -57,7 +57,7 @@ export function registerErrorMiddleware(app: FastifyInstance): void {
   app.setNotFoundHandler((_request, reply) => {
     reply.status(404).send({
       success: false,
-      message: "Route not found."
+      message: "Rota não encontrada."
     });
   });
 }

@@ -14,13 +14,15 @@
     "start": "node dist/server.js",
     "postinstall": "prisma generate",
     "sync:frontend": "node scripts/sync-frontend.mjs",
+    "security:check": "node scripts/security-check.mjs",
     "lint": "eslint .",
     "test": "vitest",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "deploy:prepare": "npm run sync:frontend && npm run prisma:generate && npm run prisma:deploy && npm run build"
+    "deploy:prepare": "npm run sync:frontend && npm run security:check && npm run prisma:generate && npm run prisma:deploy && npm run build",
+    "verify:production": "npm run sync:frontend && npm run security:check && npm run lint && npm test && npm run build && npm audit --audit-level=high"
   },
   "dependencies": {
     "@fastify/cors": "^11.0.1",

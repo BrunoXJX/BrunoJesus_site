@@ -1,13 +1,14 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-PT">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description"
-    content="Portfólio de Bruno Jesus — construtor de sistemas, automação, empresas e execução com precisão.">
+    content="Portefólio de Bruno Jesus — Chief Sales Officer & Co-Founder @ Flowix, Embaixador EY e Software Engineer.">
   <meta property="og:title" content="Bruno Jesus — Painel Humano">
-  <meta property="og:description" content="Embaixador EY, Co-Fundador da Flowix, Ex-Deloitte e Engenheiro Informático.">
+  <meta property="og:description"
+    content="Chief Sales Officer & Co-Founder @ Flowix, Embaixador EY, ex-Deloitte e Software Engineer em Viseu.">
   <meta property="og:type" content="website">
   <title>Bruno Jesus — Painel Humano</title>
   <link rel="icon" type="image/svg+xml"
@@ -18,8 +19,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet">
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-  <script>
+  <script defer src="https://unpkg.com/lucide@1.11.0/dist/umd/lucide.js"
+    integrity="sha384-ZMkBApRp8XzSI26P7dtIOJcn6bweCl+SQ3D890zk3ilWfsJtBCtWQ4Rp4FhzcysQ"
+    crossorigin="anonymous"></script>
+  <script nonce="bj-static-csp-v1">
     try {
       if (window.sessionStorage && window.sessionStorage.getItem("bj-boot-seen") === "1") {
         document.documentElement.setAttribute("data-boot-seen", "1");
@@ -28,7 +31,7 @@
       // Ignore session storage issues and keep loading.
     }
   </script>
-  <style>
+  <style nonce="bj-static-csp-v1">
     :root {
       --bg: #050805;
       --surface: rgba(11, 15, 11, 0.88);
@@ -378,6 +381,10 @@
       display: flex;
       flex-wrap: wrap;
       gap: var(--space-2);
+    }
+
+    .badge-row--spaced {
+      margin-top: 1rem;
     }
 
     .badge {
@@ -775,6 +782,14 @@
       overflow: clip;
       clip-path: inset(100% 0 0 0);
       opacity: 0;
+    }
+
+    .hero-line--delay-1 {
+      --delay: 0.12s;
+    }
+
+    .hero-line--delay-2 {
+      --delay: 0.24s;
     }
 
     body.boot-complete .hero-line {
@@ -1433,6 +1448,22 @@
       animation-delay: var(--brand-delay, 0s);
     }
 
+    .brand-card--delay-0 {
+      --brand-delay: 0s;
+    }
+
+    .brand-card--delay-1 {
+      --brand-delay: 1.2s;
+    }
+
+    .brand-card--delay-2 {
+      --brand-delay: 2.4s;
+    }
+
+    .brand-card--delay-3 {
+      --brand-delay: 3.6s;
+    }
+
     .brand-card::before {
       content: "";
       position: absolute;
@@ -1617,6 +1648,10 @@
       margin-bottom: var(--space-4);
     }
 
+    .skill-card__top--compact {
+      margin: 1rem 0 0;
+    }
+
     .skill-card__icon {
       display: inline-flex;
       align-items: center;
@@ -1666,6 +1701,26 @@
 
     .skill-card.is-visible .skill-card__fill {
       width: var(--target, 0%);
+    }
+
+    .skill-card__fill--75 {
+      --target: 75%;
+    }
+
+    .skill-card__fill--80 {
+      --target: 80%;
+    }
+
+    .skill-card__fill--85 {
+      --target: 85%;
+    }
+
+    .skill-card__fill--90 {
+      --target: 90%;
+    }
+
+    .skill-card__fill--95 {
+      --target: 95%;
     }
 
     .timeline {
@@ -1790,6 +1845,17 @@
       gap: 0.75rem;
       justify-items: center;
       text-align: center;
+    }
+
+    .project-media__icon {
+      width: 68px;
+      height: 68px;
+      color: var(--accent);
+    }
+
+    .project-media__icon--large {
+      width: 72px;
+      height: 72px;
     }
 
     .project-media__signal strong {
@@ -2440,30 +2506,31 @@
             <span>[ LOCAL: VISEU, PT ]</span>
           </div>
           <h1 class="hero-name" id="hero-name">
-            <span class="hero-line" style="--delay: 0.12s;">
+            <span class="hero-line hero-line--delay-1">
               <span class="hero-line-text" data-text="Bruno">Bruno</span>
             </span>
-            <span class="hero-line" style="--delay: 0.24s;">
+            <span class="hero-line hero-line--delay-2">
               <span class="hero-line-text" data-text="Jesus">Jesus</span>
             </span>
           </h1>
           <p class="hero-tagline">
             <span id="hero-typewriter"></span><span class="type-cursor" aria-hidden="true">|</span>
           </p>
-          <p class="hero-subline mono">Co-Fundador @ Flowix · Embaixador EY · Ex-Deloitte · Engenheiro Informático</p>
+          <p class="hero-subline mono">Chief Sales Officer & Co-Founder @ Flowix · Embaixador EY · Software Engineer
+          </p>
           <p class="hero-summary">
-            Não sou só programador. <span class="accent">Sou um construtor de sistemas, empresas e futuro</span> com
-            ambição, precisão técnica e visão de negócio.
+            Software Engineer e empreendedor em Viseu, com experiência em Power Platform na Deloitte,
+            certificação PL-200 e trabalho atual em vendas, digitalização e automação na Flowix.
           </p>
           <div class="hero-actions">
             <a class="btn" href="#projects">Ver Projetos</a>
             <a class="btn is-ghost" href="#contact">Contacto</a>
           </div>
           <div class="brand-grid hero-entity-links">
-            <a class="brand-card" href="https://flowix.pt/" target="_blank" rel="noopener noreferrer"
-              style="--brand-delay: 0s;" aria-label="Abrir site da Flowix">
+            <a class="brand-card brand-card--delay-0" href="https://flowix.pt/" target="_blank"
+              rel="noopener noreferrer" aria-label="Abrir site da Flowix">
               <div class="brand-card__meta">
-                <span>Projeto atual</span>
+                <span>Flowix</span>
                 <i data-lucide="arrow-up-right"></i>
               </div>
               <div class="brand-logo brand-logo--flowix" aria-hidden="true">
@@ -2473,12 +2540,12 @@
                     height="397" loading="lazy">
                 </span>
               </div>
-              <p class="brand-card__caption">Co-Fundador e CSO</p>
+              <p class="brand-card__caption">Chief Sales Officer & Co-Founder</p>
             </a>
-            <a class="brand-card" href="https://www.ey.com/pt_pt" target="_blank" rel="noopener noreferrer"
-              style="--brand-delay: 1.2s;" aria-label="Abrir site da EY">
+            <a class="brand-card brand-card--delay-1" href="https://www.ey.com/pt_pt" target="_blank"
+              rel="noopener noreferrer" aria-label="Abrir site da EY">
               <div class="brand-card__meta">
-                <span>Cargo atual</span>
+                <span>EY Portugal</span>
                 <i data-lucide="arrow-up-right"></i>
               </div>
               <div class="brand-logo brand-logo--ey" aria-hidden="true">
@@ -2492,10 +2559,10 @@
                   </svg>
                 </span>
               </div>
-              <p class="brand-card__caption">Embaixador EY</p>
+              <p class="brand-card__caption">Embaixador EY · vencedor 2025/2026</p>
             </a>
-            <a class="brand-card" href="https://www.deloitte.com/pt/pt.html" target="_blank" rel="noopener noreferrer"
-              style="--brand-delay: 2.4s;" aria-label="Abrir site da Deloitte">
+            <a class="brand-card brand-card--delay-2" href="https://www.deloitte.com/pt/pt.html" target="_blank"
+              rel="noopener noreferrer" aria-label="Abrir site da Deloitte">
               <div class="brand-card__meta">
                 <span>Deloitte</span>
                 <i data-lucide="arrow-up-right"></i>
@@ -2507,10 +2574,10 @@
                     width="182" height="34" loading="lazy">
                 </span>
               </div>
-              <p class="brand-card__caption">Brightstart · Power Platform e low-code.</p>
+              <p class="brand-card__caption">Consultor & Desenvolvedor · Power Platform</p>
             </a>
-            <a class="brand-card" href="https://www.ipv.pt/" target="_blank" rel="noopener noreferrer"
-              style="--brand-delay: 3.6s;" aria-label="Abrir site do Instituto Politécnico de Viseu">
+            <a class="brand-card brand-card--delay-3" href="https://www.ipv.pt/" target="_blank"
+              rel="noopener noreferrer" aria-label="Abrir site do Instituto Politécnico de Viseu">
               <div class="brand-card__meta">
                 <span>Base académica</span>
                 <i data-lucide="arrow-up-right"></i>
@@ -2522,10 +2589,10 @@
                     loading="lazy">
                 </span>
               </div>
-              <p class="brand-card__caption">Engenharia informática, CTeSP DWDM.</p>
+              <p class="brand-card__caption">Engenharia Informática · Desenvolvimento Web/Mobile</p>
             </a>
           </div>
-          <p class="hero-inline-stats">Embaixador EY · 1 empresa fundada · 2 anos na Deloitte</p>
+          <p class="hero-inline-stats">PL-200 · Ordem dos Engenheiros · Embaixador EY 2025/2026</p>
         </div>
         <div class="hero-panel panel reveal">
           <div class="hero-panel__top">
@@ -2533,12 +2600,12 @@
               <div class="hero-mini__label">Projeto atual</div>
               <strong><a class="entity-link entity-link--title" href="https://flowix.pt/" target="_blank"
                   rel="noopener noreferrer">Flowix</a></strong>
-              <p>Automação IA para PMEs com foco em execução real.</p>
+              <p>Expansão comercial e adoção de soluções de digitalização e automação para PME.</p>
             </article>
             <article class="hero-mini">
               <div class="hero-mini__label">Base</div>
               <strong>Viseu, PT</strong>
-              <p>Operação local com ambição nacional e leitura clara de negócio.</p>
+              <p>Viseu como base para tecnologia, vendas, liderança e execução prática.</p>
             </article>
           </div>
           <div class="hero-logo-stage">
@@ -2565,19 +2632,14 @@
           </div>
           <div class="hero-panel__bottom">
             <article class="hero-metric">
-              <div class="hero-metric__label">Taxa de foco</div>
-              <strong>96%</strong>
-              <p class="feature-card__desc">Execução alta, pouca fricção e prioridade clara.</p>
-            </article>
-            <article class="hero-metric">
               <div class="hero-metric__label">Vantagem</div>
-              <strong>Automação IA</strong>
-              <p class="feature-card__desc">Substituir repetição por sistemas que escalam.</p>
+              <strong>Power Platform</strong>
+              <p class="feature-card__desc">Power Apps, low-code/no-code e automação de processos.</p>
             </article>
             <article class="hero-metric">
               <div class="hero-metric__label">Base técnica</div>
-              <strong>n8n · APIs · Python</strong>
-              <p class="feature-card__desc">Integração, lógica e automação com contexto comercial.</p>
+              <strong>IA · Dados · Vendas</strong>
+              <p class="feature-card__desc">Certificações em IA, análise de dados, liderança e desenvolvimento comercial.</p>
             </article>
           </div>
         </div>
@@ -2591,139 +2653,162 @@
             <h2 class="section-title">Competências desenhadas para construir sistemas completos.</h2>
           </div>
           <p class="section-intro">
-            A minha base técnica junta automação, integrações, dados, IA aplicada e contexto de negócio. O objetivo não
-            é usar mais ferramentas. É criar menos fricção e mais execução.
+            Base técnica e empresarial construída entre Power Platform, low-code, n8n, IA, visualização de dados,
+            liderança e vendas. Sem percentagens inventadas: apenas áreas sustentadas por experiência, formação,
+            certificações e prática atual.
           </p>
         </header>
         <div class="skills-grid">
           <article class="skill-card reveal" data-progress="95">
             <div class="skill-card__top">
               <div>
-                <h3 class="skill-card__name">n8n</h3>
-                <p class="skill-card__description">Plataforma de automação</p>
+                <h3 class="skill-card__name">Power Apps / Power Platform</h3>
+                <p class="skill-card__description">Aplicações empresariais</p>
               </div>
-              <span class="skill-card__icon"><i data-lucide="workflow"></i></span>
+              <span class="skill-card__icon"><i data-lucide="layers-3"></i></span>
             </div>
-            <p class="skill-card__description">Desenho de fluxos, integrações e operações automáticas orientadas a uso
-              real.</p>
-            <div class="skill-card__top" style="margin: 1rem 0 0;">
-              <span class="skill-card__percent mono">95%</span>
+            <p class="skill-card__description">Experiência em Power Apps, automação de processos e soluções internas em
+              contexto Deloitte.</p>
+            <div class="skill-card__top skill-card__top--compact">
+              <span class="skill-card__percent mono">PL-200</span>
             </div>
             <div class="skill-card__meter">
-              <div class="skill-card__fill" style="--target:95%;"></div>
+              <div class="skill-card__fill skill-card__fill--95"></div>
             </div>
           </article>
           <article class="skill-card reveal" data-progress="80">
             <div class="skill-card__top">
               <div>
-                <h3 class="skill-card__name">Python</h3>
-                <p class="skill-card__description">Scripts e lógica de dados</p>
+                <h3 class="skill-card__name">Low-Code / No-Code</h3>
+                <p class="skill-card__description">Construção rápida de soluções</p>
               </div>
-              <span class="skill-card__icon"><i data-lucide="file-code-2"></i></span>
+              <span class="skill-card__icon"><i data-lucide="blocks"></i></span>
             </div>
-            <p class="skill-card__description">Lógica utilitária, automações de suporte e manipulação de dados.</p>
-            <div class="skill-card__top" style="margin: 1rem 0 0;">
-              <span class="skill-card__percent mono">80%</span>
+            <p class="skill-card__description">Base prática em Power Platform e Mendix para entregar sistemas com menos
+              fricção técnica.</p>
+            <div class="skill-card__top skill-card__top--compact">
+              <span class="skill-card__percent mono">CV + CERT.</span>
             </div>
             <div class="skill-card__meter">
-              <div class="skill-card__fill" style="--target:80%;"></div>
+              <div class="skill-card__fill skill-card__fill--80"></div>
             </div>
           </article>
           <article class="skill-card reveal" data-progress="75">
             <div class="skill-card__top">
               <div>
-                <h3 class="skill-card__name">SQL</h3>
-                <p class="skill-card__description">Dados e sistemas de consulta</p>
+                <h3 class="skill-card__name">n8n</h3>
+                <p class="skill-card__description">Automação de workflows</p>
               </div>
-              <span class="skill-card__icon"><i data-lucide="database"></i></span>
+              <span class="skill-card__icon"><i data-lucide="workflow"></i></span>
             </div>
-            <p class="skill-card__description">Consulta, estrutura e leitura de dados para suportar decisões e fluxos.
-            </p>
-            <div class="skill-card__top" style="margin: 1rem 0 0;">
-              <span class="skill-card__percent mono">75%</span>
+            <p class="skill-card__description">Construção de fluxos de automação, ligações entre ferramentas e
+              processos digitais orientados a execução.</p>
+            <div class="skill-card__top skill-card__top--compact">
+              <span class="skill-card__percent mono">FLOWIX</span>
             </div>
             <div class="skill-card__meter">
-              <div class="skill-card__fill" style="--target:75%;"></div>
+              <div class="skill-card__fill skill-card__fill--85"></div>
+            </div>
+          </article>
+          <article class="skill-card reveal" data-progress="75">
+            <div class="skill-card__top">
+              <div>
+                <h3 class="skill-card__name">Mendix</h3>
+                <p class="skill-card__description">Rapid development</p>
+              </div>
+              <span class="skill-card__icon"><i data-lucide="app-window"></i></span>
+            </div>
+            <p class="skill-card__description">Certificação Rapid Developer e experiência com abordagem low-code.
+            </p>
+            <div class="skill-card__top skill-card__top--compact">
+              <span class="skill-card__percent mono">2023</span>
+            </div>
+            <div class="skill-card__meter">
+              <div class="skill-card__fill skill-card__fill--75"></div>
             </div>
           </article>
           <article class="skill-card reveal" data-progress="85">
             <div class="skill-card__top">
               <div>
-                <h3 class="skill-card__name">Power Platform / Low-Code</h3>
-                <p class="skill-card__description">Automação empresarial</p>
+                <h3 class="skill-card__name">Inteligência Artificial</h3>
+                <p class="skill-card__description">IA generativa e análise de dados</p>
               </div>
-              <span class="skill-card__icon"><i data-lucide="building-2"></i></span>
+              <span class="skill-card__icon"><i data-lucide="brain-circuit"></i></span>
             </div>
-            <p class="skill-card__description">Experiência em ambientes empresariais e soluções internas escaláveis.</p>
-            <div class="skill-card__top" style="margin: 1rem 0 0;">
-              <span class="skill-card__percent mono">85%</span>
+            <p class="skill-card__description">Formação certificada em IA generativa, análise de dados e produtividade
+              com IA.</p>
+            <div class="skill-card__top skill-card__top--compact">
+              <span class="skill-card__percent mono">2024-2025</span>
             </div>
             <div class="skill-card__meter">
-              <div class="skill-card__fill" style="--target:85%;"></div>
+              <div class="skill-card__fill skill-card__fill--85"></div>
             </div>
           </article>
           <article class="skill-card reveal" data-progress="90">
             <div class="skill-card__top">
               <div>
-                <h3 class="skill-card__name">APIs e integrações</h3>
-                <p class="skill-card__description">Conectividade entre sistemas</p>
+                <h3 class="skill-card__name">Machine Learning</h3>
+                <p class="skill-card__description">Aprendizagem automática</p>
               </div>
-              <span class="skill-card__icon"><i data-lucide="plug-zap"></i></span>
+              <span class="skill-card__icon"><i data-lucide="network"></i></span>
             </div>
-            <p class="skill-card__description">Ligação entre ferramentas, dados, acionadores e equipas.</p>
-            <div class="skill-card__top" style="margin: 1rem 0 0;">
-              <span class="skill-card__percent mono">90%</span>
+            <p class="skill-card__description">Formação certificada pelo Instituto Superior Técnico em conceitos de
+              machine learning.</p>
+            <div class="skill-card__top skill-card__top--compact">
+              <span class="skill-card__percent mono">IST</span>
             </div>
             <div class="skill-card__meter">
-              <div class="skill-card__fill" style="--target:90%;"></div>
+              <div class="skill-card__fill skill-card__fill--90"></div>
             </div>
           </article>
           <article class="skill-card reveal" data-progress="80">
             <div class="skill-card__top">
               <div>
-                <h3 class="skill-card__name">Implementação de IA/LLM</h3>
-                <p class="skill-card__description">Fluxos inteligentes</p>
+                <h3 class="skill-card__name">Visualização de Dados</h3>
+                <p class="skill-card__description">Relatórios interativos</p>
               </div>
-              <span class="skill-card__icon"><i data-lucide="sparkles"></i></span>
+              <span class="skill-card__icon"><i data-lucide="bar-chart-3"></i></span>
             </div>
-            <p class="skill-card__description">Uso prático de IA para triagem, resposta, apoio e automação.</p>
-            <div class="skill-card__top" style="margin: 1rem 0 0;">
-              <span class="skill-card__percent mono">80%</span>
+            <p class="skill-card__description">Criação de relatórios e leitura de dados para apoiar decisões e
+              operação.</p>
+            <div class="skill-card__top skill-card__top--compact">
+              <span class="skill-card__percent mono">CV</span>
             </div>
             <div class="skill-card__meter">
-              <div class="skill-card__fill" style="--target:80%;"></div>
+              <div class="skill-card__fill skill-card__fill--80"></div>
             </div>
           </article>
           <article class="skill-card reveal" data-progress="85">
             <div class="skill-card__top">
               <div>
-                <h3 class="skill-card__name">Estratégia de negócio</h3>
-                <p class="skill-card__description">Mercado e posicionamento</p>
+                <h3 class="skill-card__name">Agile / Scrum</h3>
+                <p class="skill-card__description">Equipas multidisciplinares</p>
               </div>
-              <span class="skill-card__icon"><i data-lucide="briefcase-business"></i></span>
+              <span class="skill-card__icon"><i data-lucide="repeat-2"></i></span>
             </div>
-            <p class="skill-card__description">Leitura de mercado, proposta de valor e direção operacional.</p>
-            <div class="skill-card__top" style="margin: 1rem 0 0;">
-              <span class="skill-card__percent mono">85%</span>
+            <p class="skill-card__description">Colaboração em equipas com método, comunicação e ciclos de entrega.</p>
+            <div class="skill-card__top skill-card__top--compact">
+              <span class="skill-card__percent mono">CV</span>
             </div>
             <div class="skill-card__meter">
-              <div class="skill-card__fill" style="--target:85%;"></div>
+              <div class="skill-card__fill skill-card__fill--85"></div>
             </div>
           </article>
           <article class="skill-card reveal" data-progress="90">
             <div class="skill-card__top">
               <div>
-                <h3 class="skill-card__name">Vendas</h3>
-                <p class="skill-card__description">Contacto e aquisição</p>
+                <h3 class="skill-card__name">Liderança e Vendas</h3>
+                <p class="skill-card__description">CSO, comunicação e crescimento</p>
               </div>
               <span class="skill-card__icon"><i data-lucide="rocket"></i></span>
             </div>
-            <p class="skill-card__description">Contacto comercial, qualificação, proposta de valor e aquisição.</p>
-            <div class="skill-card__top" style="margin: 1rem 0 0;">
-              <span class="skill-card__percent mono">90%</span>
+            <p class="skill-card__description">Chief Sales Officer na Flowix, Embaixador EY e formação em liderança,
+              equipas e empreendedorismo.</p>
+            <div class="skill-card__top skill-card__top--compact">
+              <span class="skill-card__percent mono">ATUAL</span>
             </div>
             <div class="skill-card__meter">
-              <div class="skill-card__fill" style="--target:90%;"></div>
+              <div class="skill-card__fill skill-card__fill--90"></div>
             </div>
           </article>
         </div>
@@ -2747,76 +2832,106 @@
             <div class="timeline-progress" id="timeline-progress"></div>
           </div>
           <article class="timeline-item panel reveal">
-            <div class="timeline-date">2026 - Presente</div>
+            <div class="timeline-date">Dez 2025 - Presente</div>
             <h3 class="timeline-title">
               <a class="entity-link entity-link--title" href="https://flowix.pt/" target="_blank"
                 rel="noopener noreferrer">Flowix</a>
             </h3>
-            <div class="timeline-role">Co-Fundador e CSO</div>
-            <p class="timeline-text">Automação IA para PMEs em Viseu, com foco em operações, vendas e execução
-              comercial.</p>
-            <div class="badge-row" style="margin-top: 1rem;">
-              <span class="badge">#empresa</span>
+            <div class="timeline-role">Chief Sales Officer & Co-Founder</div>
+            <p class="timeline-text">Liderança da expansão comercial na região de Viseu, com foco no crescimento de
+              receita e na adoção de soluções de digitalização e automação por PME.</p>
+            <div class="badge-row badge-row--spaced">
+              <span class="badge">#flowix</span>
               <span class="badge">#automacao</span>
               <span class="badge">#vendas</span>
-              <span class="badge">#ia</span>
+              <span class="badge">#pme</span>
             </div>
           </article>
           <article class="timeline-item panel reveal">
-            <div class="timeline-date">2025 - Presente</div>
+            <div class="timeline-date">Abr 2025 - Presente</div>
             <h3 class="timeline-title">
               <a class="entity-link entity-link--title" href="https://www.ey.com/pt_pt" target="_blank"
                 rel="noopener noreferrer">EY</a>
             </h3>
             <div class="timeline-role">Embaixador EY</div>
-            <p class="timeline-text">Representação da EY em contexto académico e distinção de topo no programa
-              atual.</p>
-            <div class="badge-row" style="margin-top: 1rem;">
+            <p class="timeline-text">Representação da EY em contexto académico, ligação entre a marca e a comunidade
+              estudantil e distinção como vencedor do programa de Embaixadores EY 2025/2026.</p>
+            <div class="badge-row badge-row--spaced">
               <span class="badge">#distincao</span>
               <span class="badge">#embaixador</span>
-              <span class="badge">#consultoria</span>
+              <span class="badge">#academia</span>
+              <span class="badge">#lideranca</span>
             </div>
           </article>
           <article class="timeline-item panel reveal">
-            <div class="timeline-date">2022 - 2024</div>
+            <div class="timeline-date">Set 2024 - Presente</div>
+            <h3 class="timeline-title">
+              <a class="entity-link entity-link--title" href="https://www.ordemengenheiros.pt/" target="_blank"
+                rel="noopener noreferrer">Ordem dos Engenheiros</a>
+            </h3>
+            <div class="timeline-role">Membro Estudante</div>
+            <p class="timeline-text">Membro estudante da Ordem dos Engenheiros, com cédula profissional 98 587.</p>
+            <div class="badge-row badge-row--spaced">
+              <span class="badge">#engenharia</span>
+              <span class="badge">#membro</span>
+              <span class="badge">#formacao</span>
+            </div>
+          </article>
+          <article class="timeline-item panel reveal">
+            <div class="timeline-date">Set 2022 - Ago 2024</div>
             <h3 class="timeline-title">
               <a class="entity-link entity-link--title" href="https://www.deloitte.com/pt/pt.html" target="_blank"
                 rel="noopener noreferrer">Deloitte</a>
             </h3>
-            <div class="timeline-role">Brightstart</div>
-            <p class="timeline-text">Power Platform, low-code e soluções empresariais em contexto de consultoria.</p>
-            <div class="badge-row" style="margin-top: 1rem;">
+            <div class="timeline-role">Consultor & Desenvolvedor</div>
+            <p class="timeline-text">Desenvolvimento de aplicações com Power Apps e plataformas low-code/no-code,
+              automação de processos, relatórios interativos e colaboração em equipas Agile/Scrum.</p>
+            <div class="badge-row badge-row--spaced">
               <span class="badge">#consultoria</span>
               <span class="badge">#lowcode</span>
-              <span class="badge">#empresa</span>
+              <span class="badge">#powerplatform</span>
+              <span class="badge">#pl200</span>
             </div>
           </article>
           <article class="timeline-item panel reveal">
-            <div class="timeline-date">2024 - 2026</div>
+            <div class="timeline-date">Set 2024 - Presente</div>
             <h3 class="timeline-title">
               <a class="entity-link entity-link--title" href="https://www.ipv.pt/" target="_blank"
                 rel="noopener noreferrer">IPV</a>
             </h3>
             <div class="timeline-role">Licenciatura em Engenharia Informática</div>
-            <p class="timeline-text">Ano final com foco em engenharia de software, web, bases de dados e sistemas.</p>
-            <div class="badge-row" style="margin-top: 1rem;">
+            <p class="timeline-text">Formação superior em engenharia informática, software, sistemas e base técnica
+              para construção de soluções digitais.</p>
+            <div class="badge-row badge-row--spaced">
               <span class="badge">#formacao</span>
               <span class="badge">#software</span>
               <span class="badge">#engenharia</span>
             </div>
           </article>
           <article class="timeline-item panel reveal">
-            <div class="timeline-date">2022 - 2024</div>
+            <div class="timeline-date">Set 2022 - Ago 2024</div>
             <h3 class="timeline-title">
               <a class="entity-link entity-link--title" href="https://www.ipv.pt/" target="_blank"
                 rel="noopener noreferrer">IPV</a>
             </h3>
-            <div class="timeline-role">CTeSP em DWDM</div>
-            <p class="timeline-text">Base técnica em desenvolvimento web, multimédia e sistemas digitais.</p>
-            <div class="badge-row" style="margin-top: 1rem;">
+            <div class="timeline-role">Técnico Superior - Desenvolvimento Web e Mobile</div>
+            <p class="timeline-text">Especialização em desenvolvimento web e mobile no Instituto Politécnico de Viseu.
+            </p>
+            <div class="badge-row badge-row--spaced">
               <span class="badge">#formacao</span>
               <span class="badge">#web</span>
-              <span class="badge">#digital</span>
+              <span class="badge">#mobile</span>
+            </div>
+          </article>
+          <article class="timeline-item panel reveal">
+            <div class="timeline-date">Set 2019 - Jul 2022</div>
+            <h3 class="timeline-title">Escola Profissional de Carvalhais</h3>
+            <div class="timeline-role">Programador de Informática</div>
+            <p class="timeline-text">Primeira base formal em programação e desenvolvimento de software.</p>
+            <div class="badge-row badge-row--spaced">
+              <span class="badge">#programacao</span>
+              <span class="badge">#software</span>
+              <span class="badge">#base</span>
             </div>
           </article>
         </div>
@@ -2826,21 +2941,21 @@
       <div class="container">
         <header class="section-header reveal">
           <div class="section-heading">
-            <div class="section-kicker">&gt; PROJECT_REGISTRY.query()</div>
-            <h2 class="section-title">Projetos são linguagem de operação, não apenas montra.</h2>
+            <div class="section-kicker">&gt; WORK_SYSTEMS.query()</div>
+            <h2 class="section-title">Áreas de trabalho com base real.</h2>
           </div>
           <p class="section-intro">
-            Cada módulo reflete a mesma lógica: automatizar, ligar, simplificar e criar impulso à volta de um objetivo
-            real.
+            Em vez de listar projetos inventados, esta secção resume frentes comprovadas por experiência profissional,
+            formação e trabalho atual.
           </p>
         </header>
         <div class="projects-grid">
           <article class="project-card project-card--featured reveal" data-tilt="true">
             <div class="project-media">
               <div class="project-media__signal">
-                <i data-lucide="workflow" style="width: 72px; height: 72px; color: var(--accent);"></i>
-                <strong>Camada Operacional Flowix</strong>
-                <span>Automação aplicada — execução real</span>
+                <i data-lucide="workflow" class="project-media__icon project-media__icon--large"></i>
+                <strong>Flowix</strong>
+                <span>Vendas, automação e crescimento</span>
               </div>
             </div>
             <div class="project-card__top">
@@ -2854,99 +2969,103 @@
                 aria-label="Abrir Flowix">Abrir -></a>
             </div>
             <p class="project-card__text">
-              Agência de automação IA para pequenas e médias empresas que precisam de substituir trabalho repetitivo
-              por sistemas inteligentes e executáveis.
+              Empresa cofundada por Bruno Jesus, focada em digitalização, automação e crescimento comercial para PME.
             </p>
             <div class="badge-row">
               <span class="badge">n8n</span>
-              <span class="badge">IA</span>
               <span class="badge">Automação</span>
+              <span class="badge">PME</span>
               <span class="badge">Vendas</span>
+              <span class="badge">Comercial</span>
             </div>
           </article>
           <article class="project-card reveal" data-tilt="true">
             <div class="project-media">
-              <i data-lucide="cpu" style="width: 68px; height: 68px; color: var(--accent);"></i>
+              <i data-lucide="layers-3" class="project-media__icon"></i>
             </div>
             <div class="project-card__top">
               <div>
-                <h3 class="project-card__title">Sistemas de automação para clientes</h3>
+                <h3 class="project-card__title">Power Platform na Deloitte</h3>
               </div>
-              <a class="project-link" href="#" aria-label="Ligação de projeto indisponível">Abrir -></a>
+              <a class="project-link" href="https://www.deloitte.com/pt/pt.html" target="_blank"
+                rel="noopener noreferrer" aria-label="Abrir site da Deloitte">Abrir -></a>
             </div>
-            <p class="project-card__text">Sistemas para ligar aplicações, documentos, notificações e dados sem esforço
-              manual desnecessário.</p>
+            <p class="project-card__text">Aplicações, automação de processos e relatórios interativos em ambiente de
+              consultoria.</p>
             <div class="badge-row">
-              <span class="badge">APIs</span>
-              <span class="badge">Operações</span>
-              <span class="badge">Automação</span>
+              <span class="badge">Power Apps</span>
+              <span class="badge">Low-code</span>
+              <span class="badge">PL-200</span>
             </div>
           </article>
           <article class="project-card reveal" data-tilt="true">
             <div class="project-media">
-              <i data-lucide="send" style="width: 68px; height: 68px; color: var(--accent);"></i>
+              <i data-lucide="brain-circuit" class="project-media__icon"></i>
             </div>
             <div class="project-card__top">
               <div>
-                <h3 class="project-card__title">Motores comerciais</h3>
+                <h3 class="project-card__title">IA, dados e produtividade</h3>
               </div>
-              <a class="project-link" href="#" aria-label="Ligação de projeto indisponível">Abrir -></a>
+              <a class="project-link" href="https://www.ordemengenheiros.pt/" target="_blank"
+                rel="noopener noreferrer" aria-label="Abrir site da Ordem dos Engenheiros">Abrir -></a>
             </div>
-            <p class="project-card__text">Integração, lógica e automação com contexto comercial.</p>
+            <p class="project-card__text">Formação certificada em IA generativa, machine learning, análise de dados e
+              produtividade com IA.</p>
             <div class="badge-row">
-              <span class="badge">Vendas</span>
-              <span class="badge">Funil comercial</span>
-              <span class="badge">Automação</span>
-            </div>
-          </article>
-          <article class="project-card reveal" data-tilt="true">
-            <div class="project-media">
-              <i data-lucide="flask-conical" style="width: 68px; height: 68px; color: var(--accent);"></i>
-            </div>
-            <div class="project-card__top">
-              <div>
-                <h3 class="project-card__title">Laboratório de construção</h3>
-              </div>
-              <a class="project-link" href="#" aria-label="Ligação de projeto indisponível">Abrir -></a>
-            </div>
-            <p class="project-card__text">Zona de protótipos, testes de integração e sistemas internos ainda em
-              exploração controlada.</p>
-            <div class="badge-row">
-              <span class="badge">Protótipo</span>
-              <span class="badge">Produto</span>
               <span class="badge">IA</span>
+              <span class="badge">Dados</span>
+              <span class="badge">ML</span>
+            </div>
+          </article>
+          <article class="project-card reveal" data-tilt="true">
+            <div class="project-media">
+              <i data-lucide="users-round" class="project-media__icon"></i>
+            </div>
+            <div class="project-card__top">
+              <div>
+                <h3 class="project-card__title">Liderança, vendas e representação</h3>
+              </div>
+              <a class="project-link" href="https://www.ey.com/pt_pt" target="_blank" rel="noopener noreferrer"
+                aria-label="Abrir site da EY">Abrir -></a>
+            </div>
+            <p class="project-card__text">CSO na Flowix, Embaixador EY e formação em empreendedorismo, liderança e
+              desenvolvimento de equipas.</p>
+            <div class="badge-row">
+              <span class="badge">CSO</span>
+              <span class="badge">EY</span>
+              <span class="badge">Liderança</span>
             </div>
           </article>
         </div>
       </div>
     </section>
-    <section class="section" data-surface="surface-2">
+    <section id="stats" class="section" data-surface="surface-2">
       <div class="container">
         <header class="section-header reveal">
           <div class="section-heading">
             <div class="section-kicker">&gt; STATS.render()</div>
-            <h2 class="section-title">Números simples. Leitura direta.</h2>
+            <h2 class="section-title">Factos rápidos. Sem ruído.</h2>
           </div>
           <p class="section-intro">
-            Construídos a partir de experiência empresarial, energia empreendedora e execução no terreno.
+            Métricas e marcos retirados do CV, do percurso académico e do perfil profissional.
           </p>
         </header>
         <div class="stats-grid">
           <article class="stat-card panel reveal">
             <span class="stat-value" data-countup data-prefix="#" data-value="1">#0</span>
-            <p class="stat-label">Distinção Top Ambassador EY</p>
+            <p class="stat-label">Top Embaixador EY 2025/2026</p>
           </article>
           <article class="stat-card panel reveal">
             <span class="stat-value" data-countup data-value="1">0</span>
-            <p class="stat-label">Empresa fundada</p>
+            <p class="stat-label">Empresa cofundada</p>
+          </article>
+          <article class="stat-card panel reveal">
+            <span class="stat-value stat-value--static">PL-200</span>
+            <p class="stat-label">Certificação Microsoft</p>
           </article>
           <article class="stat-card panel reveal">
             <span class="stat-value" data-countup data-value="2">0</span>
             <p class="stat-label">Anos na Deloitte</p>
-          </article>
-          <article class="stat-card panel reveal">
-            <span class="stat-value" data-countup data-value="50" data-suffix="+">0</span>
-            <p class="stat-label">Empresas contactadas</p>
           </article>
         </div>
       </div>
@@ -2956,25 +3075,27 @@
         <header class="section-header reveal">
           <div class="section-heading">
             <div class="section-kicker">&gt; ESTABLISH_CONNECTION()</div>
-            <h2 class="section-title">Pronto para sistemas ambiciosos, automação de alto impacto e colaboração séria.
+            <h2 class="section-title">Pronto para conversas úteis, automação aplicada e colaboração séria.
             </h2>
           </div>
           <p class="section-intro">
-            Disponível para projetos de automação, parcerias empresariais e conversas que levem a execução real.
+            Aberto a conversas sobre Power Platform, low-code, IA aplicada, vendas, liderança e projetos digitais com
+            execução real.
           </p>
         </header>
         <div class="contact-layout">
           <div class="contact-copy">
             <h3 class="contact-headline reveal">Vamos construir algo com impacto.</h3>
             <p class="contact-text reveal">
-              Disponível para colaborações, projetos de automação, conversas sobre empresas e sistemas ambiciosos.
+              Disponível para colaborações, projetos de automação, conversas sobre tecnologia e desafios com impacto
+              prático.
             </p>
             <div class="contact-stack">
               <article class="contact-card panel reveal">
                 <div class="contact-card__label">Canal principal</div>
                 <div class="contact-email-row">
                   <div>
-                    <a class="contact-card__value mono" id="contact-email-display" href="mailto:bruno@flowix.pt"></a>
+                    <a class="contact-card__value mono" id="contact-email-display" href="mailto:bruno.asjesuss@gmail.com"></a>
                     <p class="contact-card__note">Canal principal disponível para contacto direto.</p>
                   </div>
                   <div class="copy-group">
@@ -3045,13 +3166,13 @@
   <footer class="footer">
     <div class="container footer-inner">
       <div class="footer-meta">BRUNO JESUS / PAINEL HUMANO</div>
-      <p class="footer-quote">"Não sou só programador. <span class="accent">Sou um construtor de sistemas, empresas e
-          futuro</span> com ambição, precisão técnica e visão de negócio."</p>
+      <p class="footer-quote">"Software, low-code, IA aplicada e vendas <span class="accent">com execução técnica e
+          foco em valor real</span>."</p>
     </div>
   </footer>
-  <script>
+  <script nonce="bj-static-csp-v1">
     (() => {
-      const CONTACT_EMAIL = "bruno@flowix.pt";
+      const CONTACT_EMAIL = "bruno.asjesuss@gmail.com";
       const CONTACT_API_URL = (() => {
         const configuredApiUrl = window.BRUNO_PORTFOLIO_API_URL;
         if (typeof configuredApiUrl === "string" && configuredApiUrl.trim()) {
@@ -3060,7 +3181,7 @@
 
         return window.location.protocol === "file:" ? "http://localhost:3333/api/contact" : "/api/contact";
       })();
-      const HERO_TAGLINE = "Automatizo o que os outros repetem.";
+      const HERO_TAGLINE = "Transformo processos em soluções digitais.";
       const TERMINAL_TEXT = [
         "$ ping bruno.jesus",
         "> Pacote enviado...",
@@ -3093,6 +3214,7 @@
         const emailDisplay = document.getElementById("contact-email-display");
         if (emailDisplay) {
           emailDisplay.textContent = CONTACT_EMAIL;
+          emailDisplay.setAttribute("href", "mailto:" + CONTACT_EMAIL);
         }
       }
       function typeText(node, text, speed) {

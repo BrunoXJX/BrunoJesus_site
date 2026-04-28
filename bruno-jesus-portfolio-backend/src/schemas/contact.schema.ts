@@ -3,39 +3,48 @@ import { z, type ZodError } from "zod";
 import type { ValidationErrorItem } from "../types/contact.types";
 import { sanitizeMultiline, sanitizeSingleLine } from "../utils/sanitize";
 
+const URL_PATTERN = /\b(?:https?:\/\/|www\.)\S+/gi;
+
+function countLinks(value: string): number {
+  return value.match(URL_PATTERN)?.length ?? 0;
+}
+
 export const contactRequestSchema = z
   .object({
     name: z
-      .string({ required_error: "Name is required." })
+      .string({ required_error: "Nome obrigatório." })
       .transform((value) => sanitizeSingleLine(value))
       .refine((value) => value.length >= 2, {
-        message: "Name must be at least 2 characters."
+        message: "O nome deve ter pelo menos 2 caracteres."
       })
       .refine((value) => value.length <= 80, {
-        message: "Name must be at most 80 characters."
+        message: "O nome deve ter no máximo 80 caracteres."
       }),
     email: z
-      .string({ required_error: "Email is required." })
+      .string({ required_error: "Email obrigatório." })
       .trim()
       .toLowerCase()
-      .max(120, "Email must be at most 120 characters.")
-      .email("Invalid email address."),
+      .max(120, "O email deve ter no máximo 120 caracteres.")
+      .email("Endereço de email inválido."),
     subject: z
       .string()
       .optional()
       .transform((value) => sanitizeSingleLine(value ?? ""))
       .refine((value) => value.length <= 120, {
-        message: "Subject must be at most 120 characters."
+        message: "O assunto deve ter no máximo 120 caracteres."
       })
-      .transform((value) => (value.length === 0 ? "Portfolio Contact" : value)),
+      .transform((value) => (value.length === 0 ? "Contacto pelo portefólio" : value)),
     message: z
-      .string({ required_error: "Message is required." })
+      .string({ required_error: "Mensagem obrigatória." })
       .transform((value) => sanitizeMultiline(value))
       .refine((value) => value.length >= 10, {
-        message: "Message must be at least 10 characters."
+        message: "A mensagem deve ter pelo menos 10 caracteres."
       })
       .refine((value) => value.length <= 3000, {
-        message: "Message must be at most 3000 characters."
+        message: "A mensagem deve ter no máximo 3000 caracteres."
+      })
+      .refine((value) => countLinks(value) <= 4, {
+        message: "A mensagem contém demasiadas ligações."
       }),
     website: z
       .string()

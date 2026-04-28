@@ -1,6 +1,6 @@
 # bruno-jesus-portfolio-backend
 
-Backend e runtime web do portefólio de Bruno Jesus. A API valida pedidos de contacto, guarda mensagens em PostgreSQL com Prisma, envia emails com Resend e serve o front-end no mesmo servidor para um deploy simples, sem Docker.
+Backend e runtime web do portefólio de Bruno Jesus. A API valida pedidos de contacto, guarda mensagens em PostgreSQL com Prisma, envia emails com Resend e serve o front-end no mesmo domínio para um deploy simples, sem Docker.
 
 ## Stack
 
@@ -14,29 +14,13 @@ Backend e runtime web do portefólio de Bruno Jesus. A API valida pedidos de con
 - Pino Logger
 - Vitest
 
-## Estrutura
-
-```txt
-bruno-jesus-portfolio-backend/
-├── prisma/
-├── public/
-├── scripts/
-├── src/
-├── tests/
-├── .env.example
-├── package.json
-├── README.md
-├── tsconfig.json
-└── vitest.config.ts
-```
-
 ## Instalação
 
 ```bash
 npm install
 ```
 
-## Ambiente
+## Ambiente local
 
 Cria o `.env` local a partir do exemplo:
 
@@ -50,30 +34,61 @@ No Windows PowerShell:
 Copy-Item .env.example .env
 ```
 
-Valores obrigatórios:
+Valores principais:
 
-- `NODE_ENV`
-- `PORT`
-- `HOST`
-- `TRUST_PROXY`
+- `PORT=3333`
 - `DATABASE_URL`
 - `FRONTEND_URL`
 - `RESEND_API_KEY`
 - `CONTACT_RECEIVER_EMAIL`
 - `CONTACT_FROM_EMAIL`
 
-Nunca coloques valores reais no GitHub. Usa `.env.example` apenas com placeholders.
+Nunca coloques valores reais no GitHub. O `.env.example` deve ficar sempre com placeholders.
 
-## PostgreSQL
+## Ambiente de produção
 
-Podes usar PostgreSQL local ou uma base de dados gerida pelo fornecedor de deploy.
+Para domínio público, configura no painel do fornecedor:
+
+```env
+NODE_ENV=production
+PORT=3333
+HOST=0.0.0.0
+TRUST_PROXY=true
+
+FRONTEND_URL="https://teu-dominio.pt"
+CORS_ORIGINS="https://www.teu-dominio.pt"
+
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
+
+RESEND_API_KEY="re_..."
+CONTACT_RECEIVER_EMAIL="bruno@teu-dominio.pt"
+CONTACT_FROM_EMAIL="Bruno Jesus Portfolio <contacto@teu-dominio.pt>"
+
+REQUEST_BODY_LIMIT_BYTES=65536
+EMAIL_TIMEOUT_MS=5000
+RATE_LIMIT_CONTACT_MAX=5
+RATE_LIMIT_CONTACT_WINDOW_MINUTES=10
+RATE_LIMIT_GLOBAL_MAX=100
+RATE_LIMIT_GLOBAL_WINDOW_MINUTES=15
+```
+
+Notas importantes:
+
+- `FRONTEND_URL` tem de usar HTTPS em produção.
+- `CORS_ORIGINS` é opcional e aceita origens extra separadas por vírgulas, por exemplo domínio com `www`.
+- `CONTACT_FROM_EMAIL` deve estar verificado no Resend.
+- `TRUST_PROXY=true` é necessário quando a app fica atrás de proxy, load balancer, Cloudflare, Render, Railway, Nginx ou semelhante.
+
+## PostgreSQL e Prisma
+
+Desenvolvimento:
 
 ```bash
 npm run prisma:generate
 npx prisma migrate dev
 ```
 
-Em produção:
+Produção:
 
 ```bash
 npm run prisma:deploy
@@ -81,18 +96,25 @@ npm run prisma:deploy
 
 ## Front-end incluído
 
-O backend serve o portefólio no mesmo domínio:
+Fonte de verdade visual:
 
-- fonte de verdade: `../portfolio.html`
-- ficheiro servido: `public/index.html`
+```txt
+../portfolio.html
+```
 
-Sempre que alterares o front-end:
+Ficheiro servido em produção:
+
+```txt
+public/index.html
+```
+
+Sincronizar:
 
 ```bash
 npm run sync:frontend
 ```
 
-O `predev` e o `prebuild` já executam esta sincronização automaticamente.
+O script limpa a pasta `public` e deixa apenas o `index.html` final, evitando ficheiros antigos expostos por engano.
 
 ## Desenvolvimento
 
@@ -106,25 +128,30 @@ URLs locais:
 - health: `http://localhost:3333/health`
 - API info: `http://localhost:3333/api`
 
-## Build e produção
+## Produção
 
-```bash
-npm run build
-npm start
-```
-
-Preparação completa antes do deploy:
+Preparar release:
 
 ```bash
 npm run deploy:prepare
 ```
 
-Este comando sincroniza o front-end, gera o cliente Prisma, aplica migrations de produção e compila TypeScript.
+Verificação completa antes de publicar:
+
+```bash
+npm run verify:production
+```
+
+Arrancar depois do build:
+
+```bash
+npm start
+```
 
 ## Health check
 
 ```bash
-curl http://localhost:3333/health
+curl https://teu-dominio.pt/health
 ```
 
 Resposta esperada:
@@ -160,7 +187,21 @@ Quando o portefólio é servido pelo backend, o formulário usa:
 fetch("/api/contact")
 ```
 
-Se o front-end for servido noutro domínio, define CORS no `.env` com `FRONTEND_URL` e configura o endpoint no front-end sem colocar segredos no HTML.
+Se precisares de servir o HTML noutro domínio, define `FRONTEND_URL`, adiciona origens extra em `CORS_ORIGINS` e expõe a URL da API através de `window.BRUNO_PORTFOLIO_API_URL`, sem colocar segredos no HTML.
+
+## Segurança
+
+- CORS controlado, sem wildcard.
+- CSP restritiva com fontes e CDNs necessários.
+- HSTS ativo apenas em produção.
+- Rate limit global e específico no formulário.
+- Body limit configurável.
+- Validação com Zod.
+- Sanitização de HTML perigoso.
+- Honeypot anti-spam.
+- Bloqueio simples de excesso de links.
+- Logs sem expor conteúdo completo da mensagem.
+- `.env` e logs ignorados por Git.
 
 ## Testes
 
@@ -169,13 +210,3 @@ npm test
 ```
 
 Os testes usam mocks para Prisma e Resend, por isso não precisam de base de dados real nem credenciais válidas.
-
-## Segurança
-
-- Não commitar `.env`.
-- Não commitar logs, `node_modules`, `dist` ou `coverage`.
-- Configurar segredos reais apenas no painel do fornecedor de deploy.
-- Usar `NODE_ENV=production` em produção.
-- Usar `TRUST_PROXY=true` apenas atrás de reverse proxy confiável.
-- Manter `FRONTEND_URL` alinhado com o domínio real.
-- Manter `RATE_LIMIT_CONTACT_MAX` baixo para reduzir spam.

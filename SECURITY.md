@@ -1,57 +1,45 @@
 # Segurança
 
-Este projeto está preparado para ser publicado como repositório público, desde que os segredos fiquem fora do Git.
+Este projeto está preparado para repositório público e deploy em domínio real, desde que os segredos fiquem fora do Git.
 
-## O que nunca deve ir para o GitHub
+## Nunca publicar
 
 - `.env`
 - `.env.*`
 - chaves Resend
-- URLs de bases de dados reais
+- URLs reais de base de dados
 - passwords
 - tokens
 - logs com dados pessoais
 - dumps de base de dados
 
-## Ficheiros seguros para commit
-
-- `.env.example`
-- `portfolio.html`
-- `bruno-jesus-portfolio-backend/src/**`
-- `bruno-jesus-portfolio-backend/prisma/schema.prisma`
-- documentação
-- testes
-
-## Variáveis de ambiente
-
-Configura os valores reais apenas no ambiente de deploy:
-
-- `DATABASE_URL`
-- `RESEND_API_KEY`
-- `CONTACT_RECEIVER_EMAIL`
-- `CONTACT_FROM_EMAIL`
-- `FRONTEND_URL`
-
-## Antes de publicar
-
-Executa:
+## Verificação antes de deploy
 
 ```bash
 cd bruno-jesus-portfolio-backend
-npm run build
-npm run lint
-npm test
-npm audit --audit-level=high
+npm run verify:production
 ```
 
-Na raiz do projeto:
+Este comando sincroniza o front-end, verifica ficheiros sensíveis, executa lint, testes, build e `npm audit --audit-level=high`.
 
-```bash
-git check-ignore -v bruno-jesus-portfolio-backend/.env
-```
+## Variáveis obrigatórias em produção
 
-O comando deve confirmar que o `.env` está ignorado.
+- `NODE_ENV=production`
+- `TRUST_PROXY=true`
+- `FRONTEND_URL=https://teu-dominio.pt`
+- `DATABASE_URL` com PostgreSQL de produção
+- `RESEND_API_KEY` real
+- `CONTACT_RECEIVER_EMAIL` real
+- `CONTACT_FROM_EMAIL` com domínio verificado no Resend
 
-## Contacto de segurança
+## Cabeçalhos e proteções
 
-Usa o canal de contacto público do portefólio para reportar problemas.
+- CSP restritiva
+- HSTS apenas em produção
+- CORS sem `*`
+- rate limit global e no formulário
+- limite de payload
+- validação com Zod
+- sanitização de HTML perigoso
+- honeypot anti-spam
+- logs sem expor mensagens completas

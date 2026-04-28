@@ -34,7 +34,7 @@ export function createContactController(contactService: ContactService) {
       const parsedBody = contactRequestSchema.safeParse(request.body);
 
       if (!parsedBody.success) {
-        throw new AppError("Validation error.", {
+        throw new AppError("Erro de validação.", {
           statusCode: 400,
           code: "VALIDATION_ERROR",
           details: formatContactValidationErrors(parsedBody.error)
@@ -52,7 +52,7 @@ export function createContactController(contactService: ContactService) {
 
         return reply.status(200).send({
           success: false,
-          message: "Request rejected."
+          message: "Pedido rejeitado."
         });
       }
 
@@ -73,8 +73,8 @@ export function createContactController(contactService: ContactService) {
       return reply.status(201).send({
         success: true,
         message: result.emailNotificationFailed
-          ? "Message received successfully. Email notification failed."
-          : "Message received successfully.",
+          ? "Mensagem recebida com sucesso. A notificação por email falhou."
+          : "Mensagem recebida com sucesso.",
         data: {
           id: result.id
         }
