@@ -1,11 +1,10 @@
-import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
+import { resolve } from "node:path";
 
 const backendRoot = resolve(import.meta.dirname, "..");
 const projectRoot = resolve(backendRoot, "..");
-const source = resolve(projectRoot, "portfolio.html");
+const source = resolve(projectRoot, "frontend");
 const publicRoot = resolve(backendRoot, "public");
-const target = resolve(publicRoot, "index.html");
 
 function assertInside(parent, child) {
   if (!child.startsWith(`${parent}\\`) && !child.startsWith(`${parent}/`)) {
@@ -14,16 +13,20 @@ function assertInside(parent, child) {
 }
 
 if (!existsSync(source)) {
-  throw new Error(`Frontend source not found: ${source}`);
+  throw new Error(`Frontend source folder not found: ${source}`);
 }
 
-mkdirSync(dirname(target), { recursive: true });
+mkdirSync(publicRoot, { recursive: true });
 for (const entry of readdirSync(publicRoot, { withFileTypes: true })) {
   const entryPath = resolve(publicRoot, entry.name);
   assertInside(publicRoot, entryPath);
   rmSync(entryPath, { recursive: true, force: true });
 }
 
-copyFileSync(source, target);
+cpSync(source, publicRoot, {
+  recursive: true,
+  force: true,
+  verbatimSymlinks: false
+});
 
-console.log("Synced portfolio.html to public/index.html");
+console.log("Synced frontend/ to public/");

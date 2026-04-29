@@ -17,10 +17,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Legacy generated frontend files. The production frontend is public/index.html.
-public/assets/
-public/*.html
-!public/index.html
+# Generated frontend output. Source lives in ../frontend/.
+public/
 
 # OS/editor noise
 .DS_Store

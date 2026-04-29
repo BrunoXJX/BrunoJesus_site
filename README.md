@@ -1,31 +1,39 @@
 # Bruno Jesus Portfolio
 
-Portefólio pessoal de Bruno Jesus com front-end premium e backend Fastify para contacto real.
+Portefólio pessoal de Bruno Jesus com front-end estático profissional e backend Fastify para contacto real.
 
 ## Estrutura
 
 ```txt
 JarvisBJ/
-├── portfolio.html
-├── SECURITY.md
+├── frontend/
+│   ├── index.html
+│   └── assets/
+│       ├── css/styles.css
+│       ├── js/boot-preload.js
+│       ├── js/main.js
+│       └── img/
 ├── bruno-jesus-portfolio-backend/
-│   ├── prisma/
 │   ├── public/
+│   ├── prisma/
 │   ├── scripts/
 │   ├── src/
 │   ├── tests/
 │   ├── .env.example
 │   └── package.json
+├── SECURITY.md
 └── README.md
 ```
 
 ## Front-end
 
-O ficheiro visual principal é `portfolio.html`. Para produção, o backend sincroniza esse ficheiro para `bruno-jesus-portfolio-backend/public/index.html` e serve o site no mesmo domínio da API.
+A fonte visual está em `frontend/`. O backend sincroniza essa pasta para `bruno-jesus-portfolio-backend/public/` antes de correr em desenvolvimento, build ou validação de produção.
+
+O ficheiro `portfolio.html` na raiz é apenas um atalho legado para o servidor local.
 
 ## Backend
 
-O backend recebe o formulário de contacto, valida e sanitiza dados, aplica rate limit, guarda mensagens em PostgreSQL, envia emails via Resend e serve o front-end.
+O backend recebe o formulário de contacto, valida e sanitiza dados, aplica rate limiting, guarda mensagens em PostgreSQL, envia emails via Resend e serve o front-end no mesmo domínio.
 
 ## Produção
 

@@ -1,10 +1,11 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { join, relative, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 
 const backendRoot = resolve(import.meta.dirname, "..");
 const projectRoot = resolve(backendRoot, "..");
 const publicRoot = resolve(backendRoot, "public");
+const frontendRoot = resolve(projectRoot, "frontend");
 
 const blockedSecretPatterns = [
   /-----BEGIN (?:RSA |EC |OPENSSH |)PRIVATE KEY-----/,
@@ -79,16 +80,77 @@ function assertPublicFolderIsClean() {
     return;
   }
 
-  const entries = readdirSync(publicRoot).filter((entry) => entry !== "index.html");
+  const entries = readdirSync(publicRoot).filter((entry) => !["index.html", "assets"].includes(entry));
 
   if (entries.length > 0) {
     fail(`public folder has unexpected files: ${entries.join(", ")}`);
   }
 }
 
+function walkFiles(directory) {
+  if (!existsSync(directory)) {
+    return [];
+  }
+
+  const files = [];
+
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const entryPath = join(directory, entry.name);
+
+    if (entry.isDirectory()) {
+      files.push(...walkFiles(entryPath));
+    } else if (entry.isFile()) {
+      files.push(entryPath);
+    }
+  }
+
+  return files;
+}
+
+function assertFrontendAssetsAreSafe() {
+  for (const root of [frontendRoot, publicRoot]) {
+    const indexPath = resolve(root, "index.html");
+
+    if (!existsSync(indexPath)) {
+      fail(`frontend index is missing: ${indexPath}`);
+      continue;
+    }
+
+    const html = readFileSync(indexPath, "utf8");
+
+    if (/<style[\s>]/i.test(html)) {
+      fail(`inline style block found in ${relative(projectRoot, indexPath)}`);
+    }
+
+    if (/<script(?![^>]*\bsrc=)[^>]*>/i.test(html)) {
+      fail(`inline script block found in ${relative(projectRoot, indexPath)}`);
+    }
+
+    if (/\sstyle=/.test(html)) {
+      fail(`inline style attribute found in ${relative(projectRoot, indexPath)}`);
+    }
+
+    if (/lucide@latest/i.test(html)) {
+      fail(`unpinned lucide CDN found in ${relative(projectRoot, indexPath)}`);
+    }
+
+    if (/data:image\/png/i.test(html)) {
+      fail(`large base64 image found in ${relative(projectRoot, indexPath)}`);
+    }
+  }
+
+  const publicFiles = walkFiles(publicRoot);
+  const oversizedHtml = publicFiles.filter((file) => file.endsWith(".html") && statSync(file).size > 100_000);
+
+  if (oversizedHtml.length > 0) {
+    fail(`oversized HTML file found: ${oversizedHtml.map((file) => relative(projectRoot, file)).join(", ")}`);
+  }
+}
+
 assertEnvFilesAreIgnored();
 assertNoObviousSecretsInTrackedFiles();
 assertPublicFolderIsClean();
+assertFrontendAssetsAreSafe();
 
 if (process.exitCode) {
   process.exit(process.exitCode);

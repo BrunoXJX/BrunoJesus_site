@@ -5,7 +5,7 @@ import Fastify, {
   type FastifyServerOptions
 } from "fastify";
 
-import { API_VERSION, env } from "./config/env";
+import { API_VERSION, env, isProduction } from "./config/env";
 import prisma from "./database/prisma";
 import { registerErrorMiddleware } from "./middlewares/error.middleware";
 import { registerSecurityMiddleware } from "./middlewares/security.middleware";
@@ -58,7 +58,16 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(fastifyStatic, {
     root: publicRoot,
     prefix: "/",
-    index: false
+    cacheControl: false,
+    index: false,
+    setHeaders: (response, filePath) => {
+      if (isProduction && filePath.includes(`${path.sep}assets${path.sep}`)) {
+        response.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        return;
+      }
+
+      response.setHeader("Cache-Control", "no-store");
+    }
   });
 
   const emailService = options.emailService ?? createEmailService(app.log);

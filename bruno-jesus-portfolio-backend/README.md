@@ -99,13 +99,19 @@ npm run prisma:deploy
 Fonte de verdade visual:
 
 ```txt
-../portfolio.html
+../frontend/
+├── index.html
+└── assets/
+    ├── css/styles.css
+    ├── js/boot-preload.js
+    ├── js/main.js
+    └── img/
 ```
 
-Ficheiro servido em produção:
+Pasta servida em produção:
 
 ```txt
-public/index.html
+public/
 ```
 
 Sincronizar:
@@ -114,7 +120,9 @@ Sincronizar:
 npm run sync:frontend
 ```
 
-O script limpa a pasta `public` e deixa apenas o `index.html` final, evitando ficheiros antigos expostos por engano.
+O script limpa a pasta `public` e copia a estrutura de `frontend/`, evitando ficheiros antigos expostos por engano.
+
+O HTML não contém CSS ou JavaScript inline. A CSP permite apenas scripts próprios, Lucide fixado por versão, estilos próprios e CDNs de fontes.
 
 ## Desenvolvimento
 

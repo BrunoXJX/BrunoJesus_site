@@ -20,7 +20,17 @@ cd bruno-jesus-portfolio-backend
 npm run verify:production
 ```
 
-Este comando sincroniza o front-end, verifica ficheiros sensíveis, executa lint, testes, build e `npm audit --audit-level=high`.
+Este comando sincroniza `frontend/` para `public/`, verifica ficheiros sensíveis, valida a estrutura estática, executa lint, testes, build e `npm audit --audit-level=high`.
+
+## Front-end seguro
+
+- HTML sem `<style>` inline.
+- HTML sem `<script>` inline.
+- CSS em `frontend/assets/css/styles.css`.
+- JavaScript em `frontend/assets/js/`.
+- Imagens locais em `frontend/assets/img/`.
+- Sem `unsafe-inline` na CSP.
+- Lucide está fixado por versão e com SRI.
 
 ## Variáveis obrigatórias em produção
 

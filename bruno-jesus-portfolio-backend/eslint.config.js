@@ -59,7 +59,11 @@ module.exports = [
         performance: "readonly",
         FormData: "readonly",
         IntersectionObserver: "readonly",
+        requestAnimationFrame: "readonly",
+        cancelAnimationFrame: "readonly",
+        navigator: "readonly",
         HTMLElement: "readonly",
+        HTMLCanvasElement: "readonly",
         HTMLButtonElement: "readonly",
         HTMLFormElement: "readonly"
       }
