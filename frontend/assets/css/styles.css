@@ -1587,6 +1587,9 @@
     }
 
     .skill-card {
+      display: flex;
+      min-height: clamp(18.5rem, 23vw, 21.5rem);
+      flex-direction: column;
       padding: 1.35rem;
       border-radius: var(--radius-md);
       border: 1px solid var(--border);
@@ -1614,12 +1617,18 @@
       margin-bottom: var(--space-4);
     }
 
+    .skill-card__top > div {
+      min-width: 0;
+    }
+
     .skill-card__top--compact {
-      margin: 1rem 0 0;
+      margin: auto 0 0;
+      padding-top: var(--space-4);
     }
 
     .skill-card__icon {
       display: inline-flex;
+      flex: 0 0 40px;
       align-items: center;
       justify-content: center;
       width: 40px;
@@ -1632,24 +1641,38 @@
 
     .skill-card__name {
       font-size: 1.28rem;
+      line-height: 1.05;
     }
 
     .skill-card__description {
       color: var(--text-muted);
       font-size: var(--text-sm);
+      line-height: 1.62;
       min-height: 3.2em;
+    }
+
+    .skill-card__top .skill-card__description {
+      min-height: 0;
+      margin-top: 0.25rem;
+      line-height: 1.35;
+    }
+
+    .skill-card > .skill-card__description {
+      max-width: 25ch;
+      margin-bottom: var(--space-4);
     }
 
     .skill-card__percent {
       font-family: "JetBrains Mono", monospace;
       color: var(--accent);
       font-size: var(--text-sm);
+      letter-spacing: 0.02em;
     }
 
     .skill-card__meter {
       position: relative;
       height: 8px;
-      margin-top: var(--space-4);
+      margin-top: 0.9rem;
       border-radius: 999px;
       overflow: hidden;
       background: rgba(255, 255, 255, 0.07);
@@ -2352,6 +2375,10 @@
       .brand-grid,
       .skills-grid {
         grid-template-columns: 1fr;
+      }
+
+      .skill-card {
+        min-height: auto;
       }
 
       .contact-email-row {
