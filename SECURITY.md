@@ -29,6 +29,7 @@ Este comando sincroniza `frontend/` para `public/`, verifica ficheiros sensívei
 - CSS em `frontend/assets/css/styles.css`.
 - JavaScript em `frontend/assets/js/`.
 - Imagens locais em `frontend/assets/img/`.
+- `bruno-jesus-portfolio-backend/public/` é gerado no build e não deve ser commitado.
 - Sem `unsafe-inline` na CSP.
 - Lucide está fixado por versão e com SRI.
 

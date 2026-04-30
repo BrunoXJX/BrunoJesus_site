@@ -56,6 +56,21 @@ function assertEnvFilesAreIgnored() {
   }
 }
 
+function assertGeneratedFilesAreNotTracked() {
+  const trackedFiles = runGit(["ls-files"])
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map((file) => file.replaceAll("\\", "/"));
+
+  const trackedPublicFiles = trackedFiles.filter((file) =>
+    file.startsWith("bruno-jesus-portfolio-backend/public/")
+  );
+
+  if (trackedPublicFiles.length > 0) {
+    fail(`generated public files are tracked: ${trackedPublicFiles.join(", ")}`);
+  }
+}
+
 function assertNoObviousSecretsInTrackedFiles() {
   const trackedFiles = runGit(["ls-files"])
     .split(/\r?\n/)
@@ -134,6 +149,22 @@ function assertFrontendAssetsAreSafe() {
       fail(`unpinned lucide CDN found in ${relative(projectRoot, indexPath)}`);
     }
 
+    const externalScriptTags = html.match(/<script\b[^>]*\bsrc=["']https?:\/\/[^"']+["'][^>]*>/gi) ?? [];
+
+    for (const tag of externalScriptTags) {
+      if (!/\bintegrity=["'][^"']+["']/i.test(tag) || !/\bcrossorigin=["']anonymous["']/i.test(tag)) {
+        fail(`external script without SRI/crossorigin found in ${relative(projectRoot, indexPath)}: ${tag}`);
+      }
+    }
+
+    const externalBlankLinks = html.match(/<a\b[^>]*\btarget=["']_blank["'][^>]*>/gi) ?? [];
+
+    for (const tag of externalBlankLinks) {
+      if (!/\brel=["'][^"']*\bnoopener\b[^"']*\bnoreferrer\b[^"']*["']/i.test(tag)) {
+        fail(`target=_blank link without noopener noreferrer found in ${relative(projectRoot, indexPath)}: ${tag}`);
+      }
+    }
+
     if (/data:image\/png/i.test(html)) {
       fail(`large base64 image found in ${relative(projectRoot, indexPath)}`);
     }
@@ -148,6 +179,7 @@ function assertFrontendAssetsAreSafe() {
 }
 
 assertEnvFilesAreIgnored();
+assertGeneratedFilesAreNotTracked();
 assertNoObviousSecretsInTrackedFiles();
 assertPublicFolderIsClean();
 assertFrontendAssetsAreSafe();

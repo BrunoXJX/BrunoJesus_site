@@ -61,7 +61,7 @@ CORS_ORIGINS="https://www.teu-dominio.pt"
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public"
 
 RESEND_API_KEY="re_..."
-CONTACT_RECEIVER_EMAIL="bruno@teu-dominio.pt"
+CONTACT_RECEIVER_EMAIL="bruno.asjesuss@gmail.com"
 CONTACT_FROM_EMAIL="Bruno Jesus Portfolio <contacto@teu-dominio.pt>"
 
 REQUEST_BODY_LIMIT_BYTES=65536
@@ -121,6 +121,8 @@ npm run sync:frontend
 ```
 
 O script limpa a pasta `public` e copia a estrutura de `frontend/`, evitando ficheiros antigos expostos por engano.
+
+A pasta `public/` é gerada e não deve ser commitada. O deploy deve correr `npm run build` ou `npm run deploy:prepare` para a recriar a partir de `../frontend/`.
 
 O HTML não contém CSS ou JavaScript inline. A CSP permite apenas scripts próprios, Lucide fixado por versão, estilos próprios e CDNs de fontes.
 

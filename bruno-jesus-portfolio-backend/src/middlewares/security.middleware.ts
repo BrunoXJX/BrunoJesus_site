@@ -14,6 +14,7 @@ export async function registerSecurityMiddleware(app: FastifyInstance): Promise<
       "accelerometer=(), autoplay=(), camera=(), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=()"
     );
     reply.header("X-Permitted-Cross-Domain-Policies", "none");
+    reply.header("Cache-Control", "no-store");
   });
 
   await app.register(helmet, {
