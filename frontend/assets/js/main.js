@@ -6,6 +6,10 @@
           return configuredApiUrl.trim();
         }
 
+        if (window.location.hostname.endsWith("github.io")) {
+          return "";
+        }
+
         return window.location.protocol === "file:" ? "http://localhost:3333/api/contact" : "/api/contact";
       })();
       const HERO_TAGLINE = "Transformo processos em soluções digitais.";
@@ -588,7 +592,8 @@
           }
           formStatus.textContent = "A processar mensagem...";
           const fallbackSuccess = () => {
-            formStatus.textContent = "Mensagem preparada localmente. Liga aqui o teu endpoint real quando quiseres.";
+            formStatus.textContent =
+              "Pré-visualização ativa. Para envio real, publica o backend e configura a URL da API.";
             form.reset();
           };
           if (!CONTACT_API_URL) {

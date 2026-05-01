@@ -95,7 +95,8 @@ function assertPublicFolderIsClean() {
     return;
   }
 
-  const entries = readdirSync(publicRoot).filter((entry) => !["index.html", "assets"].includes(entry));
+  const allowedPublicEntries = new Set([".nojekyll", "index.html", "assets"]);
+  const entries = readdirSync(publicRoot).filter((entry) => !allowedPublicEntries.has(entry));
 
   if (entries.length > 0) {
     fail(`public folder has unexpected files: ${entries.join(", ")}`);
