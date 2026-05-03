@@ -41,6 +41,79 @@
           window.lucide.createIcons();
         }
       }
+      const THEME_STORAGE_KEY = "bj-theme";
+      const DEFAULT_THEME = "electric";
+      const FLOWIX_THEME = "flowix";
+      function getStoredTheme() {
+        try {
+          if (window.localStorage) {
+            return window.localStorage.getItem(THEME_STORAGE_KEY) === FLOWIX_THEME ? FLOWIX_THEME : DEFAULT_THEME;
+          }
+        } catch {
+          // Ignore storage issues and use the default theme.
+        }
+        return document.documentElement.getAttribute("data-theme") === FLOWIX_THEME ? FLOWIX_THEME : DEFAULT_THEME;
+      }
+      function storeTheme(theme) {
+        try {
+          if (!window.localStorage) {
+            return;
+          }
+          if (theme === FLOWIX_THEME) {
+            window.localStorage.setItem(THEME_STORAGE_KEY, FLOWIX_THEME);
+          } else {
+            window.localStorage.removeItem(THEME_STORAGE_KEY);
+          }
+        } catch {
+          // Theme switching still works without persistence.
+        }
+      }
+      function applyTheme(theme, shouldAnimate) {
+        const isFlowix = theme === FLOWIX_THEME;
+        const root = document.documentElement;
+        const toggle = document.getElementById("theme-toggle");
+        const toggleText = toggle ? toggle.querySelector(".theme-toggle__text") : null;
+        const themeColor = document.querySelector("meta[name='theme-color']");
+        if (isFlowix) {
+          root.setAttribute("data-theme", FLOWIX_THEME);
+        } else {
+          root.removeAttribute("data-theme");
+        }
+        if (toggle instanceof HTMLButtonElement) {
+          toggle.setAttribute("aria-pressed", String(isFlowix));
+          toggle.setAttribute("aria-label", isFlowix ? "Voltar ao tema verde elétrico" : "Ativar tema Flowix azul");
+        }
+        if (toggleText) {
+          toggleText.textContent = isFlowix ? "Verde" : "Flowix";
+        }
+        if (themeColor && themeColor.tagName === "META") {
+          themeColor.setAttribute("content", isFlowix ? "#030712" : "#050805");
+        }
+        if (shouldAnimate && !prefersReducedMotion.matches) {
+          const heroName = document.getElementById("hero-name");
+          if (heroName) {
+            heroName.classList.remove("is-zapping");
+            void heroName.offsetWidth;
+            heroName.classList.add("is-zapping");
+            window.setTimeout(() => heroName.classList.remove("is-zapping"), 420);
+          }
+        }
+      }
+      function initThemeToggle() {
+        const toggle = document.getElementById("theme-toggle");
+        const initialTheme = getStoredTheme();
+        applyTheme(initialTheme, false);
+        if (!(toggle instanceof HTMLButtonElement)) {
+          return;
+        }
+        const onToggle = () => {
+          const nextTheme = document.documentElement.getAttribute("data-theme") === FLOWIX_THEME ? DEFAULT_THEME : FLOWIX_THEME;
+          storeTheme(nextTheme);
+          applyTheme(nextTheme, true);
+        };
+        toggle.addEventListener("click", onToggle);
+        addCleanup(() => toggle.removeEventListener("click", onToggle));
+      }
       function setEmail() {
         const emailDisplay = document.getElementById("contact-email-display");
         if (emailDisplay) {
@@ -251,6 +324,7 @@
             return;
           }
           lastFrame = timestamp;
+          const accentRgb = window.getComputedStyle(document.documentElement).getPropertyValue("--accent-rgb").trim() || "57, 255, 20";
           ctx.clearRect(0, 0, width, height);
           for (let i = 0; i < particles.length; i += 1) {
             const particle = particles[i];
@@ -276,7 +350,7 @@
             particle.vy = Math.max(-0.42, Math.min(0.42, particle.vy));
             ctx.beginPath();
             ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(57, 255, 20, 0.72)";
+            ctx.fillStyle = "rgba(" + accentRgb + ", 0.72)";
             ctx.fill();
           }
           for (let i = 0; i < particles.length; i += 1) {
@@ -291,7 +365,7 @@
                 ctx.beginPath();
                 ctx.moveTo(a.x, a.y);
                 ctx.lineTo(b.x, b.y);
-                ctx.strokeStyle = "rgba(57, 255, 20, " + opacity.toFixed(3) + ")";
+                ctx.strokeStyle = "rgba(" + accentRgb + ", " + opacity.toFixed(3) + ")";
                 ctx.lineWidth = 1;
                 ctx.stroke();
               }
@@ -793,6 +867,7 @@
         initHeroTagline();
       }
       function init() {
+        initThemeToggle();
         setEmail();
         initIcons();
         initCustomCursor();
