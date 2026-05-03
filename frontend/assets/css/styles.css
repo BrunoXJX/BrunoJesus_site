@@ -666,10 +666,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.55rem;
+      gap: 0.5rem;
       min-width: 44px;
       min-height: 44px;
-      padding: 0 0.82rem;
+      padding: 0 0.76rem;
       overflow: hidden;
       border-radius: 999px;
       border: 1px solid var(--border-bright);
@@ -737,6 +737,13 @@
       letter-spacing: 0.08em;
       text-transform: uppercase;
       white-space: nowrap;
+      color: var(--text-muted);
+      transition: color 0.25s ease;
+    }
+
+    .theme-toggle:hover .theme-toggle__text,
+    .theme-toggle:focus-visible .theme-toggle__text {
+      color: var(--accent);
     }
 
     html[data-theme="flowix"] .theme-toggle {

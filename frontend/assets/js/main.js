@@ -84,7 +84,7 @@
           toggle.setAttribute("aria-label", isFlowix ? "Voltar ao tema verde elétrico" : "Ativar tema Flowix azul");
         }
         if (toggleText) {
-          toggleText.textContent = isFlowix ? "Verde" : "Flowix";
+          toggleText.textContent = isFlowix ? "Verde" : "Azul";
         }
         if (themeColor && themeColor.tagName === "META") {
           themeColor.setAttribute("content", isFlowix ? "#030712" : "#050805");
