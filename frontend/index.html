@@ -652,92 +652,63 @@
             execução real.
           </p>
         </header>
-        <div class="stats-grid">
-          <article class="stat-card panel reveal">
-            <span class="stat-value" data-countup data-prefix="#" data-value="1">#0</span>
-            <p class="stat-label">Top Embaixador EY 2025/2026</p>
-          </article>
-          <article class="stat-card panel reveal">
-            <span class="stat-value" data-countup data-value="1">0</span>
-            <p class="stat-label">Empresa cofundada</p>
-          </article>
-          <article class="stat-card panel reveal">
-            <span class="stat-value stat-value--static">PL-200</span>
-            <p class="stat-label">Certificação Microsoft</p>
-          </article>
-          <article class="stat-card panel reveal">
-            <span class="stat-value" data-countup data-value="2">0</span>
-            <p class="stat-label">Anos na Deloitte</p>
-          </article>
-        </div>
-      </div>
-    </section>
-    <section id="contact" class="section">
-      <div class="container">
-        <header class="section-header reveal">
-          <div class="section-heading">
-            <div class="section-kicker">&gt; ESTABLISH_CONNECTION()</div>
-            <h2 class="section-title">Pronto para conversas úteis, automação aplicada e colaboração séria.
-            </h2>
-          </div>
-          <p class="section-intro">
-            Aberto a conversas sobre Power Platform, low-code, IA aplicada, vendas, liderança e projetos digitais com
-            execução real.
-          </p>
-        </header>
-        <div class="contact-layout">
-          <div class="contact-copy">
-            <h3 class="contact-headline reveal">Vamos construir algo com impacto.</h3>
-            <p class="contact-text reveal">
-              Disponível para colaborações, projetos de automação, conversas sobre tecnologia e desafios com impacto
-              prático.
-            </p>
-            <div class="contact-stack">
-              <article class="contact-card panel reveal">
-                <div class="contact-card__label">Canal principal</div>
-                <div class="contact-email-row">
-                  <div>
-                    <a class="contact-card__value mono" id="contact-email-display" href="mailto:bruno.asjesuss@gmail.com"></a>
-                    <p class="contact-card__note">Canal principal disponível para contacto direto.</p>
-                  </div>
-                  <div class="copy-group">
-                    <button type="button" class="icon-btn" id="copy-email" aria-label="Copiar email">
-                      <i data-lucide="copy"></i>
-                    </button>
-                    <span class="copy-tooltip" id="copy-tooltip" role="status" aria-live="polite">Copiado!</span>
-                  </div>
-                </div>
-              </article>
-              <div class="contact-links">
-                <a class="contact-link reveal" href="https://www.linkedin.com/in/brunojesus1/" target="_blank"
-                  rel="noopener noreferrer" aria-label="LinkedIn de Bruno Jesus">
-                  <div>
-                    <strong>LinkedIn</strong>
-                    <span>Presença profissional e contacto direto</span>
-                  </div>
-                  <i data-lucide="arrow-up-right"></i>
-                </a>
-                <a class="contact-link reveal" href="https://github.com/BrunoXJX" target="_blank"
-                  rel="noopener noreferrer" aria-label="GitHub de Bruno Jesus">
-                  <div>
-                    <strong>GitHub</strong>
-                    <span>Repositórios, código e base técnica</span>
-                  </div>
-                  <i data-lucide="arrow-up-right"></i>
-                </a>
-                <div class="contact-card panel reveal">
-                  <div class="contact-card__label">Localização</div>
-                  <div class="contact-card__value">Viseu, Portugal</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="terminal panel reveal" aria-label="Janela de terminal ilustrativa" style="height: 100%; display: flex; flex-direction: column;">
+        <!-- Terminal — full width centerpiece -->
+        <div class="contact-terminal-hero panel reveal">
+          <div class="terminal" aria-label="Janela de terminal ilustrativa">
             <div class="terminal__bar">
               <span>sessão@bruno-terminal</span>
               <span>pronto</span>
             </div>
-            <div class="terminal__screen" id="terminal-text" style="flex: 1; padding: 1.8rem; font-size: clamp(0.9rem, 0.85rem + 0.2vw, 1.05rem); line-height: 1.7;"></div>
+            <div class="terminal__screen" id="terminal-text"></div>
+          </div>
+        </div>
+
+        <!-- Headline + Contact cards below terminal -->
+        <div class="contact-below">
+          <div class="contact-below__header reveal">
+            <h3 class="contact-headline">Vamos construir algo com impacto.</h3>
+            <p class="contact-text">
+              Disponível para colaborações, projetos de automação, conversas sobre tecnologia e desafios com impacto
+              prático.
+            </p>
+          </div>
+          <div class="contact-grid">
+            <article class="contact-card panel reveal">
+              <div class="contact-card__label">Canal principal</div>
+              <div class="contact-email-row">
+                <div>
+                  <a class="contact-card__value mono" id="contact-email-display"
+                    href="mailto:bruno.asjesuss@gmail.com"></a>
+                  <p class="contact-card__note">Canal principal disponível para contacto direto.</p>
+                </div>
+                <div class="copy-group">
+                  <button type="button" class="icon-btn" id="copy-email" aria-label="Copiar email">
+                    <i data-lucide="copy"></i>
+                  </button>
+                  <span class="copy-tooltip" id="copy-tooltip" role="status" aria-live="polite">Copiado!</span>
+                </div>
+              </div>
+            </article>
+            <a class="contact-link panel reveal" href="https://www.linkedin.com/in/brunojesus1/" target="_blank"
+              rel="noopener noreferrer" aria-label="LinkedIn de Bruno Jesus">
+              <div>
+                <strong>LinkedIn</strong>
+                <span>Presença profissional e contacto direto</span>
+              </div>
+              <i data-lucide="arrow-up-right"></i>
+            </a>
+            <a class="contact-link panel reveal" href="https://github.com/BrunoXJX" target="_blank"
+              rel="noopener noreferrer" aria-label="GitHub de Bruno Jesus">
+              <div>
+                <strong>GitHub</strong>
+                <span>Repositórios, código e base técnica</span>
+              </div>
+              <i data-lucide="arrow-up-right"></i>
+            </a>
+            <div class="contact-card panel reveal">
+              <div class="contact-card__label">Localização</div>
+              <div class="contact-card__value">Viseu, Portugal</div>
+            </div>
           </div>
         </div>
       </div>

@@ -2639,6 +2639,69 @@
       }
     }
 
+    /* ── Contact Section: Terminal Hero + Grid ── */
+
+    .contact-terminal-hero {
+      padding: 0;
+      margin-bottom: clamp(var(--space-8), 4vw, var(--space-12));
+      overflow: hidden;
+    }
+
+    .contact-terminal-hero .terminal {
+      border: none;
+      border-radius: 0;
+    }
+
+    .contact-terminal-hero .terminal__screen {
+      min-height: 220px;
+      padding: clamp(1.2rem, 2.4vw, 2rem);
+      font-size: clamp(0.92rem, 0.86rem + 0.22vw, 1.08rem);
+      line-height: 1.75;
+    }
+
+    .contact-below {
+      display: grid;
+      gap: clamp(var(--space-8), 3vw, var(--space-12));
+    }
+
+    .contact-below__header {
+      text-align: center;
+      max-width: 38rem;
+      margin: 0 auto;
+    }
+
+    .contact-below__header .contact-headline {
+      max-width: none;
+    }
+
+    .contact-below__header .contact-text {
+      margin-top: var(--space-4);
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-4);
+    }
+
+    .contact-grid .contact-link {
+      padding: 1.2rem;
+      border-radius: var(--radius-lg);
+      min-height: auto;
+    }
+
+    @media (max-width: 1120px) {
+      .contact-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       html {
         scroll-behavior: auto;
