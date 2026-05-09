@@ -652,6 +652,39 @@
             execução real.
           </p>
         </header>
+        <div class="stats-grid">
+          <article class="stat-card panel reveal">
+            <span class="stat-value" data-countup data-prefix="#" data-value="1">#0</span>
+            <p class="stat-label">Top Embaixador EY 2025/2026</p>
+          </article>
+          <article class="stat-card panel reveal">
+            <span class="stat-value" data-countup data-value="1">0</span>
+            <p class="stat-label">Empresa cofundada</p>
+          </article>
+          <article class="stat-card panel reveal">
+            <span class="stat-value stat-value--static">PL-200</span>
+            <p class="stat-label">Certificação Microsoft</p>
+          </article>
+          <article class="stat-card panel reveal">
+            <span class="stat-value" data-countup data-value="2">0</span>
+            <p class="stat-label">Anos na Deloitte</p>
+          </article>
+        </div>
+      </div>
+    </section>
+    <section id="contact" class="section">
+      <div class="container">
+        <header class="section-header reveal">
+          <div class="section-heading">
+            <div class="section-kicker">&gt; ESTABLISH_CONNECTION()</div>
+            <h2 class="section-title">Pronto para conversas úteis, automação aplicada e colaboração séria.
+            </h2>
+          </div>
+          <p class="section-intro">
+            Aberto a conversas sobre Power Platform, low-code, IA aplicada, vendas, liderança e projetos digitais com
+            execução real.
+          </p>
+        </header>
         <div class="contact-layout">
           <div class="contact-copy">
             <h3 class="contact-headline reveal">Vamos construir algo com impacto.</h3>
@@ -699,36 +732,12 @@
               </div>
             </div>
           </div>
-          <div class="contact-panel panel reveal">
-            <div class="terminal" aria-label="Janela de terminal ilustrativa">
-              <div class="terminal__bar">
-                <span>sessão@bruno-terminal</span>
-                <span>pronto</span>
-              </div>
-              <div class="terminal__screen" id="terminal-text"></div>
+          <div class="terminal panel reveal" aria-label="Janela de terminal ilustrativa" style="height: 100%; display: flex; flex-direction: column;">
+            <div class="terminal__bar">
+              <span>sessão@bruno-terminal</span>
+              <span>pronto</span>
             </div>
-            <form class="contact-form" id="contact-form" novalidate>
-              <div class="form-row">
-                <label for="contact-name">Nome</label>
-                <input id="contact-name" name="name" type="text" autocomplete="name" required>
-              </div>
-              <div class="form-row">
-                <label for="contact-email">Email</label>
-                <input id="contact-email" name="email" type="email" autocomplete="email" required>
-              </div>
-              <div class="form-row">
-                <label for="contact-message">Mensagem</label>
-                <textarea id="contact-message" name="message" required minlength="10" maxlength="3000"></textarea>
-              </div>
-              <div class="sr-only" aria-hidden="true">
-                <label for="contact-website">Website</label>
-                <input id="contact-website" name="website" type="text" tabindex="-1" autocomplete="off">
-              </div>
-              <p class="form-privacy">Ao enviar, os dados são usados apenas para responder ao teu contacto e ficam
-                protegidos no backend do portefólio.</p>
-              <button type="submit" class="btn" id="contact-submit">Enviar mensagem</button>
-              <p class="form-status" id="form-status" aria-live="polite"></p>
-            </form>
+            <div class="terminal__screen" id="terminal-text" style="flex: 1; padding: 1.8rem; font-size: clamp(0.9rem, 0.85rem + 0.2vw, 1.05rem); line-height: 1.7;"></div>
           </div>
         </div>
       </div>
