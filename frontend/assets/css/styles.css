@@ -1448,7 +1448,7 @@
     }
 
     html[data-theme="flowix"] .atom-logo__portrait-shell::after {
-      opacity: 0.82;
+      opacity: 0;
     }
 
     .atom-logo__portrait {
@@ -1462,7 +1462,7 @@
       object-fit: contain;
       object-position: center bottom;
       filter:
-        saturate(1.03) contrast(1.05) drop-shadow(0 20px 38px rgba(0, 0, 0, 0.48)) drop-shadow(0 0 28px rgba(var(--accent-rgb), 0.32));
+        drop-shadow(0 20px 38px rgba(0, 0, 0, 0.48)) drop-shadow(0 0 28px rgba(var(--accent-rgb), 0.22));
       transform: translate3d(0, 1%, 0) scale(1.02);
       transform-origin: center bottom;
       animation: portraitFloat 9s cubic-bezier(0.16, 1, 0.3, 1) infinite alternate;
@@ -1473,13 +1473,13 @@
 
     html[data-theme="flowix"] .atom-logo__portrait {
       filter:
-        saturate(1.02) contrast(1.05) drop-shadow(0 20px 38px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 34px rgba(var(--accent-rgb), 0.34));
+        drop-shadow(0 20px 38px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 28px rgba(var(--accent-rgb), 0.18));
     }
 
     /* Interactive states */
     .atom-logo:hover .atom-logo__portrait {
       filter:
-        saturate(1.15) contrast(1.1) drop-shadow(0 18px 34px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 50px rgba(var(--accent-rgb), 0.5));
+        drop-shadow(0 18px 34px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 36px rgba(var(--accent-rgb), 0.28));
       transform: translate3d(0, -1%, 0) scale(1.06);
     }
 
@@ -1530,14 +1530,14 @@
     .hero-logo-stage:hover .atom-logo__portrait,
     .hero-logo-stage:focus-within .atom-logo__portrait {
       filter:
-        saturate(1.05) contrast(1.06) drop-shadow(0 20px 40px rgba(0, 0, 0, 0.44)) drop-shadow(0 0 56px rgba(var(--accent-rgb), 0.22));
+        drop-shadow(0 20px 40px rgba(0, 0, 0, 0.44)) drop-shadow(0 0 36px rgba(var(--accent-rgb), 0.18));
     }
 
     html[data-theme="flowix"] .atom-logo:hover .atom-logo__portrait,
     html[data-theme="flowix"] .hero-logo-stage:hover .atom-logo__portrait,
     html[data-theme="flowix"] .hero-logo-stage:focus-within .atom-logo__portrait {
       filter:
-        saturate(1.08) contrast(1.08) drop-shadow(0 18px 34px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 58px rgba(var(--accent-rgb), 0.42));
+        drop-shadow(0 18px 34px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 38px rgba(var(--accent-rgb), 0.24));
     }
 
     .atom-logo__letters {
