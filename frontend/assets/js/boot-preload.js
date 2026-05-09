@@ -7,9 +7,13 @@ try {
     }
 
 try {
-      if (window.localStorage && window.localStorage.getItem("bj-theme") === "flowix") {
+      // Default theme is flowix (blue). Only switch to green if explicitly stored.
+      if (window.localStorage && window.localStorage.getItem("bj-theme") === "electric") {
+        // User explicitly chose green — do NOT set flowix
+      } else {
         document.documentElement.setAttribute("data-theme", "flowix");
       }
 } catch {
-      // Ignore theme storage issues and keep the default green identity.
+      // Default to flowix blue on any error.
+      document.documentElement.setAttribute("data-theme", "flowix");
     }

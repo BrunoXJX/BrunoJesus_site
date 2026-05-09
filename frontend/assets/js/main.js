@@ -42,25 +42,25 @@
         }
       }
       const THEME_STORAGE_KEY = "bj-theme";
-      const DEFAULT_THEME = "electric";
-      const FLOWIX_THEME = "flowix";
+      const DEFAULT_THEME = "flowix";
+      const ALT_THEME = "electric";
       function getStoredTheme() {
         try {
           if (window.localStorage) {
-            return window.localStorage.getItem(THEME_STORAGE_KEY) === FLOWIX_THEME ? FLOWIX_THEME : DEFAULT_THEME;
+            return window.localStorage.getItem(THEME_STORAGE_KEY) === ALT_THEME ? ALT_THEME : DEFAULT_THEME;
           }
         } catch {
           // Ignore storage issues and use the default theme.
         }
-        return document.documentElement.getAttribute("data-theme") === FLOWIX_THEME ? FLOWIX_THEME : DEFAULT_THEME;
+        return document.documentElement.getAttribute("data-theme") === "flowix" ? DEFAULT_THEME : ALT_THEME;
       }
       function storeTheme(theme) {
         try {
           if (!window.localStorage) {
             return;
           }
-          if (theme === FLOWIX_THEME) {
-            window.localStorage.setItem(THEME_STORAGE_KEY, FLOWIX_THEME);
+          if (theme === ALT_THEME) {
+            window.localStorage.setItem(THEME_STORAGE_KEY, ALT_THEME);
           } else {
             window.localStorage.removeItem(THEME_STORAGE_KEY);
           }
@@ -69,19 +69,19 @@
         }
       }
       function applyTheme(theme, shouldAnimate) {
-        const isFlowix = theme === FLOWIX_THEME;
+        const isFlowix = theme === DEFAULT_THEME;
         const root = document.documentElement;
         const toggle = document.getElementById("theme-toggle");
         const toggleText = toggle ? toggle.querySelector(".theme-toggle__text") : null;
         const themeColor = document.querySelector("meta[name='theme-color']");
         if (isFlowix) {
-          root.setAttribute("data-theme", FLOWIX_THEME);
+          root.setAttribute("data-theme", "flowix");
         } else {
           root.removeAttribute("data-theme");
         }
         if (toggle instanceof HTMLButtonElement) {
           toggle.setAttribute("aria-pressed", String(isFlowix));
-          toggle.setAttribute("aria-label", isFlowix ? "Voltar ao tema verde elétrico" : "Ativar tema Flowix azul");
+          toggle.setAttribute("aria-label", isFlowix ? "Ativar tema verde elétrico" : "Voltar ao tema Flowix azul");
         }
         if (toggleText) {
           toggleText.textContent = isFlowix ? "Verde" : "Azul";
@@ -107,7 +107,7 @@
           return;
         }
         const onToggle = () => {
-          const nextTheme = document.documentElement.getAttribute("data-theme") === FLOWIX_THEME ? DEFAULT_THEME : FLOWIX_THEME;
+          const nextTheme = document.documentElement.getAttribute("data-theme") === "flowix" ? ALT_THEME : DEFAULT_THEME;
           storeTheme(nextTheme);
           applyTheme(nextTheme, true);
         };
