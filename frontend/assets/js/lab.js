@@ -33,110 +33,192 @@
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 
-  // --- DEMO 1: Pipeline ---
+  // --- DEMO 1: Node Editor (Drag & Drop Canvas) ---
+  const nodeEditorContainer = document.getElementById('node-editor-container');
+  const svgEdges = document.getElementById('node-edges');
   const btnRunPipeline = document.getElementById('btn-run-pipeline');
   const emailInput = document.getElementById('email-input');
-  const nodes = [
-    document.getElementById('node-1'),
-    document.getElementById('node-2'),
-    document.getElementById('node-3'),
-    document.getElementById('node-4'),
-    document.getElementById('node-5')
-  ];
-  const connectors = document.querySelectorAll('.pipeline-connector');
   const finalStatus = document.getElementById('pipeline-final-status');
 
-  async function runPipeline() {
-    if (btnRunPipeline.disabled) return;
+  let workflowNodes = [
+    { id: 'n1', title: 'Receber Email', icon: 'mail', x: 20, y: 150, type: 'trigger', status: 'A aguardar...' },
+    { id: 'n2', title: 'Classificar (IA)', icon: 'bot', x: 260, y: 150, type: 'action', status: 'Inativo' },
+    { id: 'n3', title: 'Notificar Equipa', icon: 'bell', x: 520, y: 60, type: 'action', status: 'Inativo' },
+    { id: 'n4', title: 'Registar CRM', icon: 'database', x: 520, y: 240, type: 'action', status: 'Inativo' }
+  ];
+
+  let workflowConnections = [
+    { from: 'n1', to: 'n2', pathEl: null },
+    { from: 'n2', to: 'n3', pathEl: null },
+    { from: 'n2', to: 'n4', pathEl: null }
+  ];
+
+  function createBezierPath(x1, y1, x2, y2) {
+    const cp1x = x1 + (x2 - x1) / 2;
+    const cp2x = x2 - (x2 - x1) / 2;
+    return `M ${x1} ${y1} C ${cp1x} ${y1}, ${cp2x} ${y2}, ${x2} ${y2}`;
+  }
+
+  function renderEdges() {
+    if (!svgEdges) return;
+    svgEdges.innerHTML = '';
+    workflowConnections.forEach(conn => {
+      const elFrom = document.getElementById(conn.from);
+      const elTo = document.getElementById(conn.to);
+      if (elFrom && elTo) {
+        const portFrom = elFrom.querySelector('.wf-port--out');
+        const portTo = elTo.querySelector('.wf-port--in');
+        
+        // Use getBoundingClientRect to find exact positions inside container
+        const containerRect = nodeEditorContainer.getBoundingClientRect();
+        const fromRect = portFrom.getBoundingClientRect();
+        const toRect = portTo.getBoundingClientRect();
+        
+        const x1 = fromRect.left - containerRect.left + (fromRect.width / 2);
+        const y1 = fromRect.top - containerRect.top + (fromRect.height / 2);
+        const x2 = toRect.left - containerRect.left + (toRect.width / 2);
+        const y2 = toRect.top - containerRect.top + (toRect.height / 2);
+        
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute('d', createBezierPath(x1, y1, x2, y2));
+        path.setAttribute('class', 'node-edge-path');
+        svgEdges.appendChild(path);
+        conn.pathEl = path;
+      }
+    });
+  }
+
+  function initNodeEditor() {
+    if (!nodeEditorContainer) return;
+    // Render Nodes
+    workflowNodes.forEach(n => {
+      const nodeEl = document.createElement('div');
+      nodeEl.className = 'wf-node';
+      nodeEl.id = n.id;
+      nodeEl.style.left = `${n.x}px`;
+      nodeEl.style.top = `${n.y}px`;
+      
+      let portsHtml = '';
+      if (n.type !== 'trigger') portsHtml += '<div class="wf-port wf-port--in"></div>';
+      portsHtml += '<div class="wf-port wf-port--out"></div>';
+      
+      nodeEl.innerHTML = `
+        ${portsHtml}
+        <div class="wf-node__header"><i data-lucide="${n.icon}"></i> ${n.title}</div>
+        <div class="wf-node__status" id="status-${n.id}">${n.status}</div>
+      `;
+      nodeEditorContainer.appendChild(nodeEl);
+      
+      // Pointer Drag Logic
+      let isDragging = false;
+      let startX, startY;
+      
+      nodeEl.addEventListener('pointerdown', (e) => {
+        isDragging = true;
+        nodeEl.setPointerCapture(e.pointerId);
+        const rect = nodeEl.getBoundingClientRect();
+        const containerRect = nodeEditorContainer.getBoundingClientRect();
+        startX = e.clientX - (rect.left - containerRect.left);
+        startY = e.clientY - (rect.top - containerRect.top);
+      });
+      
+      nodeEl.addEventListener('pointermove', (e) => {
+        if (!isDragging) return;
+        let nx = e.clientX - startX;
+        let ny = e.clientY - startY;
+        nodeEl.style.left = `${nx}px`;
+        nodeEl.style.top = `${ny}px`;
+        renderEdges();
+      });
+      
+      nodeEl.addEventListener('pointerup', () => {
+        isDragging = false;
+      });
+    });
+    
+    if (window.lucide) window.lucide.createIcons();
+    // Allow rendering layout before drawing edges
+    setTimeout(renderEdges, 50);
+  }
+
+  // Handle Resize
+  window.addEventListener('resize', renderEdges);
+
+  initNodeEditor();
+
+  async function runWorkflowEngine() {
+    if (!btnRunPipeline || btnRunPipeline.disabled) return;
     btnRunPipeline.disabled = true;
     btnRunPipeline.innerHTML = 'A executar... <i data-lucide="loader"></i>';
     if (window.lucide) window.lucide.createIcons();
 
-    // Reset UI
-    nodes.forEach(n => {
-      n.classList.remove('is-active', 'is-done');
-      n.querySelector('.node-status').textContent = '';
-    });
-    connectors.forEach(c => c.classList.remove('is-active', 'is-done'));
+    // Reset Visuals
+    document.querySelectorAll('.wf-node').forEach(el => el.classList.remove('is-running', 'is-done'));
+    if (svgEdges) svgEdges.querySelectorAll('.node-edge-path').forEach(p => p.classList.remove('is-active'));
+    workflowNodes.forEach(n => document.getElementById(`status-${n.id}`).textContent = 'A aguardar...');
     if (finalStatus) finalStatus.textContent = '';
-    
-    nodes[0].querySelector('.node-status').textContent = 'A aguardar...';
 
     const emailText = (emailInput?.value || '').toLowerCase();
-    
-    // Keyword analysis (pseudo-IA)
     let isUrgent = emailText.includes('urgente') || emailText.includes('rápido');
     let category = 'Geral';
     if (emailText.includes('fatura') || emailText.includes('pagamento')) category = 'Faturação';
     else if (emailText.includes('problema') || emailText.includes('erro') || emailText.includes('reclamar')) category = 'Suporte';
 
+    const getNode = id => document.getElementById(id);
+    const setStatus = (id, txt) => document.getElementById(`status-${id}`).textContent = txt;
+    const activateConn = (from, to) => {
+      const conn = workflowConnections.find(c => c.from === from && c.to === to);
+      if (conn && conn.pathEl) conn.pathEl.classList.add('is-active');
+    };
+    const deactivateConn = (from, to) => {
+      const conn = workflowConnections.find(c => c.from === from && c.to === to);
+      if (conn && conn.pathEl) conn.pathEl.classList.remove('is-active');
+    };
+
     // Node 1: Receber
-    nodes[0].classList.add('is-active');
-    nodes[0].querySelector('.node-status').textContent = 'Email recebido';
-    await sleep(1000);
-    nodes[0].classList.remove('is-active');
-    nodes[0].classList.add('is-done');
-    connectors[0].classList.add('is-active');
+    let n1 = getNode('n1');
+    n1.classList.add('is-running');
+    setStatus('n1', 'Email ingerido');
+    await sleep(800);
+    n1.classList.replace('is-running', 'is-done');
+    activateConn('n1', 'n2');
     await sleep(600);
-    connectors[0].classList.remove('is-active');
-    connectors[0].classList.add('is-done');
+    deactivateConn('n1', 'n2');
 
     // Node 2: Classificar
-    nodes[1].classList.add('is-active');
-    nodes[1].querySelector('.node-status').textContent = 'A processar...';
-    await sleep(1200);
-    nodes[1].querySelector('.node-status').textContent = `Urgência: ${isUrgent ? 'Alta' : 'Normal'}\nCat: ${category}`;
-    await sleep(600);
-    nodes[1].classList.remove('is-active');
-    nodes[1].classList.add('is-done');
-    connectors[1].classList.add('is-active');
-    await sleep(600);
-    connectors[1].classList.remove('is-active');
-    connectors[1].classList.add('is-done');
-
-    // Node 3: Resposta Auto
-    nodes[2].classList.add('is-active');
-    nodes[2].querySelector('.node-status').textContent = 'A gerar texto...';
+    let n2 = getNode('n2');
+    n2.classList.add('is-running');
+    setStatus('n2', 'A extrair intenção...');
     await sleep(1000);
-    nodes[2].querySelector('.node-status').textContent = 'Resposta enviada ✓';
-    await sleep(400);
-    nodes[2].classList.remove('is-active');
-    nodes[2].classList.add('is-done');
-    connectors[2].classList.add('is-active');
+    setStatus('n2', `Urgência: ${isUrgent ? 'Alta' : 'Baixa'}\nTema: ${category}`);
+    await sleep(800);
+    n2.classList.replace('is-running', 'is-done');
+    
+    activateConn('n2', 'n3');
+    activateConn('n2', 'n4');
     await sleep(600);
-    connectors[2].classList.remove('is-active');
-    connectors[2].classList.add('is-done');
+    deactivateConn('n2', 'n3');
+    deactivateConn('n2', 'n4');
 
-    // Node 4: Notificar Equipa
-    nodes[3].classList.add('is-active');
-    if (isUrgent) {
-      nodes[3].querySelector('.node-status').textContent = 'Alerta Slack enviado!';
-    } else {
-      nodes[3].querySelector('.node-status').textContent = 'Log registado';
-    }
+    // Nodes 3 & 4 (Parallel)
+    let n3 = getNode('n3');
+    let n4 = getNode('n4');
+    n3.classList.add('is-running');
+    n4.classList.add('is-running');
+    setStatus('n3', isUrgent ? 'Alerta Slack > Equipa' : 'Nenhuma ação (Baixa)');
+    setStatus('n4', 'A enviar para DB...');
     await sleep(1000);
-    nodes[3].classList.remove('is-active');
-    nodes[3].classList.add('is-done');
-    connectors[3].classList.add('is-active');
-    await sleep(600);
-    connectors[3].classList.remove('is-active');
-    connectors[3].classList.add('is-done');
+    setStatus('n4', 'Criado Ticket #4928');
+    n3.classList.replace('is-running', 'is-done');
+    n4.classList.replace('is-running', 'is-done');
 
-    // Node 5: Registar CRM
-    nodes[4].classList.add('is-active');
-    nodes[4].querySelector('.node-status').textContent = 'A sincronizar...';
-    await sleep(1000);
-    nodes[4].querySelector('.node-status').textContent = 'Ticket #9482 criado';
-    nodes[4].classList.remove('is-active');
-    nodes[4].classList.add('is-done');
-
-    if (finalStatus) finalStatus.textContent = 'Pipeline concluído com sucesso ✓';
+    if (finalStatus) finalStatus.textContent = 'Workflow concluído com sucesso ✓';
     btnRunPipeline.disabled = false;
-    btnRunPipeline.innerHTML = 'Executar Pipeline <i data-lucide="play"></i>';
+    btnRunPipeline.innerHTML = 'Executar Workflow <i data-lucide="play"></i>';
     if (window.lucide) window.lucide.createIcons();
   }
 
-  btnRunPipeline?.addEventListener('click', runPipeline);
+  btnRunPipeline?.addEventListener('click', runWorkflowEngine);
 
 
   // --- DEMO 2: Dashboard Builder ---
@@ -160,11 +242,19 @@
     if (!canvas || !ctx || !csvInput) return;
     
     const parent = canvas.parentElement;
-    canvas.width = parent.clientWidth - 32; 
-    canvas.height = 400;
+    const dpr = window.devicePixelRatio || 1;
+    const displayWidth = parent.clientWidth - 32;
+    const displayHeight = 400;
+    
+    canvas.width = displayWidth * dpr; 
+    canvas.height = displayHeight * dpr;
+    canvas.style.width = `${displayWidth}px`;
+    canvas.style.height = `${displayHeight}px`;
 
-    const width = canvas.width;
-    const height = canvas.height;
+    ctx.scale(dpr, dpr);
+
+    const width = displayWidth;
+    const height = displayHeight;
 
     ctx.clearRect(0, 0, width, height);
 

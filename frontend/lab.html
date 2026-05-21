@@ -16,9 +16,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet">
   <script defer src="https://unpkg.com/lucide@1.11.0/dist/umd/lucide.js" integrity="sha384-ZMkBApRp8XzSI26P7dtIOJcn6bweCl+SQ3D890zk3ilWfsJtBCtWQ4Rp4FhzcysQ" crossorigin="anonymous"></script>
-  <script src="assets/js/boot-preload.js?v=20260510-natural-portrait"></script>
-  <link rel="stylesheet" href="assets/css/styles.css?v=20260510-natural-portrait">
-  <link rel="stylesheet" href="assets/css/lab.css">
+  <script src="assets/js/boot-preload.js?v=20260521-overhaul"></script>
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260521-overhaul">
+  <link rel="stylesheet" href="assets/css/lab.css?v=20260521-overhaul">
 </head>
 
 <body>
@@ -91,49 +91,20 @@
         </header>
 
         <div class="panel lab-panel demo-pipeline">
-          <div class="lab-panel__body">
-            <div class="lab-input-area">
+          <div class="lab-panel__body node-editor-layout">
+            <div class="node-editor-sidebar">
               <label for="email-input" class="mono lab-label">Input do Cliente (Email)</label>
-              <textarea id="email-input" class="lab-textarea" rows="4">Olá,
+              <textarea id="email-input" class="lab-textarea" rows="8">Olá,
 Estou com um problema urgente no sistema de faturação. Não consigo emitir faturas desde ontem e os clientes estão a reclamar. Precisamos de ajuda o mais rápido possível!
 Obrigado.</textarea>
-              <button id="btn-run-pipeline" class="btn" style="margin-top: 1rem;">Executar Pipeline <i data-lucide="play"></i></button>
+              <button id="btn-run-pipeline" class="btn" style="margin-top: 1rem; width: 100%;">Executar Workflow <i data-lucide="play"></i></button>
+              <div id="pipeline-final-status" class="pipeline-final-status mono" style="margin-top: 1rem; text-align: center; color: var(--accent);"></div>
             </div>
             
-            <div class="pipeline-visuals" style="margin-top: 2rem; padding: 2rem; background: rgba(0,0,0,0.2); border-radius: var(--radius-md);">
-              <div class="pipeline-track">
-                <!-- Nodes generated/managed by JS or static with CSS -->
-                <div class="pipeline-node" id="node-1">
-                  <div class="node-icon"><i data-lucide="mail"></i></div>
-                  <div class="node-label">Receber Email</div>
-                  <div class="node-status mono">A aguardar...</div>
-                </div>
-                <div class="pipeline-connector"></div>
-                <div class="pipeline-node" id="node-2">
-                  <div class="node-icon"><i data-lucide="bot"></i></div>
-                  <div class="node-label">Classificar (IA)</div>
-                  <div class="node-status mono"></div>
-                </div>
-                <div class="pipeline-connector"></div>
-                <div class="pipeline-node" id="node-3">
-                  <div class="node-icon"><i data-lucide="message-square-reply"></i></div>
-                  <div class="node-label">Resposta Auto</div>
-                  <div class="node-status mono"></div>
-                </div>
-                <div class="pipeline-connector"></div>
-                <div class="pipeline-node" id="node-4">
-                  <div class="node-icon"><i data-lucide="bell"></i></div>
-                  <div class="node-label">Notificar Equipa</div>
-                  <div class="node-status mono"></div>
-                </div>
-                <div class="pipeline-connector"></div>
-                <div class="pipeline-node" id="node-5">
-                  <div class="node-icon"><i data-lucide="database"></i></div>
-                  <div class="node-label">Registar CRM</div>
-                  <div class="node-status mono"></div>
-                </div>
-              </div>
-              <div id="pipeline-final-status" class="pipeline-final-status mono" style="margin-top: 2rem; text-align: center; height: 1.5rem; color: var(--accent);"></div>
+            <div class="node-editor-canvas-wrapper" id="node-editor-container">
+              <!-- Dot grid background is applied via CSS -->
+              <svg id="node-edges" class="node-edges"></svg>
+              <!-- Nodes will be injected here by JS -->
             </div>
           </div>
           <div class="lab-panel__footer" style="padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: rgba(0,0,0,0.1);">
@@ -242,6 +213,6 @@ Mai,22000,10000</textarea>
     </div>
   </footer>
 
-  <script src="assets/js/lab.js?v=20260521-hotfix-boot-v3"></script>
+  <script src="assets/js/lab.js?v=20260521-overhaul"></script>
 </body>
 </html>

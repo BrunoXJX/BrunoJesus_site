@@ -41,117 +41,152 @@
   box-shadow: 0 0 12px var(--accent-dim);
 }
 
-/* Pipeline Demo */
-.pipeline-track {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
-  overflow-x: auto;
-  padding: 1rem 0;
-  min-width: 600px;
+/* --- DEMO 1: Node Editor (Canvas Drag & Drop) --- */
+.node-editor-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+  min-height: 500px;
 }
 
-.pipeline-node {
+@media (max-width: 900px) {
+  .node-editor-layout {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+}
+
+.node-editor-sidebar {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 0.5rem;
-  z-index: 2;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+}
+
+.node-editor-canvas-wrapper {
   position: relative;
-  min-width: 100px;
-  opacity: 0.5;
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  background-color: rgba(0, 0, 0, 0.3);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden; /* Hide nodes that are dragged out of bounds */
+  touch-action: none; /* Prevent scrolling when dragging nodes on mobile */
+  min-height: 400px;
 }
 
-.pipeline-node.is-active {
-  opacity: 1;
-  transform: scale(1.05);
-}
-
-.pipeline-node.is-done {
-  opacity: 1;
-}
-
-.node-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: var(--surface-3);
-  border: 2px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  color: var(--text-muted);
-  transition: all 0.4s ease;
-}
-
-.node-icon i {
-  width: 24px;
-  height: 24px;
-}
-
-.pipeline-node.is-active .node-icon {
-  border-color: var(--accent);
-  color: var(--accent);
-  box-shadow: 0 0 20px var(--accent-glow);
-}
-
-.pipeline-node.is-done .node-icon {
-  border-color: var(--accent-soft);
-  color: var(--accent-soft);
-  background: var(--accent-dim);
-}
-
-.node-label {
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.node-status {
-  font-size: 0.75rem;
-  color: var(--text-faint);
-  min-height: 1.2em;
-}
-
-.pipeline-node.is-active .node-status {
-  color: var(--accent);
-}
-
-.pipeline-connector {
-  flex-grow: 1;
-  height: 2px;
-  background: var(--border);
-  position: relative;
-  margin: 0 10px;
-  top: -15px; /* Adjust based on node height */
-  overflow: hidden;
-}
-
-.pipeline-connector::after {
-  content: "";
+.node-edges {
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  transition: left 0s;
+  pointer-events: none;
+  z-index: 1;
 }
 
-.pipeline-connector.is-active::after {
-  animation: flowLine 1.5s linear infinite;
+.node-edge-path {
+  fill: none;
+  stroke: var(--border-bright);
+  stroke-width: 2px;
+  stroke-linecap: round;
+  transition: stroke 0.3s ease;
 }
 
-.pipeline-connector.is-done {
-  background: var(--accent-soft);
+.node-edge-path.is-active {
+  stroke: var(--accent);
+  filter: drop-shadow(0 0 6px var(--accent));
+  animation: dashFlow 1s linear infinite;
+  stroke-dasharray: 10, 10;
 }
 
-@keyframes flowLine {
-  0% { left: -100%; }
-  100% { left: 100%; }
+@keyframes dashFlow {
+  to { stroke-dashoffset: -20; }
+}
+
+.wf-node {
+  position: absolute;
+  width: 180px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 2;
+  cursor: grab;
+  user-select: none;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.wf-node:active {
+  cursor: grabbing;
+  z-index: 3;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.wf-node.is-running {
+  border-color: var(--accent);
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.wf-node.is-done {
+  border-color: var(--accent-soft);
+}
+
+.wf-node__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--text);
+  pointer-events: none;
+}
+
+.wf-node__header i {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+}
+
+.wf-node.is-running .wf-node__header i {
+  color: var(--accent);
+}
+
+.wf-node__status {
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  font-family: "JetBrains Mono", monospace;
+  min-height: 1.2em;
+  pointer-events: none;
+}
+
+/* Ports */
+.wf-port {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--surface-3);
+  border: 2px solid var(--text-muted);
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.wf-port--in { left: -6px; }
+.wf-port--out { right: -6px; }
+
+.wf-node.is-running .wf-port--in,
+.wf-node.is-running .wf-port--out {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
 }
 
 /* Dashboard Demo */
