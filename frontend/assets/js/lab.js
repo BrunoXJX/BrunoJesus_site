@@ -451,4 +451,65 @@
   // Expose renderDashboard to global scope so theme toggle can call it
   window.renderDashboard = renderDashboard;
 
+  // Custom Cursor
+  function initCustomCursor() {
+    const dot = document.querySelector('.cursor-dot');
+    const ring = document.querySelector('.cursor-ring');
+    const hasFinePointer = window.matchMedia('(pointer:fine)');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    if (!dot || !ring || !hasFinePointer.matches || prefersReducedMotion.matches) {
+      document.body.classList.add('pointer-disabled');
+      return;
+    }
+
+    let mouseX = window.innerWidth / 2;
+    let mouseY = window.innerHeight / 2;
+    let dotX = mouseX;
+    let dotY = mouseY;
+    let ringX = mouseX;
+    let ringY = mouseY;
+    let isHovering = false;
+    let rafId = null;
+
+    const onMouseMove = (event) => {
+      mouseX = event.clientX;
+      mouseY = event.clientY;
+      const target = event.target;
+      if (target instanceof Element) {
+        const style = window.getComputedStyle(target);
+        isHovering =
+          style.cursor === "pointer" ||
+          target.tagName.toLowerCase() === "a" ||
+          target.tagName.toLowerCase() === "button" ||
+          target.closest("a, button, [role='button']") !== null;
+      }
+    };
+
+    const updateCursor = () => {
+      dotX += (mouseX - dotX) * 0.3;
+      dotY += (mouseY - dotY) * 0.3;
+      ringX += (mouseX - ringX) * 0.15;
+      ringY += (mouseY - ringY) * 0.15;
+
+      dot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0)`;
+      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
+
+      if (isHovering) {
+        dot.classList.add("is-hover");
+        ring.classList.add("is-hover");
+      } else {
+        dot.classList.remove("is-hover");
+        ring.classList.remove("is-hover");
+      }
+
+      rafId = requestAnimationFrame(updateCursor);
+    };
+
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    rafId = requestAnimationFrame(updateCursor);
+  }
+
+  initCustomCursor();
+
 })();
