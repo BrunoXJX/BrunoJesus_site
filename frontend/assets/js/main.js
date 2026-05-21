@@ -324,7 +324,11 @@
             return;
           }
           lastFrame = timestamp;
-          const accentRgb = window.getComputedStyle(document.documentElement).getPropertyValue("--accent-rgb").trim() || "57, 255, 20";
+          if (!this.cachedAccentRgb || timestamp - this.lastThemeCheck > 1000) {
+            this.cachedAccentRgb = window.getComputedStyle(document.documentElement).getPropertyValue("--accent-rgb").trim() || "57, 255, 20";
+            this.lastThemeCheck = timestamp;
+          }
+          const accentRgb = this.cachedAccentRgb;
           ctx.clearRect(0, 0, width, height);
           for (let i = 0; i < particles.length; i += 1) {
             const particle = particles[i];
@@ -538,6 +542,178 @@
             return;
           }
           const start = performance.now();
+                ctx.lineWidth = 1;
+                ctx.stroke();
+              }
+            }
+          }
+          animationFrame = requestAnimationFrame(draw);
+        };
+        const onVisibility = () => {
+          running = !document.hidden;
+          if (running) {
+            lastFrame = 0;
+            animationFrame = requestAnimationFrame(draw);
+          } else {
+            cancelAnimationFrame(animationFrame);
+          }
+        };
+        const heroObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            heroInView = entry.isIntersecting;
+            if (heroInView && !document.hidden) {
+              lastFrame = 0;
+              cancelAnimationFrame(animationFrame);
+              animationFrame = requestAnimationFrame(draw);
+            } else {
+              cancelAnimationFrame(animationFrame);
+            }
+          });
+        }, { threshold: 0.05 });
+        resize();
+        animationFrame = requestAnimationFrame(draw);
+        window.addEventListener("resize", resize, { passive: true });
+        hero.addEventListener("mousemove", moveMouse, { passive: true });
+        hero.addEventListener("mouseleave", leaveMouse);
+        document.addEventListener("visibilitychange", onVisibility);
+        heroObserver.observe(hero);
+        addCleanup(() => {
+          running = false;
+          cancelAnimationFrame(animationFrame);
+          window.removeEventListener("resize", resize);
+          hero.removeEventListener("mousemove", moveMouse);
+          hero.removeEventListener("mouseleave", leaveMouse);
+          document.removeEventListener("visibilitychange", onVisibility);
+          heroObserver.disconnect();
+        });
+      }
+      function initHeroTagline() {
+        const node = document.getElementById("hero-typewriter");
+        typeText(node, HERO_TAGLINE, 60);
+      }
+      function initNameGlitch() {
+        const heroName = document.getElementById("hero-name");
+        if (!heroName) {
+          return;
+        }
+        let glitchTimer = 0;
+        const triggerGlitch = () => {
+          heroName.classList.remove("is-zapping");
+          void heroName.offsetWidth;
+          heroName.classList.add("is-zapping");
+          window.clearTimeout(glitchTimer);
+          glitchTimer = window.setTimeout(() => heroName.classList.remove("is-zapping"), 280);
+        };
+        heroName.addEventListener("mouseenter", triggerGlitch);
+        addCleanup(() => {
+          heroName.removeEventListener("mouseenter", triggerGlitch);
+          window.clearTimeout(glitchTimer);
+        });
+      }
+      function initRevealObserver() {
+        const elements = document.querySelectorAll(".reveal");
+        if (!elements.length) {
+          return;
+        }
+        if (prefersReducedMotion.matches) {
+          elements.forEach((element) => element.classList.add("is-visible"));
+          return;
+        }
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.18 });
+        elements.forEach((element) => observer.observe(element));
+        addCleanup(() => observer.disconnect());
+      }
+      function initSkills() {
+        const skillCards = document.querySelectorAll(".skill-card");
+        if (!skillCards.length) {
+          return;
+        }
+        if (prefersReducedMotion.matches) {
+          skillCards.forEach((card) => card.classList.add("is-visible"));
+          return;
+        }
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.35 });
+        skillCards.forEach((card) => observer.observe(card));
+        addCleanup(() => observer.disconnect());
+      }
+      function initTimeline() {
+        const timeline = document.getElementById("timeline");
+        const progress = document.getElementById("timeline-progress");
+        if (!timeline || !progress) {
+          return;
+        }
+        const updateProgress = () => {
+          const rect = timeline.getBoundingClientRect();
+          const viewportHeight = window.innerHeight;
+          const total = rect.height + viewportHeight * 0.25;
+          const visible = viewportHeight - rect.top + viewportHeight * 0.08;
+          const ratio = Math.max(0, Math.min(1, visible / total));
+          progress.style.setProperty("--timeline-scale", ratio.toFixed(3));
+        };
+        updateProgress();
+        window.addEventListener("scroll", updateProgress, { passive: true });
+        window.addEventListener("resize", updateProgress, { passive: true });
+        addCleanup(() => {
+          window.removeEventListener("scroll", updateProgress);
+          window.removeEventListener("resize", updateProgress);
+        });
+      }
+      function initProjectTilt() {
+        const cards = document.querySelectorAll(".project-card[data-tilt='true']");
+        if (!cards.length || !hasFinePointer.matches || prefersReducedMotion.matches) {
+          return;
+        }
+        cards.forEach((card) => {
+          const onMove = (event) => {
+            const rect = card.getBoundingClientRect();
+            const px = (event.clientX - rect.left) / rect.width;
+            const py = (event.clientY - rect.top) / rect.height;
+            const rotateY = (px - 0.5) * 16;
+            const rotateX = (0.5 - py) * 16;
+            card.style.transform =
+              "perspective(1000px) rotateX(" + rotateX.toFixed(2) + "deg) rotateY(" + rotateY.toFixed(2) + "deg) scale(1.02)";
+          };
+          const reset = () => {
+            card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)";
+          };
+          card.addEventListener("mousemove", onMove);
+          card.addEventListener("mouseleave", reset);
+          card.addEventListener("blur", reset, true);
+          addCleanup(() => {
+            card.removeEventListener("mousemove", onMove);
+            card.removeEventListener("mouseleave", reset);
+            card.removeEventListener("blur", reset, true);
+          });
+        });
+      }
+      function initStats() {
+        const nodes = document.querySelectorAll("[data-countup]");
+        if (!nodes.length) {
+          return;
+        }
+        const animate = (node) => {
+          const value = Number(node.getAttribute("data-value") || "0");
+          const prefix = node.getAttribute("data-prefix") || "";
+          const suffix = node.getAttribute("data-suffix") || "";
+          if (prefersReducedMotion.matches || prefix === "#") {
+            node.textContent = prefix + value + suffix;
+            return;
+          }
+          const start = performance.now();
           const duration = 1200;
           const step = (now) => {
             const progress = Math.min(1, (now - start) / duration);
@@ -546,6 +722,8 @@
             node.textContent = prefix + current + suffix;
             if (progress < 1) {
               requestAnimationFrame(step);
+            } else {
+              node.classList.add("counted");
             }
           };
           requestAnimationFrame(step);
@@ -596,14 +774,15 @@
         const form = document.getElementById("contact-form");
         const formStatus = document.getElementById("form-status");
         const submitButton = document.getElementById("contact-submit");
+        let tooltipTimerId = null;
         const showTooltip = (message) => {
           if (!tooltip) {
             return;
           }
           tooltip.textContent = message;
           tooltip.classList.add("is-visible");
-          window.clearTimeout(showTooltip.timerId);
-          showTooltip.timerId = window.setTimeout(() => {
+          window.clearTimeout(tooltipTimerId);
+          tooltipTimerId = window.setTimeout(() => {
             tooltip.classList.remove("is-visible");
           }, 1500);
         };
@@ -630,82 +809,7 @@
         if (copyButton) {
           copyButton.addEventListener("click", copyEmail);
           addCleanup(() => copyButton.removeEventListener("click", copyEmail));
-        }
-        if (!form || !formStatus || !(form instanceof HTMLFormElement)) {
-          return;
-        }
-        const handleSubmit = async (event) => {
-          event.preventDefault();
-          const formData = new FormData(form);
-          const payload = {
-            name: String(formData.get("name") || "").trim(),
-            email: String(formData.get("email") || "").trim(),
-            subject: "Contacto do portfólio",
-            message: String(formData.get("message") || "").trim(),
-            website: String(formData.get("website") || "").trim()
-          };
-          if (!payload.name || payload.name.length < 2) {
-            formStatus.textContent = "O nome tem de ter pelo menos 2 caracteres.";
-            return;
-          }
-          if (!payload.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email)) {
-            formStatus.textContent = "Verifica o endereço de email.";
-            return;
-          }
-          if (!payload.message || payload.message.length < 10) {
-            formStatus.textContent = "A mensagem tem de ter pelo menos 10 caracteres.";
-            return;
-          }
-          if (payload.website) {
-            formStatus.textContent = "Pedido rejeitado.";
-            return;
-          }
-          if (submitButton instanceof HTMLButtonElement) {
-            submitButton.disabled = true;
-            submitButton.textContent = "A enviar...";
-          }
-          formStatus.textContent = "A processar mensagem...";
-          const fallbackSuccess = () => {
-            formStatus.textContent =
-              "Pré-visualização ativa. Para envio real, publica o backend e configura a URL da API.";
-            form.reset();
-          };
-          if (!CONTACT_API_URL) {
-            fallbackSuccess();
-            if (submitButton instanceof HTMLButtonElement) {
-              submitButton.disabled = false;
-              submitButton.textContent = "Enviar mensagem";
-            }
-            return;
-          }
-          try {
-            const response = await fetch(CONTACT_API_URL, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify(payload)
-            });
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok || !data.success) {
-              throw new Error(typeof data.message === "string" ? data.message : "Não foi possível enviar a mensagem.");
-            }
-            formStatus.textContent =
-              typeof data.message === "string" && data.message.includes("Email notification failed")
-                ? "Mensagem recebida com sucesso. A notificação por email falhou nesta fase de teste."
-                : "Mensagem recebida com sucesso.";
-            form.reset();
-          } catch {
-            fallbackSuccess();
-          } finally {
-            if (submitButton instanceof HTMLButtonElement) {
-              submitButton.disabled = false;
-            submitButton.textContent = "Enviar mensagem";
-            }
-          }
-        };
-        form.addEventListener("submit", handleSubmit);
-        addCleanup(() => form.removeEventListener("submit", handleSubmit));
+          // O formulário de contacto foi removido do design atual.", handleSubmit));
       }
       function initNavigation() {
         const menuToggle = document.getElementById("menu-toggle");
@@ -786,7 +890,7 @@
           let ticking = false;
           let navLockUntil = 0;
           const getNavHeight = () => {
-            const nav = document.querySelector(".site-nav");
+            const nav = document.querySelector(".navbar");
             return nav instanceof HTMLElement ? nav.offsetHeight : 72;
           };
           const setActive = (activeId) => {
@@ -866,7 +970,21 @@
       function startExperience() {
         initHeroTagline();
       }
-      function init() {
+      function initScrollIndicator() {
+        const indicator = document.getElementById("scroll-indicator");
+        if (!indicator) return;
+        const onScroll = () => {
+          if (window.scrollY > 100) {
+            indicator.classList.add("is-hidden");
+          } else {
+            indicator.classList.remove("is-hidden");
+          }
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        addCleanup(() => window.removeEventListener("scroll", onScroll));
+      }
+
+      function boot() {
         initThemeToggle();
         setEmail();
         initIcons();
@@ -881,12 +999,13 @@
         initTerminal();
         initContact();
         initNavigation();
+        initScrollIndicator();
         initBootScreen(startExperience);
       }
       if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", init, { once: true });
+        document.addEventListener("DOMContentLoaded", boot, { once: true });
       } else {
-        init();
+        boot();
       }
       window.addEventListener("pagehide", () => {
         cleanupCallbacks.forEach((callback) => {

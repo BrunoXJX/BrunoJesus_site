@@ -1,5 +1,6 @@
 import type { FastifyBaseLogger } from "fastify";
 import { Resend } from "resend";
+import { getEmailDomain } from "../utils/emailDomain.js";
 
 import { env } from "../config/env";
 import type { PortfolioEmailPayload } from "../types/contact.types";
@@ -18,9 +19,7 @@ class ResendEmailService implements EmailService {
     this.logger = logger.child({ service: "email" });
   }
 
-  private getEmailDomain(email: string): string {
-    return email.split("@")[1] ?? "unknown";
-  }
+
 
   public async sendPortfolioNotification(payload: PortfolioEmailPayload): Promise<void> {
     const response = await this.client.emails.send({
@@ -81,7 +80,7 @@ class ResendEmailService implements EmailService {
       {
         emailType: "confirmation",
         emailId: response.data?.id,
-        recipientDomain: this.getEmailDomain(payload.email)
+        recipientDomain: getEmailDomain(payload.email)
       },
       "Email sent"
     );

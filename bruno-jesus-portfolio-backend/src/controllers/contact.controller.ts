@@ -6,7 +6,6 @@ import {
 } from "../schemas/contact.schema";
 import type { ContactService } from "../services/contact.service";
 import { AppError } from "../utils/AppError";
-import { asyncHandler } from "../utils/asyncHandler";
 
 type ContactRequest = FastifyRequest<{
   Body: unknown;
@@ -22,7 +21,7 @@ function normalizeUserAgent(userAgent: string | string[] | undefined): string | 
 
 export function createContactController(contactService: ContactService) {
   return {
-    submitContact: asyncHandler(async (request: ContactRequest, reply: FastifyReply) => {
+    submitContact: async (request: ContactRequest, reply: FastifyReply) => {
       request.log.info(
         {
           route: "/api/contact",
@@ -79,6 +78,6 @@ export function createContactController(contactService: ContactService) {
           id: result.id
         }
       });
-    })
+    }
   };
 }

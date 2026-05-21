@@ -1,4 +1,5 @@
 import type { FastifyBaseLogger } from "fastify";
+import { getEmailDomain } from "../utils/emailDomain.js";
 
 import type {
   ContactCreateInput,
@@ -45,9 +46,7 @@ interface ContactServiceDependencies {
   logger: FastifyBaseLogger;
 }
 
-function getEmailDomain(email: string): string {
-  return email.split("@")[1] ?? "unknown";
-}
+
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number, label: string): Promise<T> {
   let timeout: NodeJS.Timeout | undefined;

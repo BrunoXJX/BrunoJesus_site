@@ -209,4 +209,154 @@ describe("Portfolio API", () => {
     expect(testContext.emailService.sendPortfolioNotification).toHaveBeenCalledTimes(1);
     expect(testContext.emailService.sendVisitorConfirmation).toHaveBeenCalledTimes(1);
   });
+  it("rejects a honeypot request silently with 200 OK", async () => {
+    const testContext = await createTestApp();
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/contact",
+      payload: {
+        name: "Jane Builder",
+        email: "jane@example.com",
+        subject: "Project Collaboration",
+        message: "This is a valid message.",
+        website: "http://spam.com"
+      }
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      success: false,
+      message: "Pedido rejeitado."
+    });
+    expect(testContext.prisma.contactMessage.create).not.toHaveBeenCalled();
+  });
+
+  it("sanitizes XSS from the name field", async () => {
+    const testContext = await createTestApp();
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/contact",
+      payload: {
+        name: "<script>alert(1)</script>Bruno",
+        email: "jane@example.com",
+        subject: "Project Collaboration",
+        message: "I would like to talk about a new automation workflow for my company."
+      }
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(testContext.prisma.contactMessage.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          name: "Bruno"
+        })
+      })
+    );
+  });
+
+  it("handles email service failures gracefully", async () => {
+    const emailServiceMock = {
+      sendPortfolioNotification: vi.fn().mockRejectedValue(new Error("Network Error")),
+      sendVisitorConfirmation: vi.fn().mockResolvedValue(undefined)
+    };
+
+    const testContext = await createTestApp({ emailService: emailServiceMock as unknown as EmailService });
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/contact",
+      payload: {
+        name: "Jane Builder",
+        email: "jane@example.com",
+        subject: "Project Collaboration",
+        message: "I would like to talk about a new automation workflow for my company."
+      }
+    });
+
+    expect(response.statusCode).toBe(201);
+    expect(response.json()).toMatchObject({
+      success: true,
+      message: "Mensagem recebida com sucesso. A notificação por email falhou."
+    });
+  });
+
+  it("rejects when required fields are missing", async () => {
+    const testContext = await createTestApp();
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/contact",
+      payload: {}
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().success).toBe(false);
+  });
+
+  it("rejects when the name field is missing", async () => {
+    const testContext = await createTestApp();
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/contact",
+      payload: {
+        email: "jane@example.com",
+        subject: "Project Collaboration",
+        message: "I would like to talk about a new automation workflow for my company."
+      }
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().success).toBe(false);
+  });
+
+  it("rejects when the message contains too many URLs", async () => {
+    const testContext = await createTestApp();
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/contact",
+      payload: {
+        name: "Jane Builder",
+        email: "jane@example.com",
+        subject: "Project Collaboration",
+        message: "Here are some links: http://a.com, http://b.com, http://c.com, http://d.com, http://e.com, http://f.com"
+      }
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().success).toBe(false);
+  });
+
+  it("responds with API info on GET /api", async () => {
+    const testContext = await createTestApp();
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/api"
+    });
+
+    expect(response.statusCode).toBe(200);
+  });
+
+  it("returns a 404 for non-existent routes", async () => {
+    const testContext = await createTestApp();
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/nonexistent"
+    });
+
+    expect(response.statusCode).toBe(404);
+  });
 });

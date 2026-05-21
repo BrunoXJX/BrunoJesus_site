@@ -4,9 +4,11 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
-    testTimeout: 30000,
+    testTimeout: 10000,
     coverage: {
-      enabled: false
+      enabled: true,
+      reporter: ["text", "text-summary"],
+      thresholds: { statements: 60, branches: 50, functions: 60, lines: 60 }
     }
   }
 });

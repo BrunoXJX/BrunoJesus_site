@@ -9,13 +9,13 @@ datasource db {
 
 model ContactMessage {
   id        String        @id @default(cuid())
-  name      String
-  email     String
-  subject   String?
+  name      String        @db.VarChar(80)
+  email     String        @db.VarChar(254)
+  subject   String        @default("Contacto pelo portefólio") @db.VarChar(120)
   message   String
-  source    String        @default("portfolio")
-  ipAddress String?
-  userAgent String?
+  source    String        @default("portfolio") @db.VarChar(50)
+  ipAddress String?       @db.VarChar(45)
+  userAgent String?       @db.VarChar(512)
   status    ContactStatus @default(NEW)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt

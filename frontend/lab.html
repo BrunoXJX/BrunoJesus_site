@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Laboratório de Automação de Bruno Jesus — Demos interativas de workflows, IA e dashboards.">
+  <meta property="og:title" content="Laboratório de Automação — Bruno Jesus">
+  <meta property="og:description" content="Demos interativas de automação, IA e dashboards.">
+  <meta property="og:type" content="website">
+  <title>Laboratório de Automação — Bruno Jesus</title>
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg?v=20260510-dual">
+  <meta name="theme-color" content="#030712">
+  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@700,800&amp;f[]=satoshi@400,500&amp;display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet">
+  <script defer src="https://unpkg.com/lucide@1.11.0/dist/umd/lucide.js" integrity="sha384-ZMkBApRp8XzSI26P7dtIOJcn6bweCl+SQ3D890zk3ilWfsJtBCtWQ4Rp4FhzcysQ" crossorigin="anonymous"></script>
+  <script src="assets/js/boot-preload.js?v=20260510-natural-portrait"></script>
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260510-natural-portrait">
+  <link rel="stylesheet" href="assets/css/lab.css">
+</head>
+
+<body>
+  <!-- Header matching portfolio but simpler -->
+  <header class="navbar">
+    <div class="nav-progress" id="nav-progress"></div>
+    <div class="container nav-inner">
+      <a class="nav-brand" href="index.html" aria-label="Voltar ao Portfolio">
+        <div class="atom-logo atom-logo--nav" aria-hidden="true">
+          <span class="atom-logo__glow"></span>
+          <span class="atom-logo__ring atom-logo__ring--outer"></span>
+          <span class="atom-logo__ring atom-logo__ring--mid"></span>
+          <span class="atom-logo__dashed"></span>
+          <span class="atom-logo__cross"></span>
+          <span class="atom-logo__orbit atom-logo__orbit--horizontal"></span>
+          <span class="atom-logo__orbit atom-logo__orbit--vertical"></span>
+          <span class="atom-logo__orbit atom-logo__orbit--diagonal-a"></span>
+          <span class="atom-logo__orbit atom-logo__orbit--diagonal-b"></span>
+          <span class="atom-logo__ring atom-logo__ring--core"></span>
+          <span class="atom-logo__core">
+            <span class="atom-logo__letters">BJ</span>
+          </span>
+        </div>
+        <span class="nav-brand__text">
+          <strong>Laboratório</strong>
+          <span>Automação</span>
+        </span>
+      </a>
+      <nav class="nav-links" aria-label="Principal">
+        <a class="nav-link" href="index.html">Voltar ao Portfolio</a>
+      </nav>
+      <div class="nav-actions">
+        <!-- Re-use theme toggle -->
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Alternar Tema">
+          <span class="theme-toggle__orb" aria-hidden="true"></span>
+          <span class="theme-toggle__text mono">Verde</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="lab-main" style="padding-top: calc(var(--nav-height) + 2rem);">
+    <section class="hero lab-hero" style="padding-top: 4rem; padding-bottom: 2rem;">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="hero-system-label" style="display: flex; gap: 1rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; margin-bottom: 1rem;">
+            <span>[ SYS_ID: BJ-LAB ]</span>
+            <span>[ ESTADO: EXPERIMENTAL ]</span>
+          </div>
+          <h1 class="hero-name" style="font-size: var(--text-hero); margin-bottom: 1rem;">Laboratório de Automação</h1>
+          <p class="hero-summary">
+            Ambiente interativo para demonstração de workflows n8n, processamento inteligente de regras e visualização de dados.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo 1: Email Workflow Pipeline -->
+    <section class="section" data-surface="surface">
+      <div class="container">
+        <header class="section-header reveal is-visible">
+          <div class="section-heading">
+            <div class="section-kicker">&gt; PIPELINE.execute()</div>
+            <h2 class="section-title">Workflow de Triagem de Email</h2>
+          </div>
+          <p class="section-intro">
+            Simulação de um fluxo de automação: processa um email, classifica a urgência e intenção com pseudo-IA, notifica a equipa, gera resposta automática e regista no CRM.
+          </p>
+        </header>
+
+        <div class="panel lab-panel demo-pipeline">
+          <div class="lab-panel__body">
+            <div class="lab-input-area">
+              <label for="email-input" class="mono lab-label">Input do Cliente (Email)</label>
+              <textarea id="email-input" class="lab-textarea" rows="4">Olá,
+Estou com um problema urgente no sistema de faturação. Não consigo emitir faturas desde ontem e os clientes estão a reclamar. Precisamos de ajuda o mais rápido possível!
+Obrigado.</textarea>
+              <button id="btn-run-pipeline" class="btn" style="margin-top: 1rem;">Executar Pipeline <i data-lucide="play"></i></button>
+            </div>
+            
+            <div class="pipeline-visuals" style="margin-top: 2rem; padding: 2rem; background: rgba(0,0,0,0.2); border-radius: var(--radius-md);">
+              <div class="pipeline-track">
+                <!-- Nodes generated/managed by JS or static with CSS -->
+                <div class="pipeline-node" id="node-1">
+                  <div class="node-icon"><i data-lucide="mail"></i></div>
+                  <div class="node-label">Receber Email</div>
+                  <div class="node-status mono">A aguardar...</div>
+                </div>
+                <div class="pipeline-connector"></div>
+                <div class="pipeline-node" id="node-2">
+                  <div class="node-icon"><i data-lucide="bot"></i></div>
+                  <div class="node-label">Classificar (IA)</div>
+                  <div class="node-status mono"></div>
+                </div>
+                <div class="pipeline-connector"></div>
+                <div class="pipeline-node" id="node-3">
+                  <div class="node-icon"><i data-lucide="message-square-reply"></i></div>
+                  <div class="node-label">Resposta Auto</div>
+                  <div class="node-status mono"></div>
+                </div>
+                <div class="pipeline-connector"></div>
+                <div class="pipeline-node" id="node-4">
+                  <div class="node-icon"><i data-lucide="bell"></i></div>
+                  <div class="node-label">Notificar Equipa</div>
+                  <div class="node-status mono"></div>
+                </div>
+                <div class="pipeline-connector"></div>
+                <div class="pipeline-node" id="node-5">
+                  <div class="node-icon"><i data-lucide="database"></i></div>
+                  <div class="node-label">Registar CRM</div>
+                  <div class="node-status mono"></div>
+                </div>
+              </div>
+              <div id="pipeline-final-status" class="pipeline-final-status mono" style="margin-top: 2rem; text-align: center; height: 1.5rem; color: var(--accent);"></div>
+            </div>
+          </div>
+          <div class="lab-panel__footer" style="padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: rgba(0,0,0,0.1);">
+            <span class="badge">#n8n-simulation</span>
+            <span class="badge">#automation</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo 2: Dashboard Builder -->
+    <section class="section" data-surface="surface-2">
+      <div class="container">
+        <header class="section-header reveal is-visible">
+          <div class="section-heading">
+            <div class="section-kicker">&gt; DATA.visualize()</div>
+            <h2 class="section-title">Construtor de Dashboard</h2>
+          </div>
+          <p class="section-intro">
+            Geração de gráficos dinâmicos a partir de dados em CSV, utilizando a Canvas API nativa para renderização.
+          </p>
+        </header>
+
+        <div class="panel lab-panel demo-dashboard">
+          <div class="lab-panel__body dashboard-grid">
+            <div class="lab-sidebar">
+              <label for="csv-input" class="mono lab-label">Dados (CSV)</label>
+              <textarea id="csv-input" class="lab-textarea" rows="7">Mês,Vendas,Custos
+Jan,12000,8000
+Fev,15000,8500
+Mar,11000,9000
+Abr,18000,9200
+Mai,22000,10000</textarea>
+              
+              <label for="chart-type" class="mono lab-label" style="margin-top: 1rem;">Tipo de Gráfico</label>
+              <select id="chart-type" class="lab-select">
+                <option value="bar">Barras (Vendas vs Custos)</option>
+                <option value="line">Linha de Tendência</option>
+                <option value="donut">Donut (Total de Vendas)</option>
+              </select>
+              
+              <button id="btn-generate-chart" class="btn" style="margin-top: 1.5rem; width: 100%;">Gerar Dashboard <i data-lucide="bar-chart-2"></i></button>
+            </div>
+            <div class="dashboard-canvas-area">
+              <canvas id="dashboard-canvas" width="600" height="400"></canvas>
+            </div>
+          </div>
+          <div class="lab-panel__footer" style="padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: rgba(0,0,0,0.1);">
+            <span class="badge">#canvas-api</span>
+            <span class="badge">#data-viz</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo 3: Chatbot Configurable Rules -->
+    <section class="section" data-surface="surface-3">
+      <div class="container">
+        <header class="section-header reveal is-visible">
+          <div class="section-heading">
+            <div class="section-kicker">&gt; BOT_ENGINE.init()</div>
+            <h2 class="section-title">Chatbot Baseado em Regras</h2>
+          </div>
+          <p class="section-intro">
+            Defina regras semânticas de keyword-matching no painel da esquerda e interaja com o agente virtual na direita.
+          </p>
+        </header>
+
+        <div class="panel lab-panel demo-chat">
+          <div class="lab-panel__body chat-split">
+            <!-- Left: Rule Editor -->
+            <div class="rule-editor">
+              <h3 class="mono rule-editor__title">Editor de Regras</h3>
+              <div id="rules-container" class="rules-container">
+                <!-- Rules injected by JS -->
+              </div>
+              <button id="btn-add-rule" class="btn is-ghost" style="width: 100%; margin-top: 1rem;"><i data-lucide="plus"></i> Adicionar Regra</button>
+            </div>
+
+            <!-- Right: Chat Interface -->
+            <div class="chat-interface">
+              <div id="chat-messages" class="chat-messages">
+                <div class="chat-message bot">
+                  <div class="chat-bubble">Olá! Sou o agente de demonstração. Configura as minhas regras e fala comigo!</div>
+                </div>
+              </div>
+              <div class="chat-input-area">
+                <input type="text" id="chat-input" class="lab-input" placeholder="Escreve uma mensagem...">
+                <button id="btn-send-chat" class="icon-btn"><i data-lucide="send"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="lab-panel__footer" style="padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: rgba(0,0,0,0.1);">
+            <span class="badge">#rule-engine</span>
+            <span class="badge">#chatbot</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-meta">BRUNO JESUS / LABORATÓRIO</div>
+      <p class="footer-quote">"A testar ideias, um protótipo de cada vez."</p>
+    </div>
+  </footer>
+
+  <script src="assets/js/lab.js"></script>
+</body>
+</html>
