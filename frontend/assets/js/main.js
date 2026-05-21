@@ -281,6 +281,8 @@
         let lastFrame = 0;
         let running = true;
         let heroInView = true;
+        let cachedAccentRgb = null;
+        let lastThemeCheck = 0;
         const particleCount = 24;
         const particles = [];
         const mouse = { x: -9999, y: -9999, active: false };
@@ -324,11 +326,11 @@
             return;
           }
           lastFrame = timestamp;
-          if (!this.cachedAccentRgb || timestamp - this.lastThemeCheck > 1000) {
-            this.cachedAccentRgb = window.getComputedStyle(document.documentElement).getPropertyValue("--accent-rgb").trim() || "57, 255, 20";
-            this.lastThemeCheck = timestamp;
+          if (!cachedAccentRgb || timestamp - lastThemeCheck > 1000) {
+            cachedAccentRgb = window.getComputedStyle(document.documentElement).getPropertyValue("--accent-rgb").trim() || "57, 255, 20";
+            lastThemeCheck = timestamp;
           }
-          const accentRgb = this.cachedAccentRgb;
+          const accentRgb = cachedAccentRgb;
           ctx.clearRect(0, 0, width, height);
           for (let i = 0; i < particles.length; i += 1) {
             const particle = particles[i];
