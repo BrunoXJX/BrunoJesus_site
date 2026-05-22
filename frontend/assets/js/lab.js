@@ -41,16 +41,23 @@
   const finalStatus = document.getElementById('pipeline-final-status');
 
   let workflowNodes = [
-    { id: 'n1', title: 'Receber Email', icon: 'mail', x: 20, y: 150, type: 'trigger', status: 'A aguardar...' },
-    { id: 'n2', title: 'Classificar (IA)', icon: 'bot', x: 260, y: 150, type: 'action', status: 'Inativo' },
-    { id: 'n3', title: 'Notificar Equipa', icon: 'bell', x: 520, y: 60, type: 'action', status: 'Inativo' },
-    { id: 'n4', title: 'Registar CRM', icon: 'database', x: 520, y: 240, type: 'action', status: 'Inativo' }
+    { id: 'n1', title: 'Receber Lead', icon: 'user', x: 20, y: 150, type: 'trigger', status: 'A aguardar...' },
+    { id: 'n2', title: 'Enriquecer (Clearbit)', icon: 'search', x: 220, y: 150, type: 'action', status: 'Inativo' },
+    { id: 'n3', title: 'Processar IA (OpenAI)', icon: 'bot', x: 420, y: 150, type: 'action', status: 'Inativo' },
+    { id: 'n4', title: 'Router Condicional', icon: 'git-branch', x: 620, y: 150, type: 'action', status: 'Inativo' },
+    { id: 'n5a', title: 'Alerta Slack (VIP)', icon: 'message-square', x: 820, y: 60, type: 'action', status: 'Inativo' },
+    { id: 'n5b', title: 'Mailchimp (Standard)', icon: 'mail', x: 820, y: 240, type: 'action', status: 'Inativo' },
+    { id: 'n6', title: 'Gravar DB (Prisma)', icon: 'database', x: 1020, y: 150, type: 'action', status: 'Inativo' }
   ];
 
   let workflowConnections = [
     { from: 'n1', to: 'n2', pathEl: null },
     { from: 'n2', to: 'n3', pathEl: null },
-    { from: 'n2', to: 'n4', pathEl: null }
+    { from: 'n3', to: 'n4', pathEl: null },
+    { from: 'n4', to: 'n5a', pathEl: null },
+    { from: 'n4', to: 'n5b', pathEl: null },
+    { from: 'n5a', to: 'n6', pathEl: null },
+    { from: 'n5b', to: 'n6', pathEl: null }
   ];
 
   function createBezierPath(x1, y1, x2, y2) {
@@ -158,11 +165,7 @@
     workflowNodes.forEach(n => document.getElementById(`status-${n.id}`).textContent = 'A aguardar...');
     if (finalStatus) finalStatus.textContent = '';
 
-    const emailText = (emailInput?.value || '').toLowerCase();
-    let isUrgent = emailText.includes('urgente') || emailText.includes('rápido');
-    let category = 'Geral';
-    if (emailText.includes('fatura') || emailText.includes('pagamento')) category = 'Faturação';
-    else if (emailText.includes('problema') || emailText.includes('erro') || emailText.includes('reclamar')) category = 'Suporte';
+    const emailText = emailInput?.value || 'elon@spacex.com';
 
     const getNode = id => document.getElementById(id);
     const setStatus = (id, txt) => document.getElementById(`status-${id}`).textContent = txt;
@@ -174,45 +177,94 @@
       const conn = workflowConnections.find(c => c.from === from && c.to === to);
       if (conn && conn.pathEl) conn.pathEl.classList.remove('is-active');
     };
+    const processNode = async (id, startMsg, endMsg, delay = 800) => {
+      let node = getNode(id);
+      node.classList.add('is-running');
+      setStatus(id, startMsg);
+      await sleep(delay);
+      setStatus(id, endMsg);
+      node.classList.replace('is-running', 'is-done');
+    };
 
-    // Node 1: Receber
-    let n1 = getNode('n1');
-    n1.classList.add('is-running');
-    setStatus('n1', 'Email ingerido');
-    await sleep(800);
-    n1.classList.replace('is-running', 'is-done');
+    // --- NODE 1: Receber ---
+    await processNode('n1', 'Recebendo Lead...', 'Lead ingerido');
     activateConn('n1', 'n2');
-    await sleep(600);
+    await sleep(400);
     deactivateConn('n1', 'n2');
 
-    // Node 2: Classificar
-    let n2 = getNode('n2');
-    n2.classList.add('is-running');
-    setStatus('n2', 'A extrair intenção...');
-    await sleep(1000);
-    setStatus('n2', `Urgência: ${isUrgent ? 'Alta' : 'Baixa'}\nTema: ${category}`);
-    await sleep(800);
-    n2.classList.replace('is-running', 'is-done');
+    // Make Real Backend Call (with Static Host Fallback)
+    let responseData = null;
+    try {
+      setStatus('n2', 'Consultando API...');
+      getNode('n2').classList.add('is-running');
+      
+      const API_URL = window.BRUNO_PORTFOLIO_API_URL || '';
+      const apiRes = await fetch(`${API_URL}/api/workflows/lead-qualification`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailText, name: 'Lead Demo', role: 'CTO' })
+      });
+      const data = await apiRes.json();
+      responseData = data?.data;
+    } catch (e) {
+      console.warn('Backend indisponível. Usando Simulação Local para GitHub Pages...');
+      const isVip = !['gmail.com', 'yahoo.com', 'hotmail.com'].includes(emailText.split('@')[1] || '');
+      responseData = {
+        enrichment: { industry: isVip ? 'Tecnologia' : 'Público Geral' },
+        aiAnalysis: { leadScore: isVip ? 95 : 45, isVip: isVip }
+      };
+      await sleep(1500); // simulate API delay
+    }
     
-    activateConn('n2', 'n3');
-    activateConn('n2', 'n4');
-    await sleep(600);
-    deactivateConn('n2', 'n3');
-    deactivateConn('n2', 'n4');
+    // --- NODE 2: Enriquecer ---
+    if (responseData) {
+      setStatus('n2', `Ind: ${responseData.enrichment.industry}`);
+      getNode('n2').classList.replace('is-running', 'is-done');
+    } else {
+      setStatus('n2', 'Falha na API!');
+      getNode('n2').classList.replace('is-running', 'is-done');
+      btnRunPipeline.disabled = false;
+      btnRunPipeline.innerHTML = 'Executar Workflow <i data-lucide="play"></i>';
+      if (window.lucide) window.lucide.createIcons();
+      return;
+    }
 
-    // Nodes 3 & 4 (Parallel)
-    let n3 = getNode('n3');
+    activateConn('n2', 'n3');
+    await sleep(400);
+    deactivateConn('n2', 'n3');
+
+    // --- NODE 3: Processar IA ---
+    await processNode('n3', 'Gerando Score...', `Score: ${responseData.aiAnalysis.leadScore}/100`, 1200);
+
+    activateConn('n3', 'n4');
+    await sleep(400);
+    deactivateConn('n3', 'n4');
+
+    // --- NODE 4: Router ---
     let n4 = getNode('n4');
-    n3.classList.add('is-running');
     n4.classList.add('is-running');
-    setStatus('n3', isUrgent ? 'Alerta Slack > Equipa' : 'Nenhuma ação (Baixa)');
-    setStatus('n4', 'A enviar para DB...');
-    await sleep(1000);
-    setStatus('n4', 'Criado Ticket #4928');
-    n3.classList.replace('is-running', 'is-done');
+    setStatus('n4', 'A avaliar score...');
+    await sleep(800);
+    const isVip = responseData.aiAnalysis.isVip;
+    setStatus('n4', isVip ? 'Caminho VIP' : 'Caminho Standard');
     n4.classList.replace('is-running', 'is-done');
 
-    if (finalStatus) finalStatus.textContent = 'Workflow concluído com sucesso ✓';
+    const nextNode = isVip ? 'n5a' : 'n5b';
+    activateConn('n4', nextNode);
+    await sleep(600);
+    deactivateConn('n4', nextNode);
+
+    // --- NODE 5: Slack ou Mailchimp ---
+    await processNode(nextNode, isVip ? 'Notificando Vendas...' : 'Enviando Nurture...', isVip ? 'Alerta Enviado!' : 'Adicionado a Lista', 1000);
+
+    activateConn(nextNode, 'n6');
+    await sleep(400);
+    deactivateConn(nextNode, 'n6');
+
+    // --- NODE 6: DB ---
+    await processNode('n6', 'Gravando Dados...', 'Row Inserted', 600);
+
+    if (finalStatus) finalStatus.textContent = 'Workflow Inteligente concluído com sucesso ✓';
     btnRunPipeline.disabled = false;
     btnRunPipeline.innerHTML = 'Executar Workflow <i data-lucide="play"></i>';
     if (window.lucide) window.lucide.createIcons();

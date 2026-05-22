@@ -82,21 +82,19 @@
       <div class="container">
         <header class="section-header reveal is-visible">
           <div class="section-heading">
-            <div class="section-kicker">&gt; PIPELINE.execute()</div>
-            <h2 class="section-title">Workflow de Triagem de Email</h2>
+            <div class="section-kicker">&gt; WORKFLOW.start()</div>
+            <h2 class="section-title">Qualificação de Leads com IA</h2>
           </div>
           <p class="section-intro">
-            Simulação de um fluxo de automação: processa um email, classifica a urgência e intenção com pseudo-IA, notifica a equipa, gera resposta automática e regista no CRM.
+            Automação multi-canal (Exclusiva): Envia a Lead para o Backend Node.js, simula o Enriquecimento de Dados, passa por uma avaliação da IA, e encaminha para a equipa via Slack (VIP) ou Mailchimp (Normal) com base no Score.
           </p>
         </header>
 
         <div class="panel lab-panel demo-pipeline">
           <div class="lab-panel__body node-editor-layout">
             <div class="node-editor-sidebar">
-              <label for="email-input" class="mono lab-label">Input do Cliente (Email)</label>
-              <textarea id="email-input" class="lab-textarea" rows="8">Olá,
-Estou com um problema urgente no sistema de faturação. Não consigo emitir faturas desde ontem e os clientes estão a reclamar. Precisamos de ajuda o mais rápido possível!
-Obrigado.</textarea>
+              <label for="email-input" class="mono lab-label">Email da Lead (Simulação)</label>
+              <input type="text" id="email-input" class="lab-textarea" value="elon@spacex.com" style="margin-bottom: 1rem; padding: 0.8rem; background: var(--surface-3); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius-sm); font-family: monospace;" />
               <button id="btn-run-pipeline" class="btn" style="margin-top: 1rem; width: 100%;">Executar Workflow <i data-lucide="play"></i></button>
               <div id="pipeline-final-status" class="pipeline-final-status mono" style="margin-top: 1rem; text-align: center; color: var(--accent);"></div>
             </div>

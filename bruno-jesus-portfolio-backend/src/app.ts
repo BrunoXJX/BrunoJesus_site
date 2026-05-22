@@ -11,6 +11,7 @@ import { registerErrorMiddleware } from "./middlewares/error.middleware";
 import { registerSecurityMiddleware } from "./middlewares/security.middleware";
 import { contactRoutes } from "./routes/contact.routes";
 import { healthRoutes } from "./routes/health.routes";
+import { workflowRoutes } from "./routes/workflow.routes";
 import { createContactService, type PrismaClientLike } from "./services/contact.service";
 import { createEmailService, type EmailService } from "./services/email.service";
 
@@ -92,6 +93,9 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(contactRoutes, {
     prefix: "/api",
     contactService
+  });
+  await app.register(workflowRoutes, {
+    prefix: "/api"
   });
 
   app.addHook("onClose", async () => {
