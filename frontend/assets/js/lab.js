@@ -19,7 +19,9 @@
     document.documentElement.setAttribute('data-theme', newTheme);
     try {
       window.localStorage.setItem('bj-theme', newTheme);
-    } catch (e) {}
+    } catch {
+      // Storage error ignored
+    }
     updateThemeUI();
     // Re-render dashboard to pick up new colors
     if (typeof renderDashboard === 'function') {
@@ -31,6 +33,16 @@
 
   // --- Helper ---
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+
+  // --- Utility: Debounce ---
+  function debounce(fn, ms) {
+    let timer;
+    return function(...args) {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn.apply(this, args), ms);
+    };
+  }
 
 
   // --- DEMO 1: Node Editor (Drag & Drop Canvas) ---
@@ -66,13 +78,20 @@
     return `M ${x1} ${y1} C ${cp1x} ${y1}, ${cp2x} ${y2}, ${x2} ${y2}`;
   }
 
+  // Fix #3: Pool SVG edge paths instead of clearing innerHTML each time
+  const edgePaths = new Map();
+
   function renderEdges() {
     if (!svgEdges) return;
-    svgEdges.innerHTML = '';
+    const activeKeys = new Set();
+
     workflowConnections.forEach(conn => {
       const elFrom = document.getElementById(conn.from);
       const elTo = document.getElementById(conn.to);
       if (elFrom && elTo) {
+        const key = conn.from + '-' + conn.to;
+        activeKeys.add(key);
+
         const portFrom = elFrom.querySelector('.wf-port--out');
         const portTo = elTo.querySelector('.wf-port--in');
         
@@ -85,12 +104,25 @@
         const y1 = fromRect.top - containerRect.top + (fromRect.height / 2);
         const x2 = toRect.left - containerRect.left + (toRect.width / 2);
         const y2 = toRect.top - containerRect.top + (toRect.height / 2);
-        
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+        let path = edgePaths.get(key);
+        if (!path) {
+          path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+          path.classList.add('node-edge-path');
+          svgEdges.appendChild(path);
+          edgePaths.set(key, path);
+        }
+
         path.setAttribute('d', createBezierPath(x1, y1, x2, y2));
-        path.setAttribute('class', 'node-edge-path');
-        svgEdges.appendChild(path);
         conn.pathEl = path;
+      }
+    });
+
+    // Remove paths that are no longer needed
+    edgePaths.forEach((path, key) => {
+      if (!activeKeys.has(key)) {
+        path.remove();
+        edgePaths.delete(key);
       }
     });
   }
@@ -119,6 +151,7 @@
       // Pointer Drag Logic
       let isDragging = false;
       let startX, startY;
+      let dragRAF = null;
       
       nodeEl.addEventListener('pointerdown', (e) => {
         isDragging = true;
@@ -129,13 +162,20 @@
         startY = e.clientY - (rect.top - containerRect.top);
       });
       
+      // Fix #6: Throttle node drag with RAF
       nodeEl.addEventListener('pointermove', (e) => {
         if (!isDragging) return;
-        let nx = e.clientX - startX;
-        let ny = e.clientY - startY;
-        nodeEl.style.left = `${nx}px`;
-        nodeEl.style.top = `${ny}px`;
-        renderEdges();
+        const ex = e.clientX;
+        const ey = e.clientY;
+        if (dragRAF) cancelAnimationFrame(dragRAF);
+        dragRAF = requestAnimationFrame(() => {
+          let nx = ex - startX;
+          let ny = ey - startY;
+          nodeEl.style.left = `${nx}px`;
+          nodeEl.style.top = `${ny}px`;
+          renderEdges();
+          dragRAF = null;
+        });
       });
       
       nodeEl.addEventListener('pointerup', () => {
@@ -143,13 +183,16 @@
       });
     });
     
-    if (window.lucide) window.lucide.createIcons();
+    // Fix #5: Scope lucide.createIcons to node editor container
+    if (window.lucide) window.lucide.createIcons({ nodes: [nodeEditorContainer] });
     // Allow rendering layout before drawing edges
     setTimeout(renderEdges, 50);
   }
 
   // Handle Resize
-  window.addEventListener('resize', renderEdges);
+  // Fix #7: Debounce resize listener for edges
+  const debouncedRenderEdges = debounce(renderEdges, 150);
+  window.addEventListener('resize', debouncedRenderEdges);
 
   initNodeEditor();
 
@@ -157,7 +200,8 @@
     if (!btnRunPipeline || btnRunPipeline.disabled) return;
     btnRunPipeline.disabled = true;
     btnRunPipeline.innerHTML = 'A executar... <i data-lucide="loader"></i>';
-    if (window.lucide) window.lucide.createIcons();
+    // Fix #5: Scope lucide.createIcons to the button
+    if (window.lucide) window.lucide.createIcons({ nodes: [btnRunPipeline] });
 
     // Reset Visuals
     document.querySelectorAll('.wf-node').forEach(el => el.classList.remove('is-running', 'is-done'));
@@ -206,7 +250,7 @@
       });
       const data = await apiRes.json();
       responseData = data?.data;
-    } catch (e) {
+    } catch {
       console.warn('Backend indisponível. Usando Simulação Local para GitHub Pages...');
       const isVip = !['gmail.com', 'yahoo.com', 'hotmail.com'].includes(emailText.split('@')[1] || '');
       responseData = {
@@ -225,7 +269,8 @@
       getNode('n2').classList.replace('is-running', 'is-done');
       btnRunPipeline.disabled = false;
       btnRunPipeline.innerHTML = 'Executar Workflow <i data-lucide="play"></i>';
-      if (window.lucide) window.lucide.createIcons();
+      // Fix #5: Scope lucide.createIcons to the button
+      if (window.lucide) window.lucide.createIcons({ nodes: [btnRunPipeline] });
       return;
     }
 
@@ -267,7 +312,8 @@
     if (finalStatus) finalStatus.textContent = 'Workflow Inteligente concluído com sucesso ✓';
     btnRunPipeline.disabled = false;
     btnRunPipeline.innerHTML = 'Executar Workflow <i data-lucide="play"></i>';
-    if (window.lucide) window.lucide.createIcons();
+    // Fix #5: Scope lucide.createIcons to the button
+    if (window.lucide) window.lucide.createIcons({ nodes: [btnRunPipeline] });
   }
 
   btnRunPipeline?.addEventListener('click', runWorkflowEngine);
@@ -303,7 +349,8 @@
     canvas.style.width = `${displayWidth}px`;
     canvas.style.height = `${displayHeight}px`;
 
-    ctx.scale(dpr, dpr);
+    // Fix #1: Reset transform matrix instead of accumulating scales
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     const width = displayWidth;
     const height = displayHeight;
@@ -331,7 +378,11 @@
     }
 
     const type = chartTypeSelect.value;
-    const maxVal = Math.max(...dataset1, ...dataset2, 1);
+    // Fix #10: Replace Math.max spread with reduce to avoid stack overflow on large datasets
+    const maxVal = Math.max(
+      dataset1.reduce((a, b) => Math.max(a, b), 1),
+      dataset2.reduce((a, b) => Math.max(a, b), 1)
+    );
     
     const primaryColor = getThemeColor();
     const secondaryColor = getSecondaryColor();
@@ -462,7 +513,9 @@
   }
 
   btnGenerateChart?.addEventListener('click', renderDashboard);
-  window.addEventListener('resize', renderDashboard);
+  // Fix #7: Debounce resize listener for dashboard
+  const debouncedRenderDashboard = debounce(renderDashboard, 150);
+  window.addEventListener('resize', debouncedRenderDashboard);
   setTimeout(renderDashboard, 200); 
 
 
@@ -521,7 +574,8 @@
       });
     });
 
-    if (window.lucide) window.lucide.createIcons();
+    // Fix #5: Scope lucide.createIcons to rules container
+    if (window.lucide) window.lucide.createIcons({ nodes: [rulesContainer] });
   }
 
   btnAddRule?.addEventListener('click', () => {
@@ -532,10 +586,14 @@
 
   renderRules();
 
+  // Fix #2: Use textContent instead of innerHTML to prevent XSS
   function appendMessage(text, sender) {
     const msg = document.createElement('div');
-    msg.className = `chat-message ${sender}`;
-    msg.innerHTML = `<div class="chat-bubble">${text}</div>`;
+    msg.className = 'chat-message ' + sender;
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble';
+    bubble.textContent = text;
+    msg.appendChild(bubble);
     chatMessages.appendChild(msg);
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
@@ -586,7 +644,8 @@
   }
 
   btnSendChat?.addEventListener('click', handleChatSend);
-  chatInput?.addEventListener('keypress', (e) => {
+  // Fix #9: Replace deprecated keypress with keydown
+  chatInput?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') handleChatSend();
   });
 
@@ -611,21 +670,18 @@
     let dotY = mouseY;
     let ringX = mouseX;
     let ringY = mouseY;
-    let isHovering = false;
+    let isHoveringInteractive = false;
     let rafId = null;
+
+    // Fix #4: Use mouseenter/mouseleave instead of getComputedStyle on every mousemove
+    document.querySelectorAll('a, button, [role="button"], input, select, textarea, .lab-card, .node').forEach(el => {
+      el.addEventListener('mouseenter', () => { isHoveringInteractive = true; });
+      el.addEventListener('mouseleave', () => { isHoveringInteractive = false; });
+    });
 
     const onMouseMove = (event) => {
       mouseX = event.clientX;
       mouseY = event.clientY;
-      const target = event.target;
-      if (target instanceof Element) {
-        const style = window.getComputedStyle(target);
-        isHovering =
-          style.cursor === "pointer" ||
-          target.tagName.toLowerCase() === "a" ||
-          target.tagName.toLowerCase() === "button" ||
-          target.closest("a, button, [role='button']") !== null;
-      }
     };
 
     const updateCursor = () => {
@@ -637,7 +693,7 @@
       dot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0)`;
       ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
 
-      if (isHovering) {
+      if (isHoveringInteractive) {
         dot.classList.add("is-hover");
         ring.classList.add("is-hover");
       } else {
@@ -650,6 +706,11 @@
 
     window.addEventListener("mousemove", onMouseMove, { passive: true });
     rafId = requestAnimationFrame(updateCursor);
+
+    // Fix #8: Cleanup RAF on pagehide
+    window.addEventListener('pagehide', () => {
+      cancelAnimationFrame(rafId);
+    });
   }
 
   initCustomCursor();

@@ -406,3 +406,64 @@ canvas {
   0%, 80%, 100% { transform: scale(0); }
   40% { transform: scale(1); }
 }
+
+/* ── Migrated inline styles ─────────────────────────────── */
+
+/* Main lab page padding to clear navbar */
+.lab-main {
+  padding-top: calc(var(--nav-height) + 2rem);
+}
+
+/* Lab hero section header spacing */
+.lab-section-header {
+  padding-top: 4rem;
+  padding-bottom: 2rem;
+}
+
+/* Hero system label (lab-specific — inherits from index if present,
+   but these ensure the lab page looks correct standalone) */
+.lab-hero .hero-system-label {
+  display: flex;
+  gap: 1rem;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+/* Hero name (lab-specific) */
+.lab-hero .hero-name {
+  font-size: var(--text-hero);
+  margin-bottom: 1rem;
+}
+
+/* Full-width lab buttons */
+.lab-btn-full {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+/* Label with extra top spacing */
+.lab-label--spaced {
+  margin-top: 1rem;
+}
+
+/* Pipeline final status indicator */
+.pipeline-final-status {
+  margin-top: 1rem;
+  text-align: center;
+  color: var(--accent);
+}
+
+/* Shared footer for all lab demo panels */
+.lab-demo-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Email input overrides — the .lab-textarea class already covers most
+   styling; this ensures the email field has correct spacing */
+#email-input {
+  margin-bottom: 1rem;
+}

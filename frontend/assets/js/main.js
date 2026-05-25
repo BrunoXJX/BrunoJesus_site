@@ -1,17 +1,5 @@
 (() => {
       const CONTACT_EMAIL = "bruno.asjesuss@gmail.com";
-      const CONTACT_API_URL = (() => {
-        const configuredApiUrl = window.BRUNO_PORTFOLIO_API_URL;
-        if (typeof configuredApiUrl === "string" && configuredApiUrl.trim()) {
-          return configuredApiUrl.trim();
-        }
-
-        if (window.location.hostname.endsWith("github.io")) {
-          return "";
-        }
-
-        return window.location.protocol === "file:" ? "http://localhost:3333/api/contact" : "/api/contact";
-      })();
       const HERO_TAGLINE = "Transformo processos em soluções digitais.";
       const TERMINAL_TEXT = [
         "$ ping bruno.jesus",
@@ -27,6 +15,29 @@
       function addCleanup(callback) {
         cleanupCallbacks.push(callback);
       }
+      const scrollCallbacks = [];
+      const resizeCallbacks = [];
+      let scrollTicking = false;
+      function onUnifiedScroll() {
+        if (!scrollTicking) {
+          scrollTicking = true;
+          requestAnimationFrame(() => {
+            scrollCallbacks.forEach(fn => fn());
+            scrollTicking = false;
+          });
+        }
+      }
+      window.addEventListener('scroll', onUnifiedScroll, { passive: true });
+      cleanupCallbacks.push(() => window.removeEventListener('scroll', onUnifiedScroll));
+      let resizeTimer;
+      function onUnifiedResize() {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          resizeCallbacks.forEach(fn => fn());
+        }, 150);
+      }
+      window.addEventListener('resize', onUnifiedResize);
+      cleanupCallbacks.push(() => window.removeEventListener('resize', onUnifiedResize));
       function safeSetBootSeen() {
         try {
           if (window.sessionStorage) {
@@ -93,8 +104,11 @@
           const heroName = document.getElementById("hero-name");
           if (heroName) {
             heroName.classList.remove("is-zapping");
-            void heroName.offsetWidth;
-            heroName.classList.add("is-zapping");
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                heroName.classList.add("is-zapping");
+              });
+            });
             window.setTimeout(() => heroName.classList.remove("is-zapping"), 420);
           }
         }
@@ -121,6 +135,7 @@
           emailDisplay.setAttribute("href", "mailto:" + CONTACT_EMAIL);
         }
       }
+      const typeTimeouts = [];
       function typeText(node, text, speed) {
         if (!node) {
           return;
@@ -134,7 +149,8 @@
           node.textContent = text.slice(0, index);
           index += 1;
           if (index <= text.length) {
-            window.setTimeout(tick, speed);
+            const id = window.setTimeout(tick, speed + Math.random() * 60);
+            typeTimeouts.push(id);
           }
         };
         tick();
@@ -238,11 +254,15 @@
         let ringX = mouseX;
         let ringY = mouseY;
         let rafId = 0;
+        let cursorVisible = false;
         const updateMouse = (event) => {
           mouseX = event.clientX;
           mouseY = event.clientY;
           dot.style.transform = "translate3d(" + mouseX + "px," + mouseY + "px,0) translate(-50%, -50%)";
-          document.body.classList.add("cursor-visible");
+          if (!cursorVisible) {
+            cursorVisible = true;
+            document.body.classList.add("cursor-visible");
+          }
         };
         const animate = () => {
           ringX += (mouseX - ringX) * 0.16;
@@ -251,6 +271,7 @@
           rafId = requestAnimationFrame(animate);
         };
         const hide = () => {
+          cursorVisible = false;
           document.body.classList.remove("cursor-visible");
         };
         window.addEventListener("mousemove", updateMouse, { passive: true });
@@ -331,6 +352,8 @@
             lastThemeCheck = timestamp;
           }
           const accentRgb = cachedAccentRgb;
+          const particleFillStyle = 'rgba(' + accentRgb + ', 0.72)';
+          const strokeStyleBase = 'rgba(' + accentRgb + ', ';
           ctx.clearRect(0, 0, width, height);
           for (let i = 0; i < particles.length; i += 1) {
             const particle = particles[i];
@@ -343,8 +366,9 @@
             if (mouse.active) {
               const dx = particle.x - mouse.x;
               const dy = particle.y - mouse.y;
-              const distance = Math.sqrt(dx * dx + dy * dy);
-              if (distance < 120 && distance > 0) {
+              const distSq = dx * dx + dy * dy;
+              if (distSq < 14400 && distSq > 0) {
+                const distance = Math.sqrt(distSq);
                 const force = (120 - distance) / 1200;
                 particle.vx += (dx / distance) * force;
                 particle.vy += (dy / distance) * force;
@@ -356,22 +380,24 @@
             particle.vy = Math.max(-0.42, Math.min(0.42, particle.vy));
             ctx.beginPath();
             ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-            ctx.fillStyle = "rgba(" + accentRgb + ", 0.72)";
+            ctx.fillStyle = particleFillStyle;
             ctx.fill();
           }
+          const maxDistSq = 130 * 130;
           for (let i = 0; i < particles.length; i += 1) {
             for (let j = i + 1; j < particles.length; j += 1) {
               const a = particles[i];
               const b = particles[j];
               const dx = a.x - b.x;
               const dy = a.y - b.y;
-              const distance = Math.sqrt(dx * dx + dy * dy);
-              if (distance < 130) {
+              const distSq = dx * dx + dy * dy;
+              if (distSq < maxDistSq) {
+                const distance = Math.sqrt(distSq);
                 const opacity = (1 - distance / 130) * 0.2;
                 ctx.beginPath();
                 ctx.moveTo(a.x, a.y);
                 ctx.lineTo(b.x, b.y);
-                ctx.strokeStyle = "rgba(" + accentRgb + ", " + opacity.toFixed(3) + ")";
+                ctx.strokeStyle = strokeStyleBase + opacity.toFixed(3) + ')';
                 ctx.lineWidth = 1;
                 ctx.stroke();
               }
@@ -402,7 +428,7 @@
         }, { threshold: 0.05 });
         resize();
         animationFrame = requestAnimationFrame(draw);
-        window.addEventListener("resize", resize, { passive: true });
+        resizeCallbacks.push(resize);
         hero.addEventListener("mousemove", moveMouse, { passive: true });
         hero.addEventListener("mouseleave", leaveMouse);
         document.addEventListener("visibilitychange", onVisibility);
@@ -410,7 +436,6 @@
         addCleanup(() => {
           running = false;
           cancelAnimationFrame(animationFrame);
-          window.removeEventListener("resize", resize);
           hero.removeEventListener("mousemove", moveMouse);
           hero.removeEventListener("mouseleave", leaveMouse);
           document.removeEventListener("visibilitychange", onVisibility);
@@ -429,8 +454,11 @@
         let glitchTimer = 0;
         const triggerGlitch = () => {
           heroName.classList.remove("is-zapping");
-          void heroName.offsetWidth;
-          heroName.classList.add("is-zapping");
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              heroName.classList.add("is-zapping");
+            });
+          });
           window.clearTimeout(glitchTimer);
           glitchTimer = window.setTimeout(() => heroName.classList.remove("is-zapping"), 280);
         };
@@ -495,12 +523,8 @@
           progress.style.setProperty("--timeline-scale", ratio.toFixed(3));
         };
         updateProgress();
-        window.addEventListener("scroll", updateProgress, { passive: true });
-        window.addEventListener("resize", updateProgress, { passive: true });
-        addCleanup(() => {
-          window.removeEventListener("scroll", updateProgress);
-          window.removeEventListener("resize", updateProgress);
-        });
+        scrollCallbacks.push(updateProgress);
+        resizeCallbacks.push(updateProgress);
       }
       function initProjectTilt() {
         const cards = document.querySelectorAll(".project-card[data-tilt='true']");
@@ -508,19 +532,24 @@
           return;
         }
         cards.forEach((card) => {
+          let tiltRAF = null;
           const onMove = (event) => {
-            const rect = card.getBoundingClientRect();
-            const px = (event.clientX - rect.left) / rect.width;
-            const py = (event.clientY - rect.top) / rect.height;
-            const rotateY = (px - 0.5) * 16;
-            const rotateX = (0.5 - py) * 16;
-            card.style.transform =
-              "perspective(1000px) rotateX(" + rotateX.toFixed(2) + "deg) rotateY(" + rotateY.toFixed(2) + "deg) scale(1.02)";
+            if (tiltRAF) return;
+            tiltRAF = requestAnimationFrame(() => {
+              const rect = card.getBoundingClientRect();
+              const px = (event.clientX - rect.left) / rect.width;
+              const py = (event.clientY - rect.top) / rect.height;
+              const rotateY = (px - 0.5) * 16;
+              const rotateX = (0.5 - py) * 16;
+              card.style.transform =
+                "perspective(1000px) rotateX(" + rotateX.toFixed(2) + "deg) rotateY(" + rotateY.toFixed(2) + "deg) scale(1.02)";
+              tiltRAF = null;
+            });
           };
           const reset = () => {
             card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)";
           };
-          card.addEventListener("mousemove", onMove);
+          card.addEventListener("mousemove", onMove, { passive: true });
           card.addEventListener("mouseleave", reset);
           card.addEventListener("blur", reset, true);
           addCleanup(() => {
@@ -601,9 +630,6 @@
       function initContact() {
         const copyButton = document.getElementById("copy-email");
         const tooltip = document.getElementById("copy-tooltip");
-        const form = document.getElementById("contact-form");
-        const formStatus = document.getElementById("form-status");
-        const submitButton = document.getElementById("contact-submit");
         let tooltipTimerId = null;
         const showTooltip = (message) => {
           if (!tooltip) {
@@ -710,18 +736,14 @@
           navProgress.style.width = (ratio * 100).toFixed(2) + "%";
         };
         updateProgress();
-        window.addEventListener("scroll", updateProgress, { passive: true });
-        window.addEventListener("resize", updateProgress, { passive: true });
-        addCleanup(() => {
-          window.removeEventListener("scroll", updateProgress);
-          window.removeEventListener("resize", updateProgress);
-        });
+        scrollCallbacks.push(updateProgress);
+        resizeCallbacks.push(updateProgress);
         if (sections.length) {
           let ticking = false;
           let navLockUntil = 0;
+          const navbarEl = document.querySelector(".navbar");
           const getNavHeight = () => {
-            const nav = document.querySelector(".navbar");
-            return nav instanceof HTMLElement ? nav.offsetHeight : 72;
+            return navbarEl instanceof HTMLElement ? navbarEl.offsetHeight : 72;
           };
           const setActive = (activeId) => {
             navLinks.forEach((link) => {
@@ -785,14 +807,12 @@
             addCleanup(() => link.removeEventListener("click", onNavClick));
           });
           updateActive();
-          window.addEventListener("scroll", requestActiveUpdate, { passive: true });
-          window.addEventListener("resize", requestActiveUpdate, { passive: true });
+          scrollCallbacks.push(requestActiveUpdate);
+          resizeCallbacks.push(requestActiveUpdate);
           window.addEventListener("hashchange", syncFromHash);
           window.addEventListener("load", syncFromHash, { once: true });
           syncFromHash();
           addCleanup(() => {
-            window.removeEventListener("scroll", requestActiveUpdate);
-            window.removeEventListener("resize", requestActiveUpdate);
             window.removeEventListener("hashchange", syncFromHash);
           });
         }
@@ -810,8 +830,7 @@
             indicator.classList.remove("is-hidden");
           }
         };
-        window.addEventListener("scroll", onScroll, { passive: true });
-        addCleanup(() => window.removeEventListener("scroll", onScroll));
+        scrollCallbacks.push(onScroll);
       }
 
       function boot() {
@@ -838,6 +857,7 @@
         boot();
       }
       window.addEventListener("pagehide", () => {
+        typeTimeouts.forEach(id => clearTimeout(id));
         cleanupCallbacks.forEach((callback) => {
           try {
             callback();

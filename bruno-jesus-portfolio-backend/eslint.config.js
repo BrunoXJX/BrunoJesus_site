@@ -66,7 +66,11 @@ module.exports = [
         HTMLElement: "readonly",
         HTMLCanvasElement: "readonly",
         HTMLButtonElement: "readonly",
-        HTMLFormElement: "readonly"
+        HTMLFormElement: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        console: "readonly",
+        Element: "readonly"
       }
     }
   }

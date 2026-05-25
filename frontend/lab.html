@@ -8,6 +8,8 @@
   <meta property="og:title" content="Laboratório de Automação — Bruno Jesus">
   <meta property="og:description" content="Demos interativas de automação, IA e dashboards.">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://brunoxjx.github.io/BrunoJesus_site/lab.html">
+  <link rel="canonical" href="https://brunoxjx.github.io/BrunoJesus_site/lab.html">
   <title>Laboratório de Automação — Bruno Jesus</title>
   <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg?v=20260510-dual">
   <meta name="theme-color" content="#030712">
@@ -16,12 +18,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet">
   <script defer src="https://unpkg.com/lucide@1.11.0/dist/umd/lucide.js" integrity="sha384-ZMkBApRp8XzSI26P7dtIOJcn6bweCl+SQ3D890zk3ilWfsJtBCtWQ4Rp4FhzcysQ" crossorigin="anonymous"></script>
-  <script src="assets/js/boot-preload.js?v=20260521-overhaul"></script>
+
   <link rel="stylesheet" href="assets/css/styles.css?v=20260521-overhaul">
   <link rel="stylesheet" href="assets/css/lab.css?v=20260521-overhaul">
 </head>
 
 <body>
+  <noscript>
+    <div style="background:#dc2626;color:#fff;text-align:center;padding:1rem;font-weight:600;">
+      Este laboratório necessita de JavaScript para funcionar.
+    </div>
+  </noscript>
   <div class="cursor-dot" aria-hidden="true"></div>
   <div class="cursor-ring" aria-hidden="true"></div>
   <header class="navbar">
@@ -61,15 +68,15 @@
     </div>
   </header>
 
-  <main class="lab-main" style="padding-top: calc(var(--nav-height) + 2rem);">
-    <section class="hero lab-hero" style="padding-top: 4rem; padding-bottom: 2rem;">
+  <main class="lab-main">
+    <section class="hero lab-hero lab-section-header">
       <div class="container hero-grid">
         <div class="hero-copy">
-          <div class="hero-system-label" style="display: flex; gap: 1rem; color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; margin-bottom: 1rem;">
+          <div class="hero-system-label">
             <span>[ SYS_ID: BJ-LAB ]</span>
             <span>[ ESTADO: EXPERIMENTAL ]</span>
           </div>
-          <h1 class="hero-name" style="font-size: var(--text-hero); margin-bottom: 1rem;">Laboratório de Automação</h1>
+          <h1 class="hero-name">Laboratório de Automação</h1>
           <p class="hero-summary">
             Ambiente interativo para demonstração de workflows n8n, processamento inteligente de regras e visualização de dados.
           </p>
@@ -94,9 +101,9 @@
           <div class="lab-panel__body node-editor-layout">
             <div class="node-editor-sidebar">
               <label for="email-input" class="mono lab-label">Email da Lead (Simulação)</label>
-              <input type="text" id="email-input" class="lab-textarea" value="elon@spacex.com" style="margin-bottom: 1rem; padding: 0.8rem; background: var(--surface-3); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius-sm); font-family: monospace;" />
-              <button id="btn-run-pipeline" class="btn" style="margin-top: 1rem; width: 100%;">Executar Workflow <i data-lucide="play"></i></button>
-              <div id="pipeline-final-status" class="pipeline-final-status mono" style="margin-top: 1rem; text-align: center; color: var(--accent);"></div>
+              <input type="email" id="email-input" class="lab-textarea" value="elon@spacex.com" />
+              <button id="btn-run-pipeline" class="btn lab-btn-full">Executar Workflow <i data-lucide="play"></i></button>
+              <div id="pipeline-final-status" class="pipeline-final-status mono"></div>
             </div>
             
             <div class="node-editor-canvas-wrapper" id="node-editor-container">
@@ -105,7 +112,7 @@
               <!-- Nodes will be injected here by JS -->
             </div>
           </div>
-          <div class="lab-panel__footer" style="padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: rgba(0,0,0,0.1);">
+          <div class="lab-panel__footer lab-demo-footer">
             <span class="badge">#n8n-simulation</span>
             <span class="badge">#automation</span>
           </div>
@@ -137,20 +144,20 @@ Mar,11000,9000
 Abr,18000,9200
 Mai,22000,10000</textarea>
               
-              <label for="chart-type" class="mono lab-label" style="margin-top: 1rem;">Tipo de Gráfico</label>
+              <label for="chart-type" class="mono lab-label lab-label--spaced">Tipo de Gráfico</label>
               <select id="chart-type" class="lab-select">
                 <option value="bar">Barras (Vendas vs Custos)</option>
                 <option value="line">Linha de Tendência</option>
                 <option value="donut">Donut (Total de Vendas)</option>
               </select>
               
-              <button id="btn-generate-chart" class="btn" style="margin-top: 1.5rem; width: 100%;">Gerar Dashboard <i data-lucide="bar-chart-2"></i></button>
+              <button id="btn-generate-chart" class="btn lab-btn-full">Gerar Dashboard <i data-lucide="bar-chart-2"></i></button>
             </div>
             <div class="dashboard-canvas-area">
-              <canvas id="dashboard-canvas" width="600" height="400"></canvas>
+              <canvas id="dashboard-canvas" width="600" height="400" role="img" aria-label="Gráfico de dashboard">Gráfico de dashboard — requer JavaScript</canvas>
             </div>
           </div>
-          <div class="lab-panel__footer" style="padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: rgba(0,0,0,0.1);">
+          <div class="lab-panel__footer lab-demo-footer">
             <span class="badge">#canvas-api</span>
             <span class="badge">#data-viz</span>
           </div>
@@ -179,23 +186,23 @@ Mai,22000,10000</textarea>
               <div id="rules-container" class="rules-container">
                 <!-- Rules injected by JS -->
               </div>
-              <button id="btn-add-rule" class="btn is-ghost" style="width: 100%; margin-top: 1rem;"><i data-lucide="plus"></i> Adicionar Regra</button>
+              <button id="btn-add-rule" class="btn is-ghost lab-btn-full"><i data-lucide="plus"></i> Adicionar Regra</button>
             </div>
 
             <!-- Right: Chat Interface -->
             <div class="chat-interface">
-              <div id="chat-messages" class="chat-messages">
+              <div id="chat-messages" class="chat-messages" role="log" aria-live="polite">
                 <div class="chat-message bot">
                   <div class="chat-bubble">Olá! Sou o agente de demonstração. Configura as minhas regras e fala comigo!</div>
                 </div>
               </div>
               <div class="chat-input-area">
                 <input type="text" id="chat-input" class="lab-input" placeholder="Escreve uma mensagem...">
-                <button id="btn-send-chat" class="icon-btn"><i data-lucide="send"></i></button>
+                <button id="btn-send-chat" class="icon-btn" aria-label="Enviar mensagem"><i data-lucide="send"></i></button>
               </div>
             </div>
           </div>
-          <div class="lab-panel__footer" style="padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: rgba(0,0,0,0.1);">
+          <div class="lab-panel__footer lab-demo-footer">
             <span class="badge">#rule-engine</span>
             <span class="badge">#chatbot</span>
           </div>
@@ -211,6 +218,6 @@ Mai,22000,10000</textarea>
     </div>
   </footer>
 
-  <script src="assets/js/lab.js?v=20260521-overhaul"></script>
+  <script defer src="assets/js/lab.js?v=20260521-overhaul"></script>
 </body>
 </html>
