@@ -204,11 +204,11 @@
           bootLine.textContent = introText.slice(0, charIndex);
           charIndex += 1;
           if (charIndex <= introText.length) {
-            window.setTimeout(writeIntro, 36);
+            window.setTimeout(writeIntro, 18);
           }
         };
         const intervalId = window.setInterval(() => {
-          progress += 4;
+          progress += 8;
           if (progress >= 100) {
             progress = 100;
           }
@@ -224,9 +224,9 @@
           if (progress === 100 && !finished) {
             finished = true;
             window.clearInterval(intervalId);
-            window.setTimeout(finish, 220);
+            window.setTimeout(finish, 110);
           }
-        }, 80);
+        }, 40);
         const skip = () => {
           if (finished) {
             return;
