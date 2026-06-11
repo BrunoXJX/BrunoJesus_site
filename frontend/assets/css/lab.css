@@ -1,5 +1,5 @@
 /* LAB CSS */
-/* Reuses variables from styles.css */
+/* Reuses variables from site.css */
 
 .lab-main {
   padding-bottom: var(--space-16);

@@ -1,50 +1,6 @@
 (function () {
   'use strict';
 
-  // --- Theme Toggle (cycle: flowix → electric → nebula) ---
-  const themeToggle = document.getElementById('theme-toggle');
-  const toggleText = themeToggle?.querySelector('.theme-toggle__text');
-  const THEME_NEXT = { flowix: 'electric', electric: 'nebula', nebula: 'flowix' };
-  const THEME_NEXT_LABEL = { flowix: 'Verde', electric: 'Roxo', nebula: 'Azul' };
-
-  function getCurrentTheme() {
-    const attr = document.documentElement.getAttribute('data-theme');
-    return attr === 'flowix' || attr === 'nebula' ? attr : 'electric';
-  }
-
-  function updateThemeUI() {
-    if (!themeToggle || !toggleText) return;
-    const currentTheme = getCurrentTheme();
-    themeToggle.setAttribute('aria-pressed', (currentTheme !== 'flowix').toString());
-    toggleText.textContent = THEME_NEXT_LABEL[currentTheme];
-  }
-
-  themeToggle?.addEventListener('click', () => {
-    const newTheme = THEME_NEXT[getCurrentTheme()];
-    if (newTheme === 'electric') {
-      document.documentElement.removeAttribute('data-theme');
-    } else {
-      document.documentElement.setAttribute('data-theme', newTheme);
-    }
-    try {
-      if (newTheme === 'flowix') {
-        window.localStorage.removeItem('bj-theme');
-      } else {
-        window.localStorage.setItem('bj-theme', newTheme);
-      }
-    } catch {
-      // Storage error ignored
-    }
-    updateThemeUI();
-    window.dispatchEvent(new CustomEvent('bj-theme-change', { detail: { theme: newTheme } }));
-    // Re-render dashboard to pick up new colors
-    if (typeof renderDashboard === 'function') {
-      setTimeout(renderDashboard, 100);
-    }
-  });
-  updateThemeUI();
-
-
   // --- Helper ---
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
@@ -340,18 +296,13 @@
   const csvInput = document.getElementById('csv-input');
   const chartTypeSelect = document.getElementById('chart-type');
 
+  // Paleta Signal fixa (violeta + ciano)
   function getThemeColor() {
-    const theme = document.documentElement.getAttribute('data-theme');
-    if (theme === 'flowix') return '#0084ff';
-    if (theme === 'nebula') return '#a855f7';
-    return '#39ff14';
+    return '#a06bff';
   }
 
   function getSecondaryColor() {
-    const theme = document.documentElement.getAttribute('data-theme');
-    if (theme === 'flowix') return '#39ff14';
-    if (theme === 'nebula') return '#22d3ee';
-    return '#0084ff';
+    return '#22d3ee';
   }
 
   function renderDashboard() {
@@ -666,9 +617,6 @@
   chatInput?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') handleChatSend();
   });
-
-  // Expose renderDashboard to global scope so theme toggle can call it
-  window.renderDashboard = renderDashboard;
 
   // Custom Cursor
   function initCustomCursor() {
