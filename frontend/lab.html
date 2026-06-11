@@ -11,16 +11,18 @@
   <meta property="og:url" content="https://brunoxjx.github.io/BrunoJesus_site/lab.html">
   <link rel="canonical" href="https://brunoxjx.github.io/BrunoJesus_site/lab.html">
   <title>Laboratório de Automação — Bruno Jesus</title>
-  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg?v=20260611-signal">
-  <meta name="theme-color" content="#040208">
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg?v=20260510-dual">
+  <meta name="theme-color" content="#030712">
   <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@700,800&amp;f[]=satoshi@400,500&amp;display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet">
   <script defer src="https://unpkg.com/lucide@1.11.0/dist/umd/lucide.js" integrity="sha384-ZMkBApRp8XzSI26P7dtIOJcn6bweCl+SQ3D890zk3ilWfsJtBCtWQ4Rp4FhzcysQ" crossorigin="anonymous"></script>
 
-  <link rel="stylesheet" href="assets/css/site.css?v=20260611-signal">
-  <link rel="stylesheet" href="assets/css/lab.css?v=20260611-signal">
+  <script src="assets/js/boot-preload.js?v=20260611-nebula"></script>
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260611-nebula">
+  <link rel="stylesheet" href="assets/css/lab.css?v=20260611-nebula">
+  <link rel="stylesheet" href="assets/css/nebula.css?v=20260611-nebula">
 </head>
 
 <body>
@@ -31,23 +33,92 @@
   </noscript>
   <div class="cursor-dot" aria-hidden="true"></div>
   <div class="cursor-ring" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
-  <header class="lab-navbar">
-    <a class="lab-navbar__brand" href="index.html">BJ — <strong>LAB</strong></a>
-    <a class="lab-navbar__back" href="index.html">← Voltar ao Signal</a>
+  <header class="navbar">
+    <div class="nav-progress" id="nav-progress"></div>
+    <div class="container nav-inner">
+      <a class="nav-brand" href="index.html" aria-label="Voltar ao Portfolio">
+        <div class="atom-logo atom-logo--nav" aria-hidden="true">
+          <span class="atom-logo__glow"></span>
+          <span class="atom-logo__ring atom-logo__ring--outer"></span>
+          <span class="atom-logo__ring atom-logo__ring--mid"></span>
+          <span class="atom-logo__dashed"></span>
+          <span class="atom-logo__cross"></span>
+          <span class="atom-logo__orbit atom-logo__orbit--horizontal"></span>
+          <span class="atom-logo__orbit atom-logo__orbit--vertical"></span>
+          <span class="atom-logo__orbit atom-logo__orbit--diagonal-a"></span>
+          <span class="atom-logo__orbit atom-logo__orbit--diagonal-b"></span>
+          <span class="atom-logo__ring atom-logo__ring--core"></span>
+          <span class="atom-logo__core">
+            <span class="atom-logo__letters">BJ</span>
+          </span>
+        </div>
+        <span class="nav-brand__text">
+          <strong>Laboratório</strong>
+          <span>Automação</span>
+        </span>
+      </a>
+      <nav class="nav-links" aria-label="Principal">
+        <a class="nav-link" href="index.html">Voltar ao Portfolio</a>
+      </nav>
+      <div class="nav-actions">
+        <!-- Re-use theme toggle -->
+        <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Alternar Tema">
+          <span class="theme-toggle__orb" aria-hidden="true"></span>
+          <span class="theme-toggle__text mono">Verde</span>
+        </button>
+      </div>
+    </div>
   </header>
 
   <main class="lab-main">
-    <section class="lab-hero-signal">
-      <div class="container">
-        <span class="chapter-tag">BJ-LAB — Estado experimental</span>
-        <h1>Laboratório de <em>automação</em></h1>
-        <p>
-          Ambiente interativo para demonstração de workflows n8n, processamento inteligente de regras e visualização
-          de dados — tudo a correr no browser.
-        </p>
+    <section class="hero lab-hero lab-section-header">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="hero-system-label">
+            <span>[ SYS_ID: BJ-LAB ]</span>
+            <span>[ ESTADO: EXPERIMENTAL ]</span>
+          </div>
+          <h1 class="hero-name">Laboratório de Automação</h1>
+          <p class="hero-summary">
+            Ambiente interativo para demonstração de workflows n8n, processamento inteligente de regras e visualização de dados.
+          </p>
+          <div class="nebula-stats nebula-only" aria-label="Métricas do laboratório">
+            <div class="nebula-stat">
+              <span class="nebula-stat__value" data-nebula-count="3">0</span>
+              <span class="nebula-stat__label">Demos interativas</span>
+            </div>
+            <div class="nebula-stat">
+              <span class="nebula-stat__value" data-nebula-count="7">0</span>
+              <span class="nebula-stat__label">Nós no workflow</span>
+            </div>
+            <div class="nebula-stat">
+              <span class="nebula-stat__value">100%</span>
+              <span class="nebula-stat__label">Canvas API nativa</span>
+            </div>
+            <div class="nebula-stat">
+              <span class="nebula-stat__value">∞</span>
+              <span class="nebula-stat__label">Regras configuráveis</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
+    <div class="nebula-marquee nebula-only" aria-hidden="true">
+      <div class="nebula-marquee__track">
+        <span class="nebula-marquee__item">Workflows n8n</span>
+        <span class="nebula-marquee__item">Qualificação de Leads</span>
+        <span class="nebula-marquee__item">Dashboards Dinâmicos</span>
+        <span class="nebula-marquee__item">Chatbots por Regras</span>
+        <span class="nebula-marquee__item">Canvas API</span>
+        <span class="nebula-marquee__item">Automação Multi-canal</span>
+        <span class="nebula-marquee__item">Workflows n8n</span>
+        <span class="nebula-marquee__item">Qualificação de Leads</span>
+        <span class="nebula-marquee__item">Dashboards Dinâmicos</span>
+        <span class="nebula-marquee__item">Chatbots por Regras</span>
+        <span class="nebula-marquee__item">Canvas API</span>
+        <span class="nebula-marquee__item">Automação Multi-canal</span>
+      </div>
+    </div>
 
     <!-- Demo 1: Email Workflow Pipeline -->
     <section class="section" data-surface="surface">
@@ -178,12 +249,12 @@ Mai,22000,10000</textarea>
 
   <footer class="footer">
     <div class="container footer-inner">
-      <span>Bruno Jesus — Lab</span>
-      <span>"A testar ideias, um protótipo de cada vez."</span>
-      <span>© 2026</span>
+      <div class="footer-meta">BRUNO JESUS / LABORATÓRIO</div>
+      <p class="footer-quote">"A testar ideias, um protótipo de cada vez."</p>
     </div>
   </footer>
 
-  <script defer src="assets/js/lab.js?v=20260611-signal"></script>
+  <script defer src="assets/js/lab.js?v=20260611-nebula"></script>
+  <script defer src="assets/js/nebula.js?v=20260611-nebula"></script>
 </body>
 </html>
