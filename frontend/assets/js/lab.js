@@ -1,28 +1,42 @@
 (function () {
   'use strict';
 
-  // --- Theme Toggle ---
+  // --- Theme Toggle (cycle: flowix → electric → nebula) ---
   const themeToggle = document.getElementById('theme-toggle');
   const toggleText = themeToggle?.querySelector('.theme-toggle__text');
-  
+  const THEME_NEXT = { flowix: 'electric', electric: 'nebula', nebula: 'flowix' };
+  const THEME_NEXT_LABEL = { flowix: 'Verde', electric: 'Roxo', nebula: 'Azul' };
+
+  function getCurrentTheme() {
+    const attr = document.documentElement.getAttribute('data-theme');
+    return attr === 'flowix' || attr === 'nebula' ? attr : 'electric';
+  }
+
   function updateThemeUI() {
     if (!themeToggle || !toggleText) return;
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'electric';
-    const isElectric = currentTheme === 'electric';
-    themeToggle.setAttribute('aria-pressed', isElectric.toString());
-    toggleText.textContent = isElectric ? 'Verde' : 'Azul';
+    const currentTheme = getCurrentTheme();
+    themeToggle.setAttribute('aria-pressed', (currentTheme !== 'flowix').toString());
+    toggleText.textContent = THEME_NEXT_LABEL[currentTheme];
   }
 
   themeToggle?.addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'electric';
-    const newTheme = currentTheme === 'electric' ? 'flowix' : 'electric';
-    document.documentElement.setAttribute('data-theme', newTheme);
+    const newTheme = THEME_NEXT[getCurrentTheme()];
+    if (newTheme === 'electric') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', newTheme);
+    }
     try {
-      window.localStorage.setItem('bj-theme', newTheme);
+      if (newTheme === 'flowix') {
+        window.localStorage.removeItem('bj-theme');
+      } else {
+        window.localStorage.setItem('bj-theme', newTheme);
+      }
     } catch {
       // Storage error ignored
     }
     updateThemeUI();
+    window.dispatchEvent(new CustomEvent('bj-theme-change', { detail: { theme: newTheme } }));
     // Re-render dashboard to pick up new colors
     if (typeof renderDashboard === 'function') {
       setTimeout(renderDashboard, 100);
@@ -328,12 +342,16 @@
 
   function getThemeColor() {
     const theme = document.documentElement.getAttribute('data-theme');
-    return theme === 'flowix' ? '#0084ff' : '#39ff14';
+    if (theme === 'flowix') return '#0084ff';
+    if (theme === 'nebula') return '#a855f7';
+    return '#39ff14';
   }
-  
+
   function getSecondaryColor() {
     const theme = document.documentElement.getAttribute('data-theme');
-    return theme === 'flowix' ? '#39ff14' : '#0084ff';
+    if (theme === 'flowix') return '#39ff14';
+    if (theme === 'nebula') return '#22d3ee';
+    return '#0084ff';
   }
 
   function renderDashboard() {

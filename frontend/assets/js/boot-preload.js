@@ -7,9 +7,13 @@ try {
     }
 
 try {
-      // Default theme is flowix (blue). Only switch to green if explicitly stored.
-      if (window.localStorage && window.localStorage.getItem("bj-theme") === "electric") {
-        // User explicitly chose green — do NOT set flowix
+      // Default theme is flowix (blue). Stored value can be "electric" (green)
+      // or "nebula" (purple); anything else falls back to flowix.
+      var storedTheme = window.localStorage ? window.localStorage.getItem("bj-theme") : null;
+      if (storedTheme === "electric") {
+        // User explicitly chose green — leave attribute unset (:root defaults).
+      } else if (storedTheme === "nebula") {
+        document.documentElement.setAttribute("data-theme", "nebula");
       } else {
         document.documentElement.setAttribute("data-theme", "flowix");
       }

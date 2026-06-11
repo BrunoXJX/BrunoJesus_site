@@ -90,6 +90,44 @@
       --orb-dot-d: #004bff;
     }
 
+    html[data-theme="nebula"] {
+      --bg: #0a0118;
+      --bg-rgb: 10, 1, 24;
+      --body-gradient-start: #070112;
+      --body-gradient-end: #120429;
+      --navbar-bg: rgba(10, 1, 24, 0.82);
+      --drawer-bg: rgba(12, 3, 30, 0.97);
+      --terminal-bg: rgba(8, 1, 20, 0.94);
+      --surface: rgba(22, 8, 46, 0.78);
+      --surface-2: rgba(28, 11, 58, 0.84);
+      --surface-3: rgba(36, 15, 72, 0.88);
+      --border: rgba(196, 181, 253, 0.1);
+      --accent-rgb: 168, 85, 247;
+      --accent-soft-rgb: 196, 181, 253;
+      --border-bright: rgba(var(--accent-rgb), 0.38);
+      --text: #f5f0ff;
+      --text-muted: #a99cc7;
+      --text-faint: #6f6391;
+      --accent: #a855f7;
+      --accent-dim: rgba(var(--accent-rgb), 0.14);
+      --accent-glow: rgba(var(--accent-rgb), 0.4);
+      --accent-soft: #c4b5fd;
+      --secondary: #22d3ee;
+      --badge-text: #efe6ff;
+      --logo-text: #f3ecff;
+      --terminal-text: #e8dcff;
+      --orb-dot-a: #f0e7ff;
+      --orb-dot-b: #d8b4fe;
+      --orb-dot-c: #a855f7;
+      --orb-dot-d: #6d28d9;
+      --nebula-fuchsia: #e879f9;
+      --nebula-fuchsia-rgb: 232, 121, 249;
+      --nebula-cyan: #22d3ee;
+      --nebula-cyan-rgb: 34, 211, 238;
+      --nebula-indigo: #6366f1;
+      --nebula-indigo-rgb: 99, 102, 241;
+    }
+
     *,
     *::before,
     *::after {
@@ -786,6 +824,16 @@
       background:
         radial-gradient(circle at 18% 50%, rgba(var(--accent-rgb), 0.34), transparent 34%),
         linear-gradient(90deg, rgba(var(--accent-rgb), 0.12), rgba(255, 255, 255, 0.02));
+    }
+
+    html[data-theme="nebula"] .theme-toggle {
+      background:
+        radial-gradient(circle at 18% 50%, rgba(var(--accent-rgb), 0.38), transparent 36%),
+        linear-gradient(90deg, rgba(var(--nebula-fuchsia-rgb), 0.14), rgba(var(--nebula-indigo-rgb), 0.08));
+    }
+
+    html[data-theme="nebula"] .theme-toggle__orb {
+      background: linear-gradient(135deg, var(--nebula-fuchsia), var(--accent) 55%, var(--nebula-indigo));
     }
 
     @keyframes themeOrbPulse {

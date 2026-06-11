@@ -19,8 +19,10 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet">
   <script defer src="https://unpkg.com/lucide@1.11.0/dist/umd/lucide.js" integrity="sha384-ZMkBApRp8XzSI26P7dtIOJcn6bweCl+SQ3D890zk3ilWfsJtBCtWQ4Rp4FhzcysQ" crossorigin="anonymous"></script>
 
-  <link rel="stylesheet" href="assets/css/styles.css?v=20260521-overhaul">
-  <link rel="stylesheet" href="assets/css/lab.css?v=20260521-overhaul">
+  <script src="assets/js/boot-preload.js?v=20260611-nebula"></script>
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260611-nebula">
+  <link rel="stylesheet" href="assets/css/lab.css?v=20260611-nebula">
+  <link rel="stylesheet" href="assets/css/nebula.css?v=20260611-nebula">
 </head>
 
 <body>
@@ -80,9 +82,43 @@
           <p class="hero-summary">
             Ambiente interativo para demonstração de workflows n8n, processamento inteligente de regras e visualização de dados.
           </p>
+          <div class="nebula-stats nebula-only" aria-label="Métricas do laboratório">
+            <div class="nebula-stat">
+              <span class="nebula-stat__value" data-nebula-count="3">0</span>
+              <span class="nebula-stat__label">Demos interativas</span>
+            </div>
+            <div class="nebula-stat">
+              <span class="nebula-stat__value" data-nebula-count="7">0</span>
+              <span class="nebula-stat__label">Nós no workflow</span>
+            </div>
+            <div class="nebula-stat">
+              <span class="nebula-stat__value">100%</span>
+              <span class="nebula-stat__label">Canvas API nativa</span>
+            </div>
+            <div class="nebula-stat">
+              <span class="nebula-stat__value">∞</span>
+              <span class="nebula-stat__label">Regras configuráveis</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
+    <div class="nebula-marquee nebula-only" aria-hidden="true">
+      <div class="nebula-marquee__track">
+        <span class="nebula-marquee__item">Workflows n8n</span>
+        <span class="nebula-marquee__item">Qualificação de Leads</span>
+        <span class="nebula-marquee__item">Dashboards Dinâmicos</span>
+        <span class="nebula-marquee__item">Chatbots por Regras</span>
+        <span class="nebula-marquee__item">Canvas API</span>
+        <span class="nebula-marquee__item">Automação Multi-canal</span>
+        <span class="nebula-marquee__item">Workflows n8n</span>
+        <span class="nebula-marquee__item">Qualificação de Leads</span>
+        <span class="nebula-marquee__item">Dashboards Dinâmicos</span>
+        <span class="nebula-marquee__item">Chatbots por Regras</span>
+        <span class="nebula-marquee__item">Canvas API</span>
+        <span class="nebula-marquee__item">Automação Multi-canal</span>
+      </div>
+    </div>
 
     <!-- Demo 1: Email Workflow Pipeline -->
     <section class="section" data-surface="surface">
@@ -218,6 +254,7 @@ Mai,22000,10000</textarea>
     </div>
   </footer>
 
-  <script defer src="assets/js/lab.js?v=20260521-overhaul"></script>
+  <script defer src="assets/js/lab.js?v=20260611-nebula"></script>
+  <script defer src="assets/js/nebula.js?v=20260611-nebula"></script>
 </body>
 </html>

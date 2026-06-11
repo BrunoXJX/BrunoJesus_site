@@ -30,8 +30,9 @@
   <script defer src="https://unpkg.com/lucide@1.11.0/dist/umd/lucide.js"
     integrity="sha384-ZMkBApRp8XzSI26P7dtIOJcn6bweCl+SQ3D890zk3ilWfsJtBCtWQ4Rp4FhzcysQ"
     crossorigin="anonymous"></script>
-  <script src="assets/js/boot-preload.js?v=20260521-overhaul"></script>
-  <link rel="stylesheet" href="assets/css/styles.css?v=20260521-overhaul">
+  <script src="assets/js/boot-preload.js?v=20260611-nebula"></script>
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260611-nebula">
+  <link rel="stylesheet" href="assets/css/nebula.css?v=20260611-nebula">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -225,6 +226,24 @@
             </a>
           </div>
           <p class="hero-inline-stats">Co-Fundador · PL-200 · Embaixador EY</p>
+          <div class="nebula-stats nebula-only" aria-label="Métricas rápidas">
+            <div class="nebula-stat">
+              <span class="nebula-stat__value">24/7</span>
+              <span class="nebula-stat__label">Automação ativa</span>
+            </div>
+            <div class="nebula-stat">
+              <span class="nebula-stat__value" data-nebula-count="3">0</span>
+              <span class="nebula-stat__label">Marcas representadas</span>
+            </div>
+            <div class="nebula-stat">
+              <span class="nebula-stat__value" data-nebula-count="8" data-nebula-prefix="+">+0</span>
+              <span class="nebula-stat__label">Competências core</span>
+            </div>
+            <div class="nebula-stat">
+              <span class="nebula-stat__value">∞</span>
+              <span class="nebula-stat__label">Workflows possíveis</span>
+            </div>
+          </div>
         </div>
         <div class="hero-panel panel reveal">
           <div class="hero-panel__top">
@@ -282,6 +301,51 @@
       <div class="scroll-indicator" id="scroll-indicator" aria-hidden="true">
         <span>Scroll</span>
         <i data-lucide="chevron-down"></i>
+      </div>
+    </section>
+    <div class="nebula-marquee nebula-only" aria-hidden="true">
+      <div class="nebula-marquee__track">
+        <span class="nebula-marquee__item">Power Platform</span>
+        <span class="nebula-marquee__item">n8n</span>
+        <span class="nebula-marquee__item">Inteligência Artificial</span>
+        <span class="nebula-marquee__item">Machine Learning</span>
+        <span class="nebula-marquee__item">Low-Code</span>
+        <span class="nebula-marquee__item">Mendix</span>
+        <span class="nebula-marquee__item">Visualização de Dados</span>
+        <span class="nebula-marquee__item">Vendas &amp; Liderança</span>
+        <span class="nebula-marquee__item">Power Platform</span>
+        <span class="nebula-marquee__item">n8n</span>
+        <span class="nebula-marquee__item">Inteligência Artificial</span>
+        <span class="nebula-marquee__item">Machine Learning</span>
+        <span class="nebula-marquee__item">Low-Code</span>
+        <span class="nebula-marquee__item">Mendix</span>
+        <span class="nebula-marquee__item">Visualização de Dados</span>
+        <span class="nebula-marquee__item">Vendas &amp; Liderança</span>
+      </div>
+    </div>
+    <section class="nebula-flywheel-section nebula-only" aria-label="Ciclo de automação">
+      <div class="container">
+        <header class="section-header">
+          <div class="section-heading">
+            <div class="section-kicker">&gt; AUTOMATION_FLYWHEEL.spin()</div>
+            <h2 class="section-title">O motor que transforma processos em resultados.</h2>
+          </div>
+          <p class="section-intro">
+            Cada processo automatizado gera dados. Cada dado melhora a decisão. Cada decisão acelera o negócio.
+          </p>
+        </header>
+        <div class="nebula-flywheel">
+          <span class="nebula-flywheel__ring" aria-hidden="true"></span>
+          <span class="nebula-flywheel__ring nebula-flywheel__ring--inner" aria-hidden="true"></span>
+          <div class="nebula-flywheel__orbit" aria-hidden="true">
+            <span class="nebula-flywheel__node nebula-flywheel__node--1"><span>Mapear</span></span>
+            <span class="nebula-flywheel__node nebula-flywheel__node--2"><span>Automatizar</span></span>
+            <span class="nebula-flywheel__node nebula-flywheel__node--3"><span>Medir</span></span>
+            <span class="nebula-flywheel__node nebula-flywheel__node--4"><span>Otimizar</span></span>
+            <span class="nebula-flywheel__node nebula-flywheel__node--5"><span>Escalar</span></span>
+          </div>
+          <div class="nebula-flywheel__core">Processo → Dados → Valor</div>
+        </div>
       </div>
     </section>
     <section id="stack" class="section" data-surface="surface">
@@ -761,7 +825,8 @@
           foco em valor real</span>."</p>
     </div>
   </footer>
-  <script defer src="assets/js/main.js?v=20260521-overhaul"></script>
+  <script defer src="assets/js/main.js?v=20260611-nebula"></script>
+  <script defer src="assets/js/nebula.js?v=20260611-nebula"></script>
 </body>
 
 </html>

@@ -53,53 +53,64 @@
         }
       }
       const THEME_STORAGE_KEY = "bj-theme";
-      const DEFAULT_THEME = "flowix";
-      const ALT_THEME = "electric";
+      const THEME_CYCLE = ["flowix", "electric", "nebula"];
+      const THEME_META = {
+        flowix: { next: "electric", nextLabel: "Verde", ariaLabel: "Ativar tema verde elétrico", metaColor: "#030712" },
+        electric: { next: "nebula", nextLabel: "Roxo", ariaLabel: "Ativar tema roxo Nebula", metaColor: "#050805" },
+        nebula: { next: "flowix", nextLabel: "Azul", ariaLabel: "Voltar ao tema Flowix azul", metaColor: "#0a0118" }
+      };
       function getStoredTheme() {
         try {
           if (window.localStorage) {
-            return window.localStorage.getItem(THEME_STORAGE_KEY) === ALT_THEME ? ALT_THEME : DEFAULT_THEME;
+            const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+            return THEME_CYCLE.includes(stored) ? stored : "flowix";
           }
         } catch {
           // Ignore storage issues and use the default theme.
         }
-        return document.documentElement.getAttribute("data-theme") === "flowix" ? DEFAULT_THEME : ALT_THEME;
+        const attr = document.documentElement.getAttribute("data-theme");
+        return THEME_CYCLE.includes(attr) ? attr : "electric";
+      }
+      function getCurrentTheme() {
+        const attr = document.documentElement.getAttribute("data-theme");
+        return THEME_CYCLE.includes(attr) ? attr : "electric";
       }
       function storeTheme(theme) {
         try {
           if (!window.localStorage) {
             return;
           }
-          if (theme === ALT_THEME) {
-            window.localStorage.setItem(THEME_STORAGE_KEY, ALT_THEME);
-          } else {
+          if (theme === "flowix") {
             window.localStorage.removeItem(THEME_STORAGE_KEY);
+          } else {
+            window.localStorage.setItem(THEME_STORAGE_KEY, theme);
           }
         } catch {
           // Theme switching still works without persistence.
         }
       }
       function applyTheme(theme, shouldAnimate) {
-        const isFlowix = theme === DEFAULT_THEME;
+        const meta = THEME_META[theme] || THEME_META.flowix;
         const root = document.documentElement;
         const toggle = document.getElementById("theme-toggle");
         const toggleText = toggle ? toggle.querySelector(".theme-toggle__text") : null;
         const themeColor = document.querySelector("meta[name='theme-color']");
-        if (isFlowix) {
-          root.setAttribute("data-theme", "flowix");
-        } else {
+        if (theme === "electric") {
           root.removeAttribute("data-theme");
+        } else {
+          root.setAttribute("data-theme", theme);
         }
         if (toggle instanceof HTMLButtonElement) {
-          toggle.setAttribute("aria-pressed", String(isFlowix));
-          toggle.setAttribute("aria-label", isFlowix ? "Ativar tema verde elétrico" : "Voltar ao tema Flowix azul");
+          toggle.setAttribute("aria-pressed", String(theme !== "flowix"));
+          toggle.setAttribute("aria-label", meta.ariaLabel);
         }
         if (toggleText) {
-          toggleText.textContent = isFlowix ? "Verde" : "Azul";
+          toggleText.textContent = meta.nextLabel;
         }
         if (themeColor && themeColor.tagName === "META") {
-          themeColor.setAttribute("content", isFlowix ? "#030712" : "#050805");
+          themeColor.setAttribute("content", meta.metaColor);
         }
+        window.dispatchEvent(new CustomEvent("bj-theme-change", { detail: { theme } }));
         if (shouldAnimate && !prefersReducedMotion.matches) {
           const heroName = document.getElementById("hero-name");
           if (heroName) {
@@ -121,7 +132,8 @@
           return;
         }
         const onToggle = () => {
-          const nextTheme = document.documentElement.getAttribute("data-theme") === "flowix" ? ALT_THEME : DEFAULT_THEME;
+          const current = getCurrentTheme();
+          const nextTheme = (THEME_META[current] || THEME_META.flowix).next;
           storeTheme(nextTheme);
           applyTheme(nextTheme, true);
         };
