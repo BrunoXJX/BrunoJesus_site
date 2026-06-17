@@ -11,6 +11,8 @@ Backend e runtime web do portefólio de Bruno Jesus. A API valida pedidos de con
 - PostgreSQL
 - Zod
 - Resend
+- Google Gmail API
+- OpenAI API
 - Pino Logger
 - Vitest
 
@@ -42,6 +44,14 @@ Valores principais:
 - `RESEND_API_KEY`
 - `CONTACT_RECEIVER_EMAIL`
 - `CONTACT_FROM_EMAIL`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `GOOGLE_REDIRECT_URI`
+- `LAB_ALLOWED_EMAILS`
+- `LAB_SESSION_SECRET`
+- `TOKEN_ENCRYPTION_KEY`
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
 
 Nunca coloques valores reais no GitHub. O `.env.example` deve ficar sempre com placeholders.
 
@@ -70,6 +80,15 @@ RATE_LIMIT_CONTACT_MAX=5
 RATE_LIMIT_CONTACT_WINDOW_MINUTES=10
 RATE_LIMIT_GLOBAL_MAX=100
 RATE_LIMIT_GLOBAL_WINDOW_MINUTES=15
+
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+GOOGLE_REDIRECT_URI="https://teu-dominio.pt/api/gmail/auth/callback"
+LAB_ALLOWED_EMAILS="bruno.asjesuss@gmail.com"
+LAB_SESSION_SECRET="gera_um_segredo_longo"
+TOKEN_ENCRYPTION_KEY="gera_outro_segredo_longo"
+OPENAI_API_KEY="sk-proj_..."
+OPENAI_MODEL="gpt-5.5"
 ```
 
 Notas importantes:
@@ -78,6 +97,8 @@ Notas importantes:
 - `CORS_ORIGINS` é opcional e aceita origens extra separadas por vírgulas, por exemplo domínio com `www`.
 - `CONTACT_FROM_EMAIL` deve estar verificado no Resend.
 - `TRUST_PROXY=true` é necessário quando a app fica atrás de proxy, load balancer, Cloudflare, Render, Railway, Nginx ou semelhante.
+- O OAuth do Gmail deve ter a Gmail API ativa e o redirect URI exatamente igual a `GOOGLE_REDIRECT_URI`.
+- A app Gmail pode começar em modo teste com as contas em `LAB_ALLOWED_EMAILS`. Para uso público, os scopes Gmail podem exigir verificação da Google.
 
 ## PostgreSQL e Prisma
 
@@ -135,6 +156,7 @@ npm run dev
 URLs locais:
 
 - site: `http://localhost:3333`
+- laboratório Gmail: `http://localhost:3333/lab.html`
 - health: `http://localhost:3333/health`
 - API info: `http://localhost:3333/api`
 

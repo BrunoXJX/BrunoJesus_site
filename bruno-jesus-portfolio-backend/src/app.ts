@@ -1,4 +1,5 @@
 import path from "node:path";
+import fastifyCookie from "@fastify/cookie";
 import fastifyStatic from "@fastify/static";
 import Fastify, {
   type FastifyInstance,
@@ -10,14 +11,21 @@ import prisma from "./database/prisma";
 import { registerErrorMiddleware } from "./middlewares/error.middleware";
 import { registerSecurityMiddleware } from "./middlewares/security.middleware";
 import { contactRoutes } from "./routes/contact.routes";
+import { gmailRoutes } from "./routes/gmail.routes";
 import { healthRoutes } from "./routes/health.routes";
 import { workflowRoutes } from "./routes/workflow.routes";
 import { createContactService, type PrismaClientLike } from "./services/contact.service";
 import { createEmailService, type EmailService } from "./services/email.service";
+import {
+  createGmailAutomationService,
+  type GmailAutomationService,
+  type GmailPrismaClient
+} from "./services/gmail.service";
 
 export interface BuildAppOptions {
-  prisma?: PrismaClientLike;
+  prisma?: PrismaClientLike & GmailPrismaClient;
   emailService?: EmailService;
+  gmailService?: GmailAutomationService;
   logger?: FastifyServerOptions["logger"];
 }
 
@@ -55,6 +63,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   });
 
   await registerSecurityMiddleware(app);
+  await app.register(fastifyCookie, {
+    secret: env.LAB_SESSION_SECRET,
+    hook: "onRequest"
+  });
   registerErrorMiddleware(app);
   await app.register(fastifyStatic, {
     root: publicRoot,
@@ -77,6 +89,12 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
     emailService,
     logger: app.log
   });
+  const gmailService =
+    options.gmailService ??
+    createGmailAutomationService({
+      prisma: prismaClient as unknown as GmailPrismaClient,
+      logger: app.log
+    });
 
   app.get("/api", async () => ({
     message: "Bruno Jesus Portfolio API",
@@ -93,6 +111,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(contactRoutes, {
     prefix: "/api",
     contactService
+  });
+  await app.register(gmailRoutes, {
+    prefix: "/api",
+    gmailService
   });
   await app.register(workflowRoutes, {
     prefix: "/api"

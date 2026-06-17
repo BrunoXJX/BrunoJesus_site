@@ -25,9 +25,77 @@ model ContactMessage {
   @@index([status])
 }
 
+model GmailAccount {
+  id                    String               @id @default(cuid())
+  googleUserId          String               @unique @db.VarChar(128)
+  email                 String               @unique @db.VarChar(254)
+  displayName           String?              @db.VarChar(120)
+  refreshTokenEncrypted String
+  tokenScope            String?              @db.VarChar(512)
+  tokenExpiry           DateTime?
+  connectedAt           DateTime             @default(now())
+  lastSyncAt            DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  sessions              GmailLabSession[]
+  logs                  GmailAutomationLog[]
+
+  @@index([email])
+  @@index([updatedAt])
+}
+
+model GmailOAuthState {
+  stateHash String   @id @db.VarChar(128)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+model GmailLabSession {
+  id               String       @id @default(cuid())
+  sessionTokenHash String       @unique @db.VarChar(128)
+  accountId        String
+  expiresAt        DateTime
+  createdAt        DateTime     @default(now())
+  lastSeenAt       DateTime     @default(now())
+  account          GmailAccount @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([expiresAt])
+}
+
+model GmailAutomationLog {
+  id             String          @id @default(cuid())
+  accountId      String
+  action         GmailActionType
+  status         GmailActionStatus
+  gmailMessageId String?         @db.VarChar(128)
+  gmailThreadId  String?         @db.VarChar(128)
+  metadata       Json?
+  createdAt      DateTime        @default(now())
+  account        GmailAccount    @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([action])
+  @@index([createdAt])
+}
+
 enum ContactStatus {
   NEW
   READ
   ARCHIVED
   SPAM
+}
+
+enum GmailActionType {
+  SUGGESTIONS_GENERATED
+  REPLY_SENT
+  SESSION_CREATED
+  SESSION_REVOKED
+}
+
+enum GmailActionStatus {
+  SUCCESS
+  FAILURE
 }

@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { EmailService } from "../src/services/email.service";
+import type { GmailAutomationService } from "../src/services/gmail.service";
 import type { PrismaClientLike } from "../src/services/contact.service";
 
 function setTestEnv(): void {
@@ -22,15 +23,25 @@ function setTestEnv(): void {
   process.env.RATE_LIMIT_CONTACT_WINDOW_MINUTES = "10";
   process.env.RATE_LIMIT_GLOBAL_MAX = "100";
   process.env.RATE_LIMIT_GLOBAL_WINDOW_MINUTES = "15";
+  process.env.GOOGLE_CLIENT_ID = "test-google-client-id";
+  process.env.GOOGLE_CLIENT_SECRET = "test-google-client-secret";
+  process.env.GOOGLE_REDIRECT_URI = "http://localhost:3333/api/gmail/auth/callback";
+  process.env.LAB_ALLOWED_EMAILS = "bruno@example.com";
+  process.env.LAB_SESSION_SECRET = "test_lab_session_secret_with_32_chars";
+  process.env.TOKEN_ENCRYPTION_KEY = "test_token_encryption_key_with_32_chars";
+  process.env.OPENAI_API_KEY = "";
+  process.env.OPENAI_MODEL = "gpt-5.5";
 }
 
 async function createTestApp(overrides?: {
   prisma?: PrismaClientLike;
   emailService?: EmailService;
+  gmailService?: GmailAutomationService;
 }): Promise<{
   app: FastifyInstance;
   prisma: PrismaClientLike;
   emailService: EmailService;
+  gmailService?: GmailAutomationService;
 }> {
   setTestEnv();
   vi.resetModules();
@@ -65,13 +76,15 @@ async function createTestApp(overrides?: {
   const app = await buildApp({
     prisma,
     emailService,
+    gmailService: overrides?.gmailService,
     logger: false
   });
 
   return {
     app,
     prisma,
-    emailService
+    emailService,
+    gmailService: overrides?.gmailService
   };
 }
 
@@ -358,5 +371,183 @@ describe("Portfolio API", () => {
     });
 
     expect(response.statusCode).toBe(404);
+  });
+
+  it("reports Gmail as disconnected without a lab session", async () => {
+    const testContext = await createTestApp();
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/api/gmail/status"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      success: true,
+      data: {
+        connected: false,
+        email: null,
+        displayName: null
+      }
+    });
+  });
+
+  it("returns a Gmail OAuth URL from the lab auth endpoint", async () => {
+    const gmailService = {
+      createAuthUrl: vi.fn().mockResolvedValue("https://accounts.google.com/o/oauth2/v2/auth?state=test"),
+      completeOAuthCallback: vi.fn(),
+      clearSession: vi.fn(),
+      getStatus: vi.fn(),
+      listMessages: vi.fn(),
+      getMessage: vi.fn(),
+      generateSuggestions: vi.fn(),
+      sendReply: vi.fn()
+    } as unknown as GmailAutomationService;
+    const testContext = await createTestApp({ gmailService });
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/api/gmail/auth/start"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      success: true,
+      data: {
+        authUrl: "https://accounts.google.com/o/oauth2/v2/auth?state=test"
+      }
+    });
+    expect(gmailService.createAuthUrl).toHaveBeenCalledTimes(1);
+  });
+
+  it("sets a signed lab session cookie after Gmail OAuth callback", async () => {
+    const gmailService = {
+      createAuthUrl: vi.fn(),
+      completeOAuthCallback: vi.fn().mockResolvedValue({
+        sessionToken: "session-token",
+        account: {
+          connected: true,
+          email: "bruno@example.com",
+          displayName: "Bruno"
+        }
+      }),
+      clearSession: vi.fn(),
+      getStatus: vi.fn(),
+      listMessages: vi.fn(),
+      getMessage: vi.fn(),
+      generateSuggestions: vi.fn(),
+      sendReply: vi.fn()
+    } as unknown as GmailAutomationService;
+    const testContext = await createTestApp({ gmailService });
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/api/gmail/auth/callback?code=oauth-code&state=1234567890123456"
+    });
+
+    expect(response.statusCode).toBe(302);
+    expect(response.headers.location).toBe("/lab.html?gmail=connected");
+    expect(response.headers["set-cookie"]).toContain("bj_lab_session=");
+    expect(gmailService.completeOAuthCallback).toHaveBeenCalledWith("oauth-code", "1234567890123456");
+  });
+
+  it("returns Gmail AI suggestions from the lab endpoint", async () => {
+    const gmailService = {
+      createAuthUrl: vi.fn(),
+      completeOAuthCallback: vi.fn(),
+      clearSession: vi.fn(),
+      getStatus: vi.fn(),
+      listMessages: vi.fn(),
+      getMessage: vi.fn(),
+      generateSuggestions: vi.fn().mockResolvedValue({
+        summary: "Pedido de reuniao sobre automacao.",
+        intent: "Quer marcar uma chamada.",
+        priority: "normal",
+        suggestions: [
+          { id: "direct", tone: "Direto", body: "Claro, podemos falar amanha." },
+          { id: "warm", tone: "Proximo", body: "Obrigado pelo contacto. Tenho gosto em falar." },
+          { id: "short", tone: "Curto", body: "Sim, envio disponibilidade." }
+        ]
+      }),
+      sendReply: vi.fn()
+    } as unknown as GmailAutomationService;
+    const testContext = await createTestApp({ gmailService });
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/gmail/messages/msg_123/suggestions",
+      payload: {}
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().data.suggestions).toHaveLength(3);
+    expect(gmailService.generateSuggestions).toHaveBeenCalledWith(null, "msg_123");
+  });
+
+  it("sends a Gmail reply only through the explicit reply endpoint", async () => {
+    const gmailService = {
+      createAuthUrl: vi.fn(),
+      completeOAuthCallback: vi.fn(),
+      clearSession: vi.fn(),
+      getStatus: vi.fn(),
+      listMessages: vi.fn(),
+      getMessage: vi.fn(),
+      generateSuggestions: vi.fn(),
+      sendReply: vi.fn().mockResolvedValue({
+        id: "sent_msg",
+        threadId: "thread_123"
+      })
+    } as unknown as GmailAutomationService;
+    const testContext = await createTestApp({ gmailService });
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/gmail/messages/msg_123/reply",
+      payload: {
+        message: "Obrigado. Confirmo a reuniao.",
+        suggestionId: "direct"
+      }
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      success: true,
+      message: "Resposta enviada pelo Gmail.",
+      data: {
+        id: "sent_msg",
+        threadId: "thread_123"
+      }
+    });
+    expect(gmailService.sendReply).toHaveBeenCalledWith(null, "msg_123", "Obrigado. Confirmo a reuniao.");
+  });
+
+  it("rejects unsafe Gmail message identifiers", async () => {
+    const gmailService = {
+      createAuthUrl: vi.fn(),
+      completeOAuthCallback: vi.fn(),
+      clearSession: vi.fn(),
+      getStatus: vi.fn(),
+      listMessages: vi.fn(),
+      getMessage: vi.fn(),
+      generateSuggestions: vi.fn(),
+      sendReply: vi.fn()
+    } as unknown as GmailAutomationService;
+    const testContext = await createTestApp({ gmailService });
+    app = testContext.app;
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/api/gmail/messages/%3Cscript%3E/suggestions",
+      payload: {}
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().success).toBe(false);
+    expect(gmailService.generateSuggestions).not.toHaveBeenCalled();
   });
 });

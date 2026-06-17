@@ -1,676 +1,423 @@
 (function () {
   'use strict';
 
-  // --- Theme Toggle (cycle: flowix → electric → nebula) ---
-  const themeToggle = document.getElementById('theme-toggle');
-  const toggleText = themeToggle?.querySelector('.theme-toggle__text');
-  const THEME_NEXT = { flowix: 'electric', electric: 'nebula', nebula: 'flowix' };
-  const THEME_NEXT_LABEL = { flowix: 'Verde', electric: 'Roxo', nebula: 'Azul' };
+  const API_ROOT = window.BRUNO_PORTFOLIO_API_URL || '';
+  const state = {
+    connected: false,
+    messages: [],
+    selectedMessage: null,
+    selectedSuggestionId: null,
+    loadingMessageId: null
+  };
 
-  function getCurrentTheme() {
-    const attr = document.documentElement.getAttribute('data-theme');
-    return attr === 'flowix' || attr === 'nebula' ? attr : 'electric';
-  }
+  const els = {
+    themeToggle: document.getElementById('theme-toggle'),
+    gmailStatus: document.getElementById('gmail-status'),
+    connect: document.getElementById('btn-connect-gmail'),
+    disconnect: document.getElementById('btn-disconnect-gmail'),
+    refresh: document.getElementById('btn-refresh-inbox'),
+    inboxEmpty: document.getElementById('inbox-empty'),
+    inboxList: document.getElementById('inbox-list'),
+    messageEmpty: document.getElementById('message-empty'),
+    messageView: document.getElementById('message-view'),
+    messageFrom: document.getElementById('message-from'),
+    messageSubject: document.getElementById('message-subject'),
+    messageDate: document.getElementById('message-date'),
+    messageBody: document.getElementById('message-body'),
+    messagePriority: document.getElementById('message-priority'),
+    summaryState: document.getElementById('summary-state'),
+    summaryText: document.getElementById('summary-text'),
+    intentText: document.getElementById('intent-text'),
+    suggestionsList: document.getElementById('suggestions-list'),
+    replyEditor: document.getElementById('reply-editor'),
+    replyState: document.getElementById('reply-state'),
+    sendReply: document.getElementById('btn-send-reply'),
+    toast: document.getElementById('lab-toast')
+  };
 
-  function updateThemeUI() {
-    if (!themeToggle || !toggleText) return;
-    const currentTheme = getCurrentTheme();
-    themeToggle.setAttribute('aria-pressed', (currentTheme !== 'flowix').toString());
-    toggleText.textContent = THEME_NEXT_LABEL[currentTheme];
-  }
-
-  themeToggle?.addEventListener('click', () => {
-    const newTheme = THEME_NEXT[getCurrentTheme()];
-    if (newTheme === 'electric') {
-      document.documentElement.removeAttribute('data-theme');
-    } else {
-      document.documentElement.setAttribute('data-theme', newTheme);
+  function refreshIcons() {
+    if (window.lucide) {
+      window.lucide.createIcons();
     }
+  }
+
+  function showToast(message, tone) {
+    if (!els.toast) return;
+    els.toast.textContent = message;
+    els.toast.dataset.tone = tone || 'info';
+    els.toast.hidden = false;
+    window.clearTimeout(showToast.timer);
+    showToast.timer = window.setTimeout(() => {
+      els.toast.hidden = true;
+    }, 3600);
+  }
+
+  async function api(path, options) {
+    const response = await fetch(`${API_ROOT}${path}`, {
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options && options.headers ? options.headers : {})
+      },
+      ...options
+    });
+
+    let payload = null;
     try {
-      if (newTheme === 'flowix') {
-        window.localStorage.removeItem('bj-theme');
-      } else {
-        window.localStorage.setItem('bj-theme', newTheme);
-      }
+      payload = await response.json();
     } catch {
-      // Storage error ignored
+      payload = null;
     }
-    updateThemeUI();
-    window.dispatchEvent(new CustomEvent('bj-theme-change', { detail: { theme: newTheme } }));
-    // Re-render dashboard to pick up new colors
-    if (typeof renderDashboard === 'function') {
-      setTimeout(renderDashboard, 100);
+
+    if (!response.ok || payload?.success === false) {
+      throw new Error(payload?.message || 'Pedido falhou.');
     }
-  });
-  updateThemeUI();
 
-
-  // --- Helper ---
-  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-
-
-  // --- Utility: Debounce ---
-  function debounce(fn, ms) {
-    let timer;
-    return function(...args) {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn.apply(this, args), ms);
-    };
+    return payload;
   }
 
-
-  // --- DEMO 1: Node Editor (Drag & Drop Canvas) ---
-  const nodeEditorContainer = document.getElementById('node-editor-container');
-  const svgEdges = document.getElementById('node-edges');
-  const btnRunPipeline = document.getElementById('btn-run-pipeline');
-  const emailInput = document.getElementById('email-input');
-  const finalStatus = document.getElementById('pipeline-final-status');
-
-  let workflowNodes = [
-    { id: 'n1', title: 'Receber Lead', icon: 'user', x: 20, y: 150, type: 'trigger', status: 'A aguardar...' },
-    { id: 'n2', title: 'Enriquecer (Clearbit)', icon: 'search', x: 220, y: 150, type: 'action', status: 'Inativo' },
-    { id: 'n3', title: 'Processar IA (OpenAI)', icon: 'bot', x: 420, y: 150, type: 'action', status: 'Inativo' },
-    { id: 'n4', title: 'Router Condicional', icon: 'git-branch', x: 620, y: 150, type: 'action', status: 'Inativo' },
-    { id: 'n5a', title: 'Alerta Slack (VIP)', icon: 'message-square', x: 820, y: 60, type: 'action', status: 'Inativo' },
-    { id: 'n5b', title: 'Mailchimp (Standard)', icon: 'mail', x: 820, y: 240, type: 'action', status: 'Inativo' },
-    { id: 'n6', title: 'Gravar DB (Prisma)', icon: 'database', x: 1020, y: 150, type: 'action', status: 'Inativo' }
-  ];
-
-  let workflowConnections = [
-    { from: 'n1', to: 'n2', pathEl: null },
-    { from: 'n2', to: 'n3', pathEl: null },
-    { from: 'n3', to: 'n4', pathEl: null },
-    { from: 'n4', to: 'n5a', pathEl: null },
-    { from: 'n4', to: 'n5b', pathEl: null },
-    { from: 'n5a', to: 'n6', pathEl: null },
-    { from: 'n5b', to: 'n6', pathEl: null }
-  ];
-
-  function createBezierPath(x1, y1, x2, y2) {
-    const cp1x = x1 + (x2 - x1) / 2;
-    const cp2x = x2 - (x2 - x1) / 2;
-    return `M ${x1} ${y1} C ${cp1x} ${y1}, ${cp2x} ${y2}, ${x2} ${y2}`;
-  }
-
-  // Fix #3: Pool SVG edge paths instead of clearing innerHTML each time
-  const edgePaths = new Map();
-
-  function renderEdges() {
-    if (!svgEdges) return;
-    const activeKeys = new Set();
-
-    workflowConnections.forEach(conn => {
-      const elFrom = document.getElementById(conn.from);
-      const elTo = document.getElementById(conn.to);
-      if (elFrom && elTo) {
-        const key = conn.from + '-' + conn.to;
-        activeKeys.add(key);
-
-        const portFrom = elFrom.querySelector('.wf-port--out');
-        const portTo = elTo.querySelector('.wf-port--in');
-        
-        // Use getBoundingClientRect to find exact positions inside container
-        const containerRect = nodeEditorContainer.getBoundingClientRect();
-        const fromRect = portFrom.getBoundingClientRect();
-        const toRect = portTo.getBoundingClientRect();
-        
-        const x1 = fromRect.left - containerRect.left + (fromRect.width / 2);
-        const y1 = fromRect.top - containerRect.top + (fromRect.height / 2);
-        const x2 = toRect.left - containerRect.left + (toRect.width / 2);
-        const y2 = toRect.top - containerRect.top + (toRect.height / 2);
-
-        let path = edgePaths.get(key);
-        if (!path) {
-          path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-          path.classList.add('node-edge-path');
-          svgEdges.appendChild(path);
-          edgePaths.set(key, path);
-        }
-
-        path.setAttribute('d', createBezierPath(x1, y1, x2, y2));
-        conn.pathEl = path;
-      }
-    });
-
-    // Remove paths that are no longer needed
-    edgePaths.forEach((path, key) => {
-      if (!activeKeys.has(key)) {
-        path.remove();
-        edgePaths.delete(key);
-      }
-    });
-  }
-
-  function initNodeEditor() {
-    if (!nodeEditorContainer) return;
-    // Render Nodes
-    workflowNodes.forEach(n => {
-      const nodeEl = document.createElement('div');
-      nodeEl.className = 'wf-node';
-      nodeEl.id = n.id;
-      nodeEl.style.left = `${n.x}px`;
-      nodeEl.style.top = `${n.y}px`;
-      
-      let portsHtml = '';
-      if (n.type !== 'trigger') portsHtml += '<div class="wf-port wf-port--in"></div>';
-      portsHtml += '<div class="wf-port wf-port--out"></div>';
-      
-      nodeEl.innerHTML = `
-        ${portsHtml}
-        <div class="wf-node__header"><i data-lucide="${n.icon}"></i> ${n.title}</div>
-        <div class="wf-node__status" id="status-${n.id}">${n.status}</div>
-      `;
-      nodeEditorContainer.appendChild(nodeEl);
-      
-      // Pointer Drag Logic
-      let isDragging = false;
-      let startX, startY;
-      let dragRAF = null;
-      
-      nodeEl.addEventListener('pointerdown', (e) => {
-        isDragging = true;
-        nodeEl.setPointerCapture(e.pointerId);
-        const rect = nodeEl.getBoundingClientRect();
-        const containerRect = nodeEditorContainer.getBoundingClientRect();
-        startX = e.clientX - (rect.left - containerRect.left);
-        startY = e.clientY - (rect.top - containerRect.top);
-      });
-      
-      // Fix #6: Throttle node drag with RAF
-      nodeEl.addEventListener('pointermove', (e) => {
-        if (!isDragging) return;
-        const ex = e.clientX;
-        const ey = e.clientY;
-        if (dragRAF) cancelAnimationFrame(dragRAF);
-        dragRAF = requestAnimationFrame(() => {
-          let nx = ex - startX;
-          let ny = ey - startY;
-          nodeEl.style.left = `${nx}px`;
-          nodeEl.style.top = `${ny}px`;
-          renderEdges();
-          dragRAF = null;
-        });
-      });
-      
-      nodeEl.addEventListener('pointerup', () => {
-        isDragging = false;
-      });
-    });
-    
-    // Fix #5: Scope lucide.createIcons to node editor container
-    if (window.lucide) window.lucide.createIcons({ nodes: [nodeEditorContainer] });
-    // Allow rendering layout before drawing edges
-    setTimeout(renderEdges, 50);
-  }
-
-  // Handle Resize
-  // Fix #7: Debounce resize listener for edges
-  const debouncedRenderEdges = debounce(renderEdges, 150);
-  window.addEventListener('resize', debouncedRenderEdges);
-
-  initNodeEditor();
-
-  async function runWorkflowEngine() {
-    if (!btnRunPipeline || btnRunPipeline.disabled) return;
-    btnRunPipeline.disabled = true;
-    btnRunPipeline.innerHTML = 'A executar... <i data-lucide="loader"></i>';
-    // Fix #5: Scope lucide.createIcons to the button
-    if (window.lucide) window.lucide.createIcons({ nodes: [btnRunPipeline] });
-
-    // Reset Visuals
-    document.querySelectorAll('.wf-node').forEach(el => el.classList.remove('is-running', 'is-done'));
-    if (svgEdges) svgEdges.querySelectorAll('.node-edge-path').forEach(p => p.classList.remove('is-active'));
-    workflowNodes.forEach(n => document.getElementById(`status-${n.id}`).textContent = 'A aguardar...');
-    if (finalStatus) finalStatus.textContent = '';
-
-    const emailText = emailInput?.value || 'elon@spacex.com';
-
-    const getNode = id => document.getElementById(id);
-    const setStatus = (id, txt) => document.getElementById(`status-${id}`).textContent = txt;
-    const activateConn = (from, to) => {
-      const conn = workflowConnections.find(c => c.from === from && c.to === to);
-      if (conn && conn.pathEl) conn.pathEl.classList.add('is-active');
-    };
-    const deactivateConn = (from, to) => {
-      const conn = workflowConnections.find(c => c.from === from && c.to === to);
-      if (conn && conn.pathEl) conn.pathEl.classList.remove('is-active');
-    };
-    const processNode = async (id, startMsg, endMsg, delay = 800) => {
-      let node = getNode(id);
-      node.classList.add('is-running');
-      setStatus(id, startMsg);
-      await sleep(delay);
-      setStatus(id, endMsg);
-      node.classList.replace('is-running', 'is-done');
-    };
-
-    // --- NODE 1: Receber ---
-    await processNode('n1', 'Recebendo Lead...', 'Lead ingerido');
-    activateConn('n1', 'n2');
-    await sleep(400);
-    deactivateConn('n1', 'n2');
-
-    // Make Real Backend Call (with Static Host Fallback)
-    let responseData = null;
+  function formatDate(value) {
+    if (!value) return '';
     try {
-      setStatus('n2', 'Consultando API...');
-      getNode('n2').classList.add('is-running');
-      
-      const API_URL = window.BRUNO_PORTFOLIO_API_URL || '';
-      const apiRes = await fetch(`${API_URL}/api/workflows/lead-qualification`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailText, name: 'Lead Demo', role: 'CTO' })
-      });
-      const data = await apiRes.json();
-      responseData = data?.data;
+      return new Intl.DateTimeFormat('pt-PT', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      }).format(new Date(value));
     } catch {
-      console.warn('Backend indisponível. Usando Simulação Local para GitHub Pages...');
-      const isVip = !['gmail.com', 'yahoo.com', 'hotmail.com'].includes(emailText.split('@')[1] || '');
-      responseData = {
-        enrichment: { industry: isVip ? 'Tecnologia' : 'Público Geral' },
-        aiAnalysis: { leadScore: isVip ? 95 : 45, isVip: isVip }
-      };
-      await sleep(1500); // simulate API delay
+      return value;
     }
-    
-    // --- NODE 2: Enriquecer ---
-    if (responseData) {
-      setStatus('n2', `Ind: ${responseData.enrichment.industry}`);
-      getNode('n2').classList.replace('is-running', 'is-done');
-    } else {
-      setStatus('n2', 'Falha na API!');
-      getNode('n2').classList.replace('is-running', 'is-done');
-      btnRunPipeline.disabled = false;
-      btnRunPipeline.innerHTML = 'Executar Workflow <i data-lucide="play"></i>';
-      // Fix #5: Scope lucide.createIcons to the button
-      if (window.lucide) window.lucide.createIcons({ nodes: [btnRunPipeline] });
+  }
+
+  function setConnectedUi(status) {
+    state.connected = Boolean(status.connected);
+    if (els.gmailStatus) {
+      els.gmailStatus.textContent = state.connected
+        ? `Ligado: ${status.email || 'Gmail'}`
+        : 'Gmail desligado';
+      els.gmailStatus.dataset.state = state.connected ? 'connected' : 'disconnected';
+    }
+
+    if (els.connect) els.connect.hidden = state.connected;
+    if (els.disconnect) els.disconnect.hidden = !state.connected;
+    if (els.refresh) els.refresh.disabled = !state.connected;
+    if (els.inboxEmpty && !state.connected) els.inboxEmpty.textContent = 'Liga o Gmail para carregar a inbox.';
+  }
+
+  function resetReader(message) {
+    state.selectedMessage = null;
+    state.selectedSuggestionId = null;
+    if (els.messageEmpty) {
+      els.messageEmpty.hidden = false;
+      const label = els.messageEmpty.querySelector('span');
+      if (label) label.textContent = message || 'Seleciona um email.';
+    }
+    if (els.messageView) els.messageView.hidden = true;
+    if (els.sendReply) els.sendReply.disabled = true;
+    if (els.replyEditor) els.replyEditor.value = '';
+  }
+
+  function renderInbox() {
+    if (!els.inboxList || !els.inboxEmpty) return;
+    els.inboxList.textContent = '';
+
+    if (!state.connected) {
+      els.inboxEmpty.hidden = false;
       return;
     }
 
-    activateConn('n2', 'n3');
-    await sleep(400);
-    deactivateConn('n2', 'n3');
+    if (state.messages.length === 0) {
+      els.inboxEmpty.textContent = 'Sem emails recentes na Inbox.';
+      els.inboxEmpty.hidden = false;
+      return;
+    }
 
-    // --- NODE 3: Processar IA ---
-    await processNode('n3', 'Gerando Score...', `Score: ${responseData.aiAnalysis.leadScore}/100`, 1200);
+    els.inboxEmpty.hidden = true;
 
-    activateConn('n3', 'n4');
-    await sleep(400);
-    deactivateConn('n3', 'n4');
+    state.messages.forEach((message) => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'mail-item';
+      item.dataset.messageId = message.id;
+      item.setAttribute('role', 'listitem');
+      if (state.selectedMessage?.id === message.id) {
+        item.classList.add('is-active');
+      }
 
-    // --- NODE 4: Router ---
-    let n4 = getNode('n4');
-    n4.classList.add('is-running');
-    setStatus('n4', 'A avaliar score...');
-    await sleep(800);
-    const isVip = responseData.aiAnalysis.isVip;
-    setStatus('n4', isVip ? 'Caminho VIP' : 'Caminho Standard');
-    n4.classList.replace('is-running', 'is-done');
+      const top = document.createElement('span');
+      top.className = 'mail-item__top';
 
-    const nextNode = isVip ? 'n5a' : 'n5b';
-    activateConn('n4', nextNode);
-    await sleep(600);
-    deactivateConn('n4', nextNode);
+      const from = document.createElement('strong');
+      from.textContent = message.from || 'Remetente desconhecido';
+      top.appendChild(from);
 
-    // --- NODE 5: Slack ou Mailchimp ---
-    await processNode(nextNode, isVip ? 'Notificando Vendas...' : 'Enviando Nurture...', isVip ? 'Alerta Enviado!' : 'Adicionado a Lista', 1000);
+      if (message.unread) {
+        const unread = document.createElement('span');
+        unread.className = 'mail-unread';
+        unread.textContent = 'novo';
+        top.appendChild(unread);
+      }
 
-    activateConn(nextNode, 'n6');
-    await sleep(400);
-    deactivateConn(nextNode, 'n6');
+      const subject = document.createElement('span');
+      subject.className = 'mail-item__subject';
+      subject.textContent = message.subject || '(sem assunto)';
 
-    // --- NODE 6: DB ---
-    await processNode('n6', 'Gravando Dados...', 'Row Inserted', 600);
+      const snippet = document.createElement('span');
+      snippet.className = 'mail-item__snippet';
+      snippet.textContent = message.snippet || '';
 
-    if (finalStatus) finalStatus.textContent = 'Workflow Inteligente concluído com sucesso ✓';
-    btnRunPipeline.disabled = false;
-    btnRunPipeline.innerHTML = 'Executar Workflow <i data-lucide="play"></i>';
-    // Fix #5: Scope lucide.createIcons to the button
-    if (window.lucide) window.lucide.createIcons({ nodes: [btnRunPipeline] });
+      const date = document.createElement('span');
+      date.className = 'mail-item__date mono';
+      date.textContent = formatDate(message.date);
+
+      item.appendChild(top);
+      item.appendChild(subject);
+      item.appendChild(snippet);
+      item.appendChild(date);
+      item.addEventListener('click', () => selectMessage(message.id));
+      els.inboxList.appendChild(item);
+    });
   }
 
-  btnRunPipeline?.addEventListener('click', runWorkflowEngine);
+  function renderMessage(message) {
+    state.selectedMessage = message;
+    state.selectedSuggestionId = null;
 
+    if (els.messageEmpty) els.messageEmpty.hidden = true;
+    if (els.messageView) els.messageView.hidden = false;
+    if (els.messageFrom) els.messageFrom.textContent = message.from || 'Remetente desconhecido';
+    if (els.messageSubject) els.messageSubject.textContent = message.subject || '(sem assunto)';
+    if (els.messageDate) els.messageDate.textContent = formatDate(message.date);
+    if (els.messageBody) els.messageBody.textContent = message.bodyText || message.snippet || 'Sem corpo de email.';
+    if (els.summaryState) els.summaryState.textContent = 'A gerar resumo...';
+    if (els.summaryText) els.summaryText.textContent = '-';
+    if (els.intentText) els.intentText.textContent = '-';
+    if (els.suggestionsList) els.suggestionsList.textContent = '';
+    if (els.messagePriority) {
+      els.messagePriority.hidden = true;
+      els.messagePriority.textContent = '';
+    }
+    if (els.replyEditor) els.replyEditor.value = '';
+    if (els.replyState) els.replyState.textContent = '';
+    if (els.sendReply) els.sendReply.disabled = true;
 
-  // --- DEMO 2: Dashboard Builder ---
-  const canvas = document.getElementById('dashboard-canvas');
-  const ctx = canvas?.getContext('2d');
-  const btnGenerateChart = document.getElementById('btn-generate-chart');
-  const csvInput = document.getElementById('csv-input');
-  const chartTypeSelect = document.getElementById('chart-type');
-
-  function getThemeColor() {
-    const theme = document.documentElement.getAttribute('data-theme');
-    if (theme === 'flowix') return '#0084ff';
-    if (theme === 'nebula') return '#a855f7';
-    return '#39ff14';
+    renderInbox();
   }
 
-  function getSecondaryColor() {
-    const theme = document.documentElement.getAttribute('data-theme');
-    if (theme === 'flowix') return '#39ff14';
-    if (theme === 'nebula') return '#22d3ee';
-    return '#0084ff';
-  }
+  function renderSuggestions(payload) {
+    if (els.summaryText) els.summaryText.textContent = payload.summary;
+    if (els.intentText) els.intentText.textContent = payload.intent;
+    if (els.summaryState) els.summaryState.textContent = 'Pronto';
+    if (els.messagePriority) {
+      els.messagePriority.hidden = false;
+      els.messagePriority.textContent = payload.priority;
+      els.messagePriority.dataset.priority = payload.priority;
+    }
+    if (!els.suggestionsList) return;
 
-  function renderDashboard() {
-    if (!canvas || !ctx || !csvInput) return;
-    
-    const parent = canvas.parentElement;
-    const dpr = window.devicePixelRatio || 1;
-    const displayWidth = parent.clientWidth - 32;
-    const displayHeight = 400;
-    
-    canvas.width = displayWidth * dpr; 
-    canvas.height = displayHeight * dpr;
-    canvas.style.width = `${displayWidth}px`;
-    canvas.style.height = `${displayHeight}px`;
+    els.suggestionsList.textContent = '';
+    payload.suggestions.forEach((suggestion) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'suggestion-card';
+      button.dataset.suggestionId = suggestion.id;
 
-    // Fix #1: Reset transform matrix instead of accumulating scales
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const tone = document.createElement('span');
+      tone.className = 'suggestion-card__tone mono';
+      tone.textContent = suggestion.tone;
 
-    const width = displayWidth;
-    const height = displayHeight;
+      const body = document.createElement('span');
+      body.className = 'suggestion-card__body';
+      body.textContent = suggestion.body;
 
-    ctx.clearRect(0, 0, width, height);
-
-    const lines = csvInput.value.trim().split('\n');
-    if (lines.length < 2) return;
-
-    const labels = [];
-    const dataset1 = [];
-    const dataset2 = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const parts = lines[i].split(',');
-      if (parts.length >= 2) {
-        labels.push(parts[0]);
-        dataset1.push(parseFloat(parts[1]) || 0);
-        if (parts.length >= 3) {
-          dataset2.push(parseFloat(parts[2]) || 0);
-        } else {
-          dataset2.push(0);
+      button.appendChild(tone);
+      button.appendChild(body);
+      button.addEventListener('click', () => {
+        state.selectedSuggestionId = suggestion.id;
+        if (els.replyEditor) {
+          els.replyEditor.value = suggestion.body;
+          els.replyEditor.focus();
         }
-      }
-    }
-
-    const type = chartTypeSelect.value;
-    // Fix #10: Replace Math.max spread with reduce to avoid stack overflow on large datasets
-    const maxVal = Math.max(
-      dataset1.reduce((a, b) => Math.max(a, b), 1),
-      dataset2.reduce((a, b) => Math.max(a, b), 1)
-    );
-    
-    const primaryColor = getThemeColor();
-    const secondaryColor = getSecondaryColor();
-    const textColor = '#f1f3ec';
-
-    ctx.font = '12px "JetBrains Mono"';
-    ctx.fillStyle = textColor;
-    ctx.textAlign = 'center';
-
-    if (type === 'bar') {
-      const padX = 50;
-      const padY = 40;
-      const chartW = width - padX * 2;
-      const chartH = height - padY * 2;
-      
-      const numBars = labels.length;
-      const groupW = chartW / numBars;
-      const barW = groupW * 0.35;
-
-      // Draw axes
-      ctx.beginPath();
-      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-      ctx.moveTo(padX, padY);
-      ctx.lineTo(padX, height - padY);
-      ctx.lineTo(width - padX, height - padY);
-      ctx.stroke();
-
-      for (let i = 0; i < numBars; i++) {
-        const x = padX + i * groupW + groupW/2;
-        
-        // Data 1
-        const h1 = (dataset1[i] / maxVal) * chartH;
-        ctx.fillStyle = primaryColor;
-        ctx.shadowColor = primaryColor;
-        ctx.shadowBlur = 8;
-        ctx.fillRect(x - barW - 2, height - padY - h1, barW, h1);
-
-        // Data 2
-        const h2 = (dataset2[i] / maxVal) * chartH;
-        ctx.fillStyle = secondaryColor;
-        ctx.shadowColor = secondaryColor;
-        ctx.shadowBlur = 8;
-        ctx.fillRect(x + 2, height - padY - h2, barW, h2);
-
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = textColor;
-        ctx.fillText(labels[i], x, height - padY + 20);
-      }
-    } else if (type === 'line') {
-      const padX = 50;
-      const padY = 40;
-      const chartW = width - padX * 2;
-      const chartH = height - padY * 2;
-      const stepX = chartW / Math.max(1, labels.length - 1);
-
-      ctx.beginPath();
-      ctx.strokeStyle = primaryColor;
-      ctx.lineWidth = 3;
-      ctx.shadowColor = primaryColor;
-      ctx.shadowBlur = 12;
-      
-      for (let i = 0; i < labels.length; i++) {
-        const x = padX + i * stepX;
-        const y = height - padY - (dataset1[i] / maxVal) * chartH;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = textColor;
-      for (let i = 0; i < labels.length; i++) {
-        const x = padX + i * stepX;
-        const y = height - padY - (dataset1[i] / maxVal) * chartH;
-        
-        ctx.beginPath();
-        ctx.fillStyle = primaryColor;
-        ctx.arc(x, y, 6, 0, Math.PI*2);
-        ctx.fill();
-
-        ctx.fillStyle = textColor;
-        ctx.fillText(labels[i], x, height - padY + 20);
-        ctx.fillText(dataset1[i].toString(), x, y - 15);
-      }
-    } else if (type === 'donut') {
-      const cx = width / 2;
-      const cy = height / 2;
-      const radius = Math.min(cx, cy) * 0.7;
-      const innerRadius = radius * 0.6;
-      
-      const total = dataset1.reduce((a, b) => a + b, 0);
-      if (total === 0) return;
-
-      let startAngle = -Math.PI / 2;
-
-      for (let i = 0; i < dataset1.length; i++) {
-        const sliceAngle = (dataset1[i] / total) * 2 * Math.PI;
-        
-        const alpha = 1 - (i * 0.15);
-        ctx.fillStyle = `rgba(${primaryColor === '#0084ff' ? '0,132,255' : '57,255,20'}, ${alpha})`;
-        
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, radius, startAngle, startAngle + sliceAngle);
-        ctx.fill();
-
-        const labelAngle = startAngle + sliceAngle / 2;
-        const labelX = cx + Math.cos(labelAngle) * (radius * 1.25);
-        const labelY = cy + Math.sin(labelAngle) * (radius * 1.25);
-        ctx.fillStyle = textColor;
-        ctx.fillText(labels[i], labelX, labelY);
-
-        startAngle += sliceAngle;
-      }
-
-      ctx.beginPath();
-      // Using a dark color that matches the container background
-      ctx.fillStyle = 'rgba(7, 10, 7, 1)'; 
-      ctx.arc(cx, cy, innerRadius, 0, Math.PI * 2);
-      ctx.fill();
-      
-      ctx.fillStyle = textColor;
-      ctx.font = '14px "Cabinet Grotesk"';
-      ctx.fillText('Total', cx, cy - 5);
-      ctx.font = 'bold 18px "JetBrains Mono"';
-      ctx.fillText(total.toLocaleString(), cx, cy + 18);
-    }
-  }
-
-  btnGenerateChart?.addEventListener('click', renderDashboard);
-  // Fix #7: Debounce resize listener for dashboard
-  const debouncedRenderDashboard = debounce(renderDashboard, 150);
-  window.addEventListener('resize', debouncedRenderDashboard);
-  setTimeout(renderDashboard, 200); 
-
-
-  // --- DEMO 3: Chatbot ---
-  const rulesContainer = document.getElementById('rules-container');
-  const btnAddRule = document.getElementById('btn-add-rule');
-  const chatMessages = document.getElementById('chat-messages');
-  const chatInput = document.getElementById('chat-input');
-  const btnSendChat = document.getElementById('btn-send-chat');
-
-  let defaultRules = [
-    { keyword: 'preço', response: 'Os nossos preços são ajustados à dimensão do desafio. Podemos agendar uma chamada para analisar o teu caso.' },
-    { keyword: 'automação', response: 'A automação é o nosso forte! Utilizamos n8n, Power Automate e scripts customizados para ligar qualquer sistema.' },
-    { keyword: 'olá', response: 'Olá! Como posso ajudar-te hoje com os teus processos?' }
-  ];
-
-  function renderRules() {
-    if (!rulesContainer) return;
-    rulesContainer.innerHTML = '';
-    defaultRules.forEach((rule, index) => {
-      const card = document.createElement('div');
-      card.className = 'rule-card';
-      card.innerHTML = `
-        <button class="btn-remove" data-index="${index}" title="Remover regra"><i data-lucide="x"></i></button>
-        <div class="rule-field">
-          <label>Se mensagem contém:</label>
-          <input type="text" class="rule-keyword" value="${rule.keyword}" data-index="${index}">
-        </div>
-        <div class="rule-field">
-          <label>Responder:</label>
-          <input type="text" class="rule-response" value="${rule.response}" data-index="${index}">
-        </div>
-      `;
-      rulesContainer.appendChild(card);
-    });
-    
-    rulesContainer.querySelectorAll('.btn-remove').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const idx = parseInt(e.currentTarget.getAttribute('data-index'));
-        defaultRules.splice(idx, 1);
-        renderRules();
+        if (els.sendReply) els.sendReply.disabled = false;
+        document.querySelectorAll('.suggestion-card').forEach((card) => {
+          card.classList.toggle('is-selected', card === button);
+        });
       });
+      els.suggestionsList.appendChild(button);
     });
-    
-    rulesContainer.querySelectorAll('.rule-keyword').forEach(input => {
-      input.addEventListener('change', (e) => {
-        const idx = parseInt(e.target.getAttribute('data-index'));
-        defaultRules[idx].keyword = e.target.value;
-      });
-    });
-    
-    rulesContainer.querySelectorAll('.rule-response').forEach(input => {
-      input.addEventListener('change', (e) => {
-        const idx = parseInt(e.target.getAttribute('data-index'));
-        defaultRules[idx].response = e.target.value;
-      });
-    });
-
-    // Fix #5: Scope lucide.createIcons to rules container
-    if (window.lucide) window.lucide.createIcons({ nodes: [rulesContainer] });
   }
 
-  btnAddRule?.addEventListener('click', () => {
-    defaultRules.push({ keyword: 'nova-palavra', response: 'Nova resposta...' });
-    renderRules();
-    rulesContainer.scrollTop = rulesContainer.scrollHeight;
-  });
-
-  renderRules();
-
-  // Fix #2: Use textContent instead of innerHTML to prevent XSS
-  function appendMessage(text, sender) {
-    const msg = document.createElement('div');
-    msg.className = 'chat-message ' + sender;
-    const bubble = document.createElement('div');
-    bubble.className = 'chat-bubble';
-    bubble.textContent = text;
-    msg.appendChild(bubble);
-    chatMessages.appendChild(msg);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-
-  function showTyping() {
-    const msg = document.createElement('div');
-    msg.className = `chat-message bot typing`;
-    msg.innerHTML = `
-      <div class="chat-bubble typing-indicator">
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-        <div class="typing-dot"></div>
-      </div>
-    `;
-    chatMessages.appendChild(msg);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    return msg;
-  }
-
-  async function handleChatSend() {
-    if (!chatInput) return;
-    const text = chatInput.value.trim();
-    if (!text) return;
-
-    chatInput.value = '';
-    appendMessage(text, 'user');
-
-    const typingEl = showTyping();
-    await sleep(800 + Math.random() * 500); 
-
-    typingEl.remove();
-
-    const lowerText = text.toLowerCase();
-    let foundResponse = null;
-
-    for (const rule of defaultRules) {
-      if (rule.keyword && lowerText.includes(rule.keyword.toLowerCase())) {
-        foundResponse = rule.response;
-        break;
+  async function loadStatus() {
+    try {
+      const payload = await api('/api/gmail/status');
+      setConnectedUi(payload.data);
+      if (payload.data.connected) {
+        await loadInbox();
+      } else {
+        resetReader('Liga o Gmail para comecar.');
       }
-    }
-
-    if (foundResponse) {
-      appendMessage(foundResponse, 'bot');
-    } else {
-      appendMessage('Não encontrei uma regra para essa mensagem. Experimenta adicionar uma nova regra no painel ao lado!', 'bot');
+    } catch (error) {
+      setConnectedUi({ connected: false });
+      resetReader('Nao foi possivel verificar a ligacao.');
+      showToast(error.message, 'error');
     }
   }
 
-  btnSendChat?.addEventListener('click', handleChatSend);
-  // Fix #9: Replace deprecated keypress with keydown
-  chatInput?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') handleChatSend();
-  });
+  async function startGmailAuth() {
+    if (!els.connect) return;
+    els.connect.disabled = true;
+    try {
+      const payload = await api('/api/gmail/auth/start');
+      window.location.href = payload.data.authUrl;
+    } catch (error) {
+      showToast(error.message, 'error');
+      els.connect.disabled = false;
+    }
+  }
 
-  // Expose renderDashboard to global scope so theme toggle can call it
-  window.renderDashboard = renderDashboard;
+  async function disconnectGmail() {
+    if (!els.disconnect) return;
+    els.disconnect.disabled = true;
+    try {
+      await api('/api/gmail/auth/logout', { method: 'POST', body: JSON.stringify({}) });
+      state.messages = [];
+      setConnectedUi({ connected: false });
+      renderInbox();
+      resetReader('Gmail desligado.');
+      showToast('Gmail desligado.', 'info');
+    } catch (error) {
+      showToast(error.message, 'error');
+    } finally {
+      els.disconnect.disabled = false;
+    }
+  }
 
-  // Custom Cursor
+  async function loadInbox() {
+    if (!state.connected || !els.refresh) return;
+    els.refresh.disabled = true;
+    if (els.inboxEmpty) {
+      els.inboxEmpty.hidden = false;
+      els.inboxEmpty.textContent = 'A carregar inbox...';
+    }
+
+    try {
+      const payload = await api('/api/gmail/messages?limit=10');
+      state.messages = payload.data.messages || [];
+      renderInbox();
+    } catch (error) {
+      showToast(error.message, 'error');
+      if (els.inboxEmpty) {
+        els.inboxEmpty.textContent = 'Nao foi possivel carregar a inbox.';
+        els.inboxEmpty.hidden = false;
+      }
+    } finally {
+      els.refresh.disabled = false;
+    }
+  }
+
+  async function selectMessage(messageId) {
+    state.loadingMessageId = messageId;
+    resetReader('A carregar email...');
+
+    try {
+      const payload = await api(`/api/gmail/messages/${encodeURIComponent(messageId)}`);
+      if (state.loadingMessageId !== messageId) return;
+      renderMessage(payload.data.message);
+      await loadSuggestions(messageId);
+    } catch (error) {
+      showToast(error.message, 'error');
+      resetReader('Nao foi possivel abrir este email.');
+    }
+  }
+
+  async function loadSuggestions(messageId) {
+    try {
+      const payload = await api(`/api/gmail/messages/${encodeURIComponent(messageId)}/suggestions`, {
+        method: 'POST',
+        body: JSON.stringify({})
+      });
+      renderSuggestions(payload.data);
+    } catch (error) {
+      if (els.summaryState) els.summaryState.textContent = 'Erro';
+      if (els.summaryText) els.summaryText.textContent = error.message;
+      if (els.intentText) els.intentText.textContent = '-';
+      showToast(error.message, 'error');
+    }
+  }
+
+  async function sendReply() {
+    if (!state.selectedMessage || !els.replyEditor || !els.sendReply) return;
+    const message = els.replyEditor.value.trim();
+    if (!message) {
+      showToast('Escreve uma resposta antes de enviar.', 'error');
+      return;
+    }
+
+    const confirmed = window.confirm('Enviar esta resposta pelo Gmail?');
+    if (!confirmed) return;
+
+    els.sendReply.disabled = true;
+    if (els.replyState) els.replyState.textContent = 'A enviar...';
+
+    try {
+      await api(`/api/gmail/messages/${encodeURIComponent(state.selectedMessage.id)}/reply`, {
+        method: 'POST',
+        body: JSON.stringify({
+          message,
+          suggestionId: state.selectedSuggestionId || undefined
+        })
+      });
+      if (els.replyState) els.replyState.textContent = 'Enviado';
+      showToast('Resposta enviada.', 'success');
+      await loadInbox();
+    } catch (error) {
+      if (els.replyState) els.replyState.textContent = 'Erro';
+      els.sendReply.disabled = false;
+      showToast(error.message, 'error');
+    }
+  }
+
+  function initThemeToggle() {
+    const toggleText = els.themeToggle?.querySelector('.theme-toggle__text');
+    const themeNext = { flowix: 'electric', electric: 'nebula', nebula: 'flowix' };
+    const themeNextLabel = { flowix: 'Verde', electric: 'Roxo', nebula: 'Azul' };
+
+    function getCurrentTheme() {
+      const attr = document.documentElement.getAttribute('data-theme');
+      return attr === 'flowix' || attr === 'nebula' ? attr : 'electric';
+    }
+
+    function updateThemeUI() {
+      if (!els.themeToggle || !toggleText) return;
+      const currentTheme = getCurrentTheme();
+      els.themeToggle.setAttribute('aria-pressed', (currentTheme !== 'flowix').toString());
+      toggleText.textContent = themeNextLabel[currentTheme];
+    }
+
+    els.themeToggle?.addEventListener('click', () => {
+      const newTheme = themeNext[getCurrentTheme()];
+      if (newTheme === 'electric') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', newTheme);
+      }
+
+      try {
+        if (newTheme === 'flowix') {
+          window.localStorage.removeItem('bj-theme');
+        } else {
+          window.localStorage.setItem('bj-theme', newTheme);
+        }
+      } catch {
+        // Storage can be unavailable in private contexts.
+      }
+
+      updateThemeUI();
+      window.dispatchEvent(new CustomEvent('bj-theme-change', { detail: { theme: newTheme } }));
+    });
+
+    updateThemeUI();
+  }
+
   function initCustomCursor() {
     const dot = document.querySelector('.cursor-dot');
     const ring = document.querySelector('.cursor-ring');
@@ -688,49 +435,51 @@
     let dotY = mouseY;
     let ringX = mouseX;
     let ringY = mouseY;
-    let isHoveringInteractive = false;
     let rafId = null;
+    let hovering = false;
 
-    // Fix #4: Use mouseenter/mouseleave instead of getComputedStyle on every mousemove
-    document.querySelectorAll('a, button, [role="button"], input, select, textarea, .lab-card, .node').forEach(el => {
-      el.addEventListener('mouseenter', () => { isHoveringInteractive = true; });
-      el.addEventListener('mouseleave', () => { isHoveringInteractive = false; });
+    document.querySelectorAll('a, button, textarea, input, select').forEach((element) => {
+      element.addEventListener('mouseenter', () => {
+        hovering = true;
+      });
+      element.addEventListener('mouseleave', () => {
+        hovering = false;
+      });
     });
 
-    const onMouseMove = (event) => {
+    window.addEventListener('mousemove', (event) => {
       mouseX = event.clientX;
       mouseY = event.clientY;
-    };
+    }, { passive: true });
 
-    const updateCursor = () => {
+    function updateCursor() {
       dotX += (mouseX - dotX) * 0.3;
       dotY += (mouseY - dotY) * 0.3;
       ringX += (mouseX - ringX) * 0.15;
       ringY += (mouseY - ringY) * 0.15;
-
       dot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0)`;
       ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
+      dot.classList.toggle('is-hover', hovering);
+      ring.classList.toggle('is-hover', hovering);
+      rafId = window.requestAnimationFrame(updateCursor);
+    }
 
-      if (isHoveringInteractive) {
-        dot.classList.add("is-hover");
-        ring.classList.add("is-hover");
-      } else {
-        dot.classList.remove("is-hover");
-        ring.classList.remove("is-hover");
-      }
-
-      rafId = requestAnimationFrame(updateCursor);
-    };
-
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
-    rafId = requestAnimationFrame(updateCursor);
-
-    // Fix #8: Cleanup RAF on pagehide
+    rafId = window.requestAnimationFrame(updateCursor);
     window.addEventListener('pagehide', () => {
-      cancelAnimationFrame(rafId);
+      if (rafId) window.cancelAnimationFrame(rafId);
     });
   }
 
-  initCustomCursor();
+  els.connect?.addEventListener('click', startGmailAuth);
+  els.disconnect?.addEventListener('click', disconnectGmail);
+  els.refresh?.addEventListener('click', loadInbox);
+  els.sendReply?.addEventListener('click', sendReply);
+  els.replyEditor?.addEventListener('input', () => {
+    if (els.sendReply) els.sendReply.disabled = !els.replyEditor.value.trim();
+  });
 
+  initThemeToggle();
+  initCustomCursor();
+  refreshIcons();
+  loadStatus();
 })();

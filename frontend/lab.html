@@ -4,35 +4,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Laboratório de Automação de Bruno Jesus — Demos interativas de workflows, IA e dashboards.">
-  <meta property="og:title" content="Laboratório de Automação — Bruno Jesus">
-  <meta property="og:description" content="Demos interativas de automação, IA e dashboards.">
+  <meta name="description" content="Laboratorio privado de automacao Gmail com IA de Bruno Jesus.">
+  <meta property="og:title" content="Laboratorio Gmail IA - Bruno Jesus">
+  <meta property="og:description" content="Inbox, resumo e respostas assistidas por IA.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://brunoxjx.github.io/BrunoJesus_site/lab.html">
   <link rel="canonical" href="https://brunoxjx.github.io/BrunoJesus_site/lab.html">
-  <title>Laboratório de Automação — Bruno Jesus</title>
-  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg?v=20260510-dual">
+  <title>Laboratorio Gmail IA - Bruno Jesus</title>
+  <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg?v=20260617-gmail-lab">
   <meta name="theme-color" content="#030712">
   <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@700,800&amp;f[]=satoshi@400,500&amp;display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet">
   <script defer src="https://unpkg.com/lucide@1.11.0/dist/umd/lucide.js" integrity="sha384-ZMkBApRp8XzSI26P7dtIOJcn6bweCl+SQ3D890zk3ilWfsJtBCtWQ4Rp4FhzcysQ" crossorigin="anonymous"></script>
-
-  <script src="assets/js/boot-preload.js?v=20260611-nebula"></script>
-  <link rel="stylesheet" href="assets/css/styles.css?v=20260611-nebula">
-  <link rel="stylesheet" href="assets/css/lab.css?v=20260611-nebula">
-  <link rel="stylesheet" href="assets/css/nebula.css?v=20260611-nebula">
+  <script src="assets/js/boot-preload.js?v=20260617-gmail-lab"></script>
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260617-gmail-lab">
+  <link rel="stylesheet" href="assets/css/lab.css?v=20260617-gmail-lab">
+  <link rel="stylesheet" href="assets/css/nebula.css?v=20260617-gmail-lab">
 </head>
 
 <body>
   <noscript>
-    <div style="background:#dc2626;color:#fff;text-align:center;padding:1rem;font-weight:600;">
-      Este laboratório necessita de JavaScript para funcionar.
-    </div>
+    <div class="noscript-banner">Este laboratorio necessita de JavaScript para funcionar.</div>
   </noscript>
   <div class="cursor-dot" aria-hidden="true"></div>
   <div class="cursor-ring" aria-hidden="true"></div>
+
   <header class="navbar">
     <div class="nav-progress" id="nav-progress"></div>
     <div class="container nav-inner">
@@ -48,20 +46,17 @@
           <span class="atom-logo__orbit atom-logo__orbit--diagonal-a"></span>
           <span class="atom-logo__orbit atom-logo__orbit--diagonal-b"></span>
           <span class="atom-logo__ring atom-logo__ring--core"></span>
-          <span class="atom-logo__core">
-            <span class="atom-logo__letters">BJ</span>
-          </span>
+          <span class="atom-logo__core"><span class="atom-logo__letters">BJ</span></span>
         </div>
         <span class="nav-brand__text">
-          <strong>Laboratório</strong>
-          <span>Automação</span>
+          <strong>Laboratorio</strong>
+          <span>Gmail IA</span>
         </span>
       </a>
       <nav class="nav-links" aria-label="Principal">
-        <a class="nav-link" href="index.html">Voltar ao Portfolio</a>
+        <a class="nav-link" href="index.html">Portfolio</a>
       </nav>
       <div class="nav-actions">
-        <!-- Re-use theme toggle -->
         <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Alternar Tema">
           <span class="theme-toggle__orb" aria-hidden="true"></span>
           <span class="theme-toggle__text mono">Verde</span>
@@ -71,190 +66,107 @@
   </header>
 
   <main class="lab-main">
-    <section class="hero lab-hero lab-section-header">
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <div class="hero-system-label">
-            <span>[ SYS_ID: BJ-LAB ]</span>
-            <span>[ ESTADO: EXPERIMENTAL ]</span>
-          </div>
-          <h1 class="hero-name">Laboratório de Automação</h1>
-          <p class="hero-summary">
-            Ambiente interativo para demonstração de workflows n8n, processamento inteligente de regras e visualização de dados.
-          </p>
-          <div class="nebula-stats nebula-only" aria-label="Métricas do laboratório">
-            <div class="nebula-stat">
-              <span class="nebula-stat__value" data-nebula-count="3">0</span>
-              <span class="nebula-stat__label">Demos interativas</span>
-            </div>
-            <div class="nebula-stat">
-              <span class="nebula-stat__value" data-nebula-count="7">0</span>
-              <span class="nebula-stat__label">Nós no workflow</span>
-            </div>
-            <div class="nebula-stat">
-              <span class="nebula-stat__value">100%</span>
-              <span class="nebula-stat__label">Canvas API nativa</span>
-            </div>
-            <div class="nebula-stat">
-              <span class="nebula-stat__value">∞</span>
-              <span class="nebula-stat__label">Regras configuráveis</span>
-            </div>
-          </div>
+    <section class="lab-toolbar" aria-label="Estado Gmail">
+      <div class="container lab-toolbar__inner">
+        <div>
+          <p class="lab-kicker mono">BJ-LAB / GMAIL_AUTOMATION</p>
+          <h1 class="lab-title">Inbox assistida por IA</h1>
         </div>
-      </div>
-    </section>
-    <div class="nebula-marquee nebula-only" aria-hidden="true">
-      <div class="nebula-marquee__track">
-        <span class="nebula-marquee__item">Workflows n8n</span>
-        <span class="nebula-marquee__item">Qualificação de Leads</span>
-        <span class="nebula-marquee__item">Dashboards Dinâmicos</span>
-        <span class="nebula-marquee__item">Chatbots por Regras</span>
-        <span class="nebula-marquee__item">Canvas API</span>
-        <span class="nebula-marquee__item">Automação Multi-canal</span>
-        <span class="nebula-marquee__item">Workflows n8n</span>
-        <span class="nebula-marquee__item">Qualificação de Leads</span>
-        <span class="nebula-marquee__item">Dashboards Dinâmicos</span>
-        <span class="nebula-marquee__item">Chatbots por Regras</span>
-        <span class="nebula-marquee__item">Canvas API</span>
-        <span class="nebula-marquee__item">Automação Multi-canal</span>
-      </div>
-    </div>
-
-    <!-- Demo 1: Email Workflow Pipeline -->
-    <section class="section" data-surface="surface">
-      <div class="container">
-        <header class="section-header reveal is-visible">
-          <div class="section-heading">
-            <div class="section-kicker">&gt; WORKFLOW.start()</div>
-            <h2 class="section-title">Qualificação de Leads com IA</h2>
-          </div>
-          <p class="section-intro">
-            Automação multi-canal (Exclusiva): Envia a Lead para o Backend Node.js, simula o Enriquecimento de Dados, passa por uma avaliação da IA, e encaminha para a equipa via Slack (VIP) ou Mailchimp (Normal) com base no Score.
-          </p>
-        </header>
-
-        <div class="panel lab-panel demo-pipeline">
-          <div class="lab-panel__body node-editor-layout">
-            <div class="node-editor-sidebar">
-              <label for="email-input" class="mono lab-label">Email da Lead (Simulação)</label>
-              <input type="email" id="email-input" class="lab-textarea" value="elon@spacex.com" />
-              <button id="btn-run-pipeline" class="btn lab-btn-full">Executar Workflow <i data-lucide="play"></i></button>
-              <div id="pipeline-final-status" class="pipeline-final-status mono"></div>
-            </div>
-            
-            <div class="node-editor-canvas-wrapper" id="node-editor-container">
-              <!-- Dot grid background is applied via CSS -->
-              <svg id="node-edges" class="node-edges"></svg>
-              <!-- Nodes will be injected here by JS -->
-            </div>
-          </div>
-          <div class="lab-panel__footer lab-demo-footer">
-            <span class="badge">#n8n-simulation</span>
-            <span class="badge">#automation</span>
-          </div>
+        <div class="lab-actions">
+          <span class="lab-status" id="gmail-status">A verificar...</span>
+          <button type="button" class="btn" id="btn-connect-gmail">
+            <i data-lucide="mail-plus" aria-hidden="true"></i>
+            Ligar Gmail
+          </button>
+          <button type="button" class="btn is-ghost" id="btn-disconnect-gmail" hidden>
+            <i data-lucide="log-out" aria-hidden="true"></i>
+            Desligar
+          </button>
         </div>
       </div>
     </section>
 
-    <!-- Demo 2: Dashboard Builder -->
-    <section class="section" data-surface="surface-2">
-      <div class="container">
-        <header class="section-header reveal is-visible">
-          <div class="section-heading">
-            <div class="section-kicker">&gt; DATA.visualize()</div>
-            <h2 class="section-title">Construtor de Dashboard</h2>
+    <section class="container lab-shell" aria-label="Laboratorio Gmail">
+      <aside class="lab-inbox" aria-label="Inbox recente">
+        <div class="lab-panel-heading">
+          <div>
+            <p class="lab-kicker mono">INBOX</p>
+            <h2>Emails recentes</h2>
           </div>
-          <p class="section-intro">
-            Geração de gráficos dinâmicos a partir de dados em CSV, utilizando a Canvas API nativa para renderização.
-          </p>
-        </header>
-
-        <div class="panel lab-panel demo-dashboard">
-          <div class="lab-panel__body dashboard-grid">
-            <div class="lab-sidebar">
-              <label for="csv-input" class="mono lab-label">Dados (CSV)</label>
-              <textarea id="csv-input" class="lab-textarea" rows="7">Mês,Vendas,Custos
-Jan,12000,8000
-Fev,15000,8500
-Mar,11000,9000
-Abr,18000,9200
-Mai,22000,10000</textarea>
-              
-              <label for="chart-type" class="mono lab-label lab-label--spaced">Tipo de Gráfico</label>
-              <select id="chart-type" class="lab-select">
-                <option value="bar">Barras (Vendas vs Custos)</option>
-                <option value="line">Linha de Tendência</option>
-                <option value="donut">Donut (Total de Vendas)</option>
-              </select>
-              
-              <button id="btn-generate-chart" class="btn lab-btn-full">Gerar Dashboard <i data-lucide="bar-chart-2"></i></button>
-            </div>
-            <div class="dashboard-canvas-area">
-              <canvas id="dashboard-canvas" width="600" height="400" role="img" aria-label="Gráfico de dashboard">Gráfico de dashboard — requer JavaScript</canvas>
-            </div>
-          </div>
-          <div class="lab-panel__footer lab-demo-footer">
-            <span class="badge">#canvas-api</span>
-            <span class="badge">#data-viz</span>
-          </div>
+          <button type="button" class="icon-btn" id="btn-refresh-inbox" aria-label="Atualizar inbox" title="Atualizar inbox">
+            <i data-lucide="refresh-cw" aria-hidden="true"></i>
+          </button>
         </div>
-      </div>
-    </section>
+        <div class="lab-empty" id="inbox-empty">Liga o Gmail para carregar a inbox.</div>
+        <div class="mail-list" id="inbox-list" role="list"></div>
+      </aside>
 
-    <!-- Demo 3: Chatbot Configurable Rules -->
-    <section class="section" data-surface="surface-3">
-      <div class="container">
-        <header class="section-header reveal is-visible">
-          <div class="section-heading">
-            <div class="section-kicker">&gt; BOT_ENGINE.init()</div>
-            <h2 class="section-title">Chatbot Baseado em Regras</h2>
-          </div>
-          <p class="section-intro">
-            Defina regras semânticas de keyword-matching no painel da esquerda e interaja com o agente virtual na direita.
-          </p>
-        </header>
-
-        <div class="panel lab-panel demo-chat">
-          <div class="lab-panel__body chat-split">
-            <!-- Left: Rule Editor -->
-            <div class="rule-editor">
-              <h3 class="mono rule-editor__title">Editor de Regras</h3>
-              <div id="rules-container" class="rules-container">
-                <!-- Rules injected by JS -->
-              </div>
-              <button id="btn-add-rule" class="btn is-ghost lab-btn-full"><i data-lucide="plus"></i> Adicionar Regra</button>
-            </div>
-
-            <!-- Right: Chat Interface -->
-            <div class="chat-interface">
-              <div id="chat-messages" class="chat-messages" role="log" aria-live="polite">
-                <div class="chat-message bot">
-                  <div class="chat-bubble">Olá! Sou o agente de demonstração. Configura as minhas regras e fala comigo!</div>
-                </div>
-              </div>
-              <div class="chat-input-area">
-                <input type="text" id="chat-input" class="lab-input" placeholder="Escreve uma mensagem...">
-                <button id="btn-send-chat" class="icon-btn" aria-label="Enviar mensagem"><i data-lucide="send"></i></button>
-              </div>
-            </div>
-          </div>
-          <div class="lab-panel__footer lab-demo-footer">
-            <span class="badge">#rule-engine</span>
-            <span class="badge">#chatbot</span>
-          </div>
+      <section class="lab-reader" aria-label="Email selecionado">
+        <div class="message-empty" id="message-empty">
+          <i data-lucide="inbox" aria-hidden="true"></i>
+          <span>Seleciona um email.</span>
         </div>
-      </div>
+
+        <article class="message-view" id="message-view" hidden>
+          <header class="message-header">
+            <div>
+              <p class="message-from" id="message-from"></p>
+              <h2 class="message-subject" id="message-subject"></h2>
+              <p class="message-date mono" id="message-date"></p>
+            </div>
+            <span class="priority-pill" id="message-priority" hidden></span>
+          </header>
+
+          <div class="message-body" id="message-body"></div>
+
+          <section class="ai-panel" aria-label="Resumo e sugestoes">
+            <div class="lab-panel-heading">
+              <div>
+                <p class="lab-kicker mono">AI_RESPONSE</p>
+                <h3>Resumo e respostas</h3>
+              </div>
+              <span class="ai-state mono" id="summary-state">A aguardar email</span>
+            </div>
+            <div class="summary-grid">
+              <div>
+                <span class="field-label">Resumo</span>
+                <p id="summary-text">-</p>
+              </div>
+              <div>
+                <span class="field-label">Intencao</span>
+                <p id="intent-text">-</p>
+              </div>
+            </div>
+            <div class="suggestions-list" id="suggestions-list"></div>
+          </section>
+
+          <section class="reply-panel" aria-label="Resposta">
+            <label class="field-label" for="reply-editor">Resposta final</label>
+            <textarea id="reply-editor" class="reply-editor" rows="8" placeholder="Escolhe uma sugestao ou escreve a tua resposta."></textarea>
+            <div class="reply-actions">
+              <span class="reply-state mono" id="reply-state"></span>
+              <button type="button" class="btn" id="btn-send-reply" disabled>
+                <i data-lucide="send" aria-hidden="true"></i>
+                Enviar resposta
+              </button>
+            </div>
+          </section>
+        </article>
+      </section>
     </section>
   </main>
 
   <footer class="footer">
     <div class="container footer-inner">
-      <div class="footer-meta">BRUNO JESUS / LABORATÓRIO</div>
-      <p class="footer-quote">"A testar ideias, um protótipo de cada vez."</p>
+      <div class="footer-meta">BRUNO JESUS / GMAIL LAB</div>
+      <p class="footer-quote">"Rever primeiro. Enviar so quando fizer sentido."</p>
     </div>
   </footer>
 
-  <script defer src="assets/js/lab.js?v=20260611-nebula"></script>
-  <script defer src="assets/js/nebula.js?v=20260611-nebula"></script>
+  <div class="lab-toast" id="lab-toast" role="status" aria-live="polite" hidden></div>
+
+  <script defer src="assets/js/lab.js?v=20260617-gmail-lab"></script>
+  <script defer src="assets/js/nebula.js?v=20260617-gmail-lab"></script>
 </body>
+
 </html>

@@ -47,7 +47,15 @@ const envSchema = z
   RATE_LIMIT_CONTACT_MAX: z.coerce.number().int().positive().default(5),
   RATE_LIMIT_CONTACT_WINDOW_MINUTES: z.coerce.number().int().positive().default(10),
   RATE_LIMIT_GLOBAL_MAX: z.coerce.number().int().positive().default(100),
-  RATE_LIMIT_GLOBAL_WINDOW_MINUTES: z.coerce.number().int().positive().default(15)
+  RATE_LIMIT_GLOBAL_WINDOW_MINUTES: z.coerce.number().int().positive().default(15),
+  GOOGLE_CLIENT_ID: z.string().default(""),
+  GOOGLE_CLIENT_SECRET: z.string().default(""),
+  GOOGLE_REDIRECT_URI: z.string().url("GOOGLE_REDIRECT_URI must be a valid URL.").optional(),
+  LAB_ALLOWED_EMAILS: z.string().default(""),
+  LAB_SESSION_SECRET: z.string().min(16).default("dev_lab_session_secret_replace_in_production"),
+  TOKEN_ENCRYPTION_KEY: z.string().min(16).default("dev_token_encryption_key_replace_in_production"),
+  OPENAI_API_KEY: z.string().default(""),
+  OPENAI_MODEL: z.string().min(1).default("gpt-5.5")
 })
   .superRefine((values, ctx) => {
     try {
@@ -128,6 +136,62 @@ const envSchema = z
         message: "DATABASE_URL must point to a production PostgreSQL database."
       });
     }
+
+    if (!values.GOOGLE_CLIENT_ID || values.GOOGLE_CLIENT_ID.includes("replace_with")) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["GOOGLE_CLIENT_ID"],
+        message: "GOOGLE_CLIENT_ID must be configured in production."
+      });
+    }
+
+    if (!values.GOOGLE_CLIENT_SECRET || values.GOOGLE_CLIENT_SECRET.includes("replace_with")) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["GOOGLE_CLIENT_SECRET"],
+        message: "GOOGLE_CLIENT_SECRET must be configured in production."
+      });
+    }
+
+    if (!values.GOOGLE_REDIRECT_URI?.startsWith("https://")) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["GOOGLE_REDIRECT_URI"],
+        message: "GOOGLE_REDIRECT_URI must use HTTPS in production."
+      });
+    }
+
+    if (!values.LAB_ALLOWED_EMAILS.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["LAB_ALLOWED_EMAILS"],
+        message: "LAB_ALLOWED_EMAILS must include at least one authorized email in production."
+      });
+    }
+
+    if (
+      values.LAB_SESSION_SECRET.includes("replace") ||
+      values.LAB_SESSION_SECRET.includes("dev_") ||
+      values.LAB_SESSION_SECRET.length < 32
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["LAB_SESSION_SECRET"],
+        message: "LAB_SESSION_SECRET must be a strong production secret."
+      });
+    }
+
+    if (
+      values.TOKEN_ENCRYPTION_KEY.includes("replace") ||
+      values.TOKEN_ENCRYPTION_KEY.includes("dev_") ||
+      values.TOKEN_ENCRYPTION_KEY.length < 32
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["TOKEN_ENCRYPTION_KEY"],
+        message: "TOKEN_ENCRYPTION_KEY must be a strong production secret."
+      });
+    }
   });
 
 const parsedEnv = envSchema.safeParse(process.env);
@@ -144,6 +208,16 @@ export const env = parsedEnv.data;
 export const SERVICE_NAME = "bruno-jesus-portfolio-backend";
 export const API_VERSION = "1.0.0";
 export const isProduction = env.NODE_ENV === "production";
+
+export function getGoogleRedirectUri(): string {
+  return env.GOOGLE_REDIRECT_URI ?? `${parseOrigin(env.FRONTEND_URL)}/api/gmail/auth/callback`;
+}
+
+export function getAllowedLabEmails(): string[] {
+  return env.LAB_ALLOWED_EMAILS.split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+}
 
 export function getAllowedCorsOrigins(): string[] {
   const origins = new Set<string>([parseOrigin(env.FRONTEND_URL)]);

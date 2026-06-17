@@ -73,7 +73,7 @@ export async function registerSecurityMiddleware(app: FastifyInstance): Promise<
     },
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
-    credentials: false,
+    credentials: true,
     strictPreflight: true,
     maxAge: 86400
   });

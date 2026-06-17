@@ -12,6 +12,9 @@ const blockedSecretPatterns = [
   /\bghp_[A-Za-z0-9_]{20,}\b/,
   /\bgithub_pat_[A-Za-z0-9_]{20,}\b/,
   /\bsk-[A-Za-z0-9]{20,}\b/,
+  /\bsk-proj-[A-Za-z0-9_-]{20,}\b/,
+  /\bya29\.[A-Za-z0-9_-]{20,}\b/,
+  /\bAIza[0-9A-Za-z_-]{30,}\b/,
   /\bAKIA[0-9A-Z]{16}\b/,
   /\bxox[baprs]-[A-Za-z0-9-]{20,}\b/
 ];
@@ -95,7 +98,7 @@ function assertPublicFolderIsClean() {
     return;
   }
 
-  const allowedPublicEntries = new Set([".nojekyll", "index.html", "assets"]);
+  const allowedPublicEntries = new Set([".nojekyll", "index.html", "lab.html", "assets"]);
   const entries = readdirSync(publicRoot).filter((entry) => !allowedPublicEntries.has(entry));
 
   if (entries.length > 0) {
@@ -125,49 +128,56 @@ function walkFiles(directory) {
 
 function assertFrontendAssetsAreSafe() {
   for (const root of [frontendRoot, publicRoot]) {
-    const indexPath = resolve(root, "index.html");
+    const htmlPaths = ["index.html", "lab.html"].map((file) => resolve(root, file));
 
-    if (!existsSync(indexPath)) {
-      fail(`frontend index is missing: ${indexPath}`);
-      continue;
-    }
-
-    const html = readFileSync(indexPath, "utf8");
-
-    if (/<style[\s>]/i.test(html)) {
-      fail(`inline style block found in ${relative(projectRoot, indexPath)}`);
-    }
-
-    if (/<script(?![^>]*\bsrc=)[^>]*>/i.test(html)) {
-      fail(`inline script block found in ${relative(projectRoot, indexPath)}`);
-    }
-
-    if (/\sstyle=/.test(html)) {
-      fail(`inline style attribute found in ${relative(projectRoot, indexPath)}`);
-    }
-
-    if (/lucide@latest/i.test(html)) {
-      fail(`unpinned lucide CDN found in ${relative(projectRoot, indexPath)}`);
-    }
-
-    const externalScriptTags = html.match(/<script\b[^>]*\bsrc=["']https?:\/\/[^"']+["'][^>]*>/gi) ?? [];
-
-    for (const tag of externalScriptTags) {
-      if (!/\bintegrity=["'][^"']+["']/i.test(tag) || !/\bcrossorigin=["']anonymous["']/i.test(tag)) {
-        fail(`external script without SRI/crossorigin found in ${relative(projectRoot, indexPath)}: ${tag}`);
+    for (const indexPath of htmlPaths) {
+      if (!existsSync(indexPath)) {
+        fail(`frontend HTML is missing: ${indexPath}`);
+        continue;
       }
-    }
 
-    const externalBlankLinks = html.match(/<a\b[^>]*\btarget=["']_blank["'][^>]*>/gi) ?? [];
+      const html = readFileSync(indexPath, "utf8");
 
-    for (const tag of externalBlankLinks) {
-      if (!/\brel=["'][^"']*\bnoopener\b[^"']*\bnoreferrer\b[^"']*["']/i.test(tag)) {
-        fail(`target=_blank link without noopener noreferrer found in ${relative(projectRoot, indexPath)}: ${tag}`);
+      if (/<style[\s>]/i.test(html)) {
+        fail(`inline style block found in ${relative(projectRoot, indexPath)}`);
       }
-    }
 
-    if (/data:image\/png/i.test(html)) {
-      fail(`large base64 image found in ${relative(projectRoot, indexPath)}`);
+      const inlineScriptTags = html.match(/<script(?![^>]*\bsrc=)[^>]*>/gi) ?? [];
+      const executableInlineScriptTags = inlineScriptTags.filter(
+        (tag) => !/\btype=["']application\/ld\+json["']/i.test(tag)
+      );
+
+      if (executableInlineScriptTags.length > 0) {
+        fail(`inline script block found in ${relative(projectRoot, indexPath)}`);
+      }
+
+      if (/\sstyle=/.test(html)) {
+        fail(`inline style attribute found in ${relative(projectRoot, indexPath)}`);
+      }
+
+      if (/lucide@latest/i.test(html)) {
+        fail(`unpinned lucide CDN found in ${relative(projectRoot, indexPath)}`);
+      }
+
+      const externalScriptTags = html.match(/<script\b[^>]*\bsrc=["']https?:\/\/[^"']+["'][^>]*>/gi) ?? [];
+
+      for (const tag of externalScriptTags) {
+        if (!/\bintegrity=["'][^"']+["']/i.test(tag) || !/\bcrossorigin=["']anonymous["']/i.test(tag)) {
+          fail(`external script without SRI/crossorigin found in ${relative(projectRoot, indexPath)}: ${tag}`);
+        }
+      }
+
+      const externalBlankLinks = html.match(/<a\b[^>]*\btarget=["']_blank["'][^>]*>/gi) ?? [];
+
+      for (const tag of externalBlankLinks) {
+        if (!/\brel=["'][^"']*\bnoopener\b[^"']*\bnoreferrer\b[^"']*["']/i.test(tag)) {
+          fail(`target=_blank link without noopener noreferrer found in ${relative(projectRoot, indexPath)}: ${tag}`);
+        }
+      }
+
+      if (/data:image\/png/i.test(html)) {
+        fail(`large base64 image found in ${relative(projectRoot, indexPath)}`);
+      }
     }
   }
 
