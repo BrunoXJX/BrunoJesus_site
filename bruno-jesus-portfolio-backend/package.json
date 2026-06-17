@@ -18,6 +18,7 @@
     "postinstall": "prisma generate",
     "sync:frontend": "node scripts/sync-frontend.mjs",
     "security:check": "node scripts/security-check.mjs",
+    "pretest": "npm run sync:frontend",
     "lint": "eslint .",
     "test": "vitest",
     "prisma:generate": "prisma generate",
