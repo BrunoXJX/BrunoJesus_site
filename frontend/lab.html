@@ -154,6 +154,54 @@
         </article>
       </section>
     </section>
+
+    <!-- Agendamento por Voz -->
+    <section class="container voice-meeting-panel-container" aria-label="Agendamento por Voz">
+      <div class="voice-meeting-panel">
+        <div class="lab-panel-heading">
+          <div>
+            <p class="lab-kicker mono">VOICE_CONTROL / CALENDAR_AUTOMATION</p>
+            <h2>Agendar Reunião por Voz</h2>
+          </div>
+          <span class="voice-state mono" id="voice-status-text">Desativado</span>
+        </div>
+        
+        <div class="voice-body">
+          <div class="voice-controls">
+            <button type="button" class="btn btn-mic" id="btn-toggle-mic">
+              <i data-lucide="mic" id="mic-icon" aria-hidden="true"></i>
+              <span id="btn-mic-text">Falar Comando</span>
+            </button>
+            <div class="voice-live-text mono" id="voice-live-text" data-placeholder="Clique em 'Falar Comando' e descreva a reunião (ex: 'Agendar reunião sobre design amanhã às 14:30 com a descrição rever as maquetes')"></div>
+          </div>
+
+          <!-- Formulário de Edição e Confirmação -->
+          <div class="meeting-form" id="meeting-form" hidden>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="field-label" for="meeting-title">Título da Reunião</label>
+                <input type="text" id="meeting-title" class="meeting-input" placeholder="Ex: Alinhamento de Projeto">
+              </div>
+              <div class="form-group">
+                <label class="field-label" for="meeting-datetime">Data e Hora</label>
+                <input type="datetime-local" id="meeting-datetime" class="meeting-input">
+              </div>
+              <div class="form-group">
+                <label class="field-label" for="meeting-desc">Descrição / Detalhes</label>
+                <textarea id="meeting-desc" class="meeting-input" rows="3" placeholder="Detalhes adicionais da reunião..."></textarea>
+              </div>
+            </div>
+            <div class="meeting-actions">
+              <button type="button" class="btn is-ghost" id="btn-cancel-meeting">Descartar</button>
+              <button type="button" class="btn" id="btn-confirm-meeting">
+                <i data-lucide="calendar-plus" aria-hidden="true"></i>
+                Confirmar e Criar Evento
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="footer">

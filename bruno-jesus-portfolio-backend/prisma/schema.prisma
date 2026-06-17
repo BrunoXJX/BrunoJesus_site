@@ -39,6 +39,7 @@ model GmailAccount {
   updatedAt             DateTime             @updatedAt
   sessions              GmailLabSession[]
   logs                  GmailAutomationLog[]
+  calendarEvents        GoogleCalendarEvent[]
 
   @@index([email])
   @@index([updatedAt])
@@ -98,4 +99,21 @@ enum GmailActionType {
 enum GmailActionStatus {
   SUCCESS
   FAILURE
+}
+
+model GoogleCalendarEvent {
+  id              String        @id @default(cuid())
+  accountId       String
+  calendarEventId String        @unique @db.VarChar(255)
+  summary         String        @db.VarChar(200)
+  description     String?       @db.Text
+  startAt         DateTime
+  endAt           DateTime
+  hangoutLink     String?       @db.VarChar(512)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  account         GmailAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId])
+  @@index([startAt])
 }

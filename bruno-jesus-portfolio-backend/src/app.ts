@@ -21,11 +21,14 @@ import {
   type GmailAutomationService,
   type GmailPrismaClient
 } from "./services/gmail.service";
+import { calendarRoutes } from "./routes/calendar.routes";
+import { createCalendarService, type CalendarService } from "./services/calendar.service";
 
 export interface BuildAppOptions {
   prisma?: PrismaClientLike & GmailPrismaClient;
   emailService?: EmailService;
   gmailService?: GmailAutomationService;
+  calendarService?: CalendarService;
   logger?: FastifyServerOptions["logger"];
 }
 
@@ -95,6 +98,12 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
       prisma: prismaClient as unknown as GmailPrismaClient,
       logger: app.log
     });
+  const calendarService =
+    options.calendarService ??
+    createCalendarService({
+      prisma: prismaClient,
+      logger: app.log
+    });
 
   app.get("/api", async () => ({
     message: "Bruno Jesus Portfolio API",
@@ -115,6 +124,10 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<FastifyIn
   await app.register(gmailRoutes, {
     prefix: "/api",
     gmailService
+  });
+  await app.register(calendarRoutes, {
+    prefix: "/api",
+    calendarService
   });
   await app.register(workflowRoutes, {
     prefix: "/api"
