@@ -28,6 +28,12 @@
     summaryState: document.getElementById('summary-state'),
     summaryText: document.getElementById('summary-text'),
     intentText: document.getElementById('intent-text'),
+    senderResearch: document.getElementById('sender-research'),
+    senderIdentity: document.getElementById('sender-identity'),
+    senderOrganization: document.getElementById('sender-organization'),
+    senderContext: document.getElementById('sender-context'),
+    senderConfidence: document.getElementById('sender-confidence'),
+    senderSources: document.getElementById('sender-sources'),
     suggestionsList: document.getElementById('suggestions-list'),
     replyEditor: document.getElementById('reply-editor'),
     replyState: document.getElementById('reply-state'),
@@ -50,6 +56,11 @@
     showToast.timer = window.setTimeout(() => {
       els.toast.hidden = true;
     }, 3600);
+  }
+
+  function setBusy(element, isBusy) {
+    if (!element) return;
+    element.setAttribute('aria-busy', isBusy ? 'true' : 'false');
   }
 
   async function api(path, options) {
@@ -101,6 +112,15 @@
     if (els.disconnect) els.disconnect.hidden = !state.connected;
     if (els.refresh) els.refresh.disabled = !state.connected;
     if (els.inboxEmpty && !state.connected) els.inboxEmpty.textContent = 'Liga o Gmail para carregar a inbox.';
+
+    const voiceButton = document.getElementById('btn-toggle-mic');
+    const voiceStatus = document.getElementById('voice-status-text');
+    if (voiceButton && voiceButton.dataset.unsupported !== 'true') {
+      voiceButton.disabled = !state.connected;
+      if (voiceStatus) {
+        voiceStatus.textContent = state.connected ? 'Pronto' : 'Liga Google para usar voz';
+      }
+    }
   }
 
   function resetReader(message) {
@@ -191,6 +211,12 @@
     if (els.summaryState) els.summaryState.textContent = 'A gerar resumo...';
     if (els.summaryText) els.summaryText.textContent = '-';
     if (els.intentText) els.intentText.textContent = '-';
+    if (els.senderResearch) els.senderResearch.hidden = true;
+    if (els.senderIdentity) els.senderIdentity.textContent = '';
+    if (els.senderOrganization) els.senderOrganization.textContent = '';
+    if (els.senderContext) els.senderContext.textContent = '';
+    if (els.senderConfidence) els.senderConfidence.textContent = '';
+    if (els.senderSources) els.senderSources.textContent = '';
     if (els.suggestionsList) els.suggestionsList.textContent = '';
     if (els.messagePriority) {
       els.messagePriority.hidden = true;
@@ -207,6 +233,7 @@
     if (els.summaryText) els.summaryText.textContent = payload.summary;
     if (els.intentText) els.intentText.textContent = payload.intent;
     if (els.summaryState) els.summaryState.textContent = 'Pronto';
+    renderSenderResearch(payload.senderResearch);
     if (els.messagePriority) {
       els.messagePriority.hidden = false;
       els.messagePriority.textContent = payload.priority;
@@ -220,6 +247,7 @@
       button.type = 'button';
       button.className = 'suggestion-card';
       button.dataset.suggestionId = suggestion.id;
+      button.setAttribute('aria-pressed', 'false');
 
       const tone = document.createElement('span');
       tone.className = 'suggestion-card__tone mono';
@@ -229,21 +257,67 @@
       body.className = 'suggestion-card__body';
       body.textContent = suggestion.body;
 
+      const action = document.createElement('span');
+      action.className = 'suggestion-card__action mono';
+      action.textContent = 'Usar resposta';
+
       button.appendChild(tone);
       button.appendChild(body);
+      button.appendChild(action);
       button.addEventListener('click', () => {
         state.selectedSuggestionId = suggestion.id;
         if (els.replyEditor) {
           els.replyEditor.value = suggestion.body;
-          els.replyEditor.focus();
         }
         if (els.sendReply) els.sendReply.disabled = false;
         document.querySelectorAll('.suggestion-card').forEach((card) => {
-          card.classList.toggle('is-selected', card === button);
+          const isSelected = card === button;
+          card.classList.toggle('is-selected', isSelected);
+          card.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
         });
       });
       els.suggestionsList.appendChild(button);
     });
+  }
+
+  function renderSenderResearch(research) {
+    if (!els.senderResearch) return;
+    if (!research) {
+      els.senderResearch.hidden = true;
+      return;
+    }
+
+    els.senderResearch.hidden = false;
+    if (els.senderIdentity) els.senderIdentity.textContent = research.identity || 'Remetente desconhecido';
+    if (els.senderOrganization) {
+      els.senderOrganization.textContent = research.organization ? `Organização: ${research.organization}` : '';
+    }
+    if (els.senderContext) els.senderContext.textContent = research.context || 'Sem contexto público suficiente.';
+    if (els.senderConfidence) {
+      els.senderConfidence.textContent = research.confidence ? `confiança ${research.confidence}` : '';
+    }
+    if (els.senderSources) {
+      els.senderSources.textContent = '';
+      (research.sources || []).slice(0, 3).forEach((source) => {
+        let safeUrl = null;
+        try {
+          const parsedUrl = new window.URL(source.url);
+          if (parsedUrl.protocol === 'https:') {
+            safeUrl = parsedUrl.href;
+          }
+        } catch {
+          safeUrl = null;
+        }
+
+        if (!safeUrl) return;
+        const link = document.createElement('a');
+        link.href = safeUrl;
+        link.target = '_blank';
+        link.rel = 'noreferrer noopener';
+        link.textContent = source.title || safeUrl;
+        els.senderSources.appendChild(link);
+      });
+    }
   }
 
   async function loadStatus() {
@@ -294,6 +368,7 @@
   async function loadInbox() {
     if (!state.connected || !els.refresh) return;
     els.refresh.disabled = true;
+    setBusy(els.inboxList, true);
     if (els.inboxEmpty) {
       els.inboxEmpty.hidden = false;
       els.inboxEmpty.textContent = 'A carregar inbox...';
@@ -311,6 +386,7 @@
       }
     } finally {
       els.refresh.disabled = false;
+      setBusy(els.inboxList, false);
     }
   }
 
@@ -324,23 +400,31 @@
       renderMessage(payload.data.message);
       await loadSuggestions(messageId);
     } catch (error) {
+      if (state.loadingMessageId !== messageId) return;
       showToast(error.message, 'error');
       resetReader('Nao foi possivel abrir este email.');
     }
   }
 
   async function loadSuggestions(messageId) {
+    setBusy(els.messageView, true);
     try {
       const payload = await api(`/api/gmail/messages/${encodeURIComponent(messageId)}/suggestions`, {
         method: 'POST',
         body: JSON.stringify({})
       });
+      if (state.selectedMessage?.id !== messageId) return;
       renderSuggestions(payload.data);
     } catch (error) {
+      if (state.selectedMessage?.id !== messageId) return;
       if (els.summaryState) els.summaryState.textContent = 'Erro';
       if (els.summaryText) els.summaryText.textContent = error.message;
       if (els.intentText) els.intentText.textContent = '-';
       showToast(error.message, 'error');
+    } finally {
+      if (state.selectedMessage?.id === messageId) {
+        setBusy(els.messageView, false);
+      }
     }
   }
 
@@ -356,6 +440,7 @@
     if (!confirmed) return;
 
     els.sendReply.disabled = true;
+    setBusy(els.replyEditor, true);
     if (els.replyState) els.replyState.textContent = 'A enviar...';
 
     try {
@@ -373,6 +458,8 @@
       if (els.replyState) els.replyState.textContent = 'Erro';
       els.sendReply.disabled = false;
       showToast(error.message, 'error');
+    } finally {
+      setBusy(els.replyEditor, false);
     }
   }
 
@@ -437,6 +524,7 @@
     let ringY = mouseY;
     let rafId = null;
     let hovering = false;
+    let cursorVisible = false;
 
     document.querySelectorAll('a, button, textarea, input, select').forEach((element) => {
       element.addEventListener('mouseenter', () => {
@@ -448,17 +536,26 @@
     });
 
     window.addEventListener('mousemove', (event) => {
+      if (!cursorVisible) {
+        cursorVisible = true;
+        document.body.classList.add('cursor-visible');
+      }
       mouseX = event.clientX;
       mouseY = event.clientY;
     }, { passive: true });
+
+    window.addEventListener('mouseleave', () => {
+      cursorVisible = false;
+      document.body.classList.remove('cursor-visible');
+    });
 
     function updateCursor() {
       dotX += (mouseX - dotX) * 0.3;
       dotY += (mouseY - dotY) * 0.3;
       ringX += (mouseX - ringX) * 0.15;
       ringY += (mouseY - ringY) * 0.15;
-      dot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0)`;
-      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0)`;
+      dot.style.transform = `translate3d(${dotX}px, ${dotY}px, 0) translate(-50%, -50%)`;
+      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
       dot.classList.toggle('is-hover', hovering);
       ring.classList.toggle('is-hover', hovering);
       rafId = window.requestAnimationFrame(updateCursor);
@@ -472,6 +569,7 @@
 
   function initVoiceMeeting() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const supportsAudioRecording = Boolean(window.navigator.mediaDevices?.getUserMedia && window.MediaRecorder);
     const btnMic = document.getElementById('btn-toggle-mic');
     const btnMicText = document.getElementById('btn-mic-text');
     const micIcon = document.getElementById('mic-icon');
@@ -486,16 +584,22 @@
 
     if (!btnMic || !statusText) return;
 
-    if (!SpeechRecognition) {
-      statusText.textContent = 'Não suportado';
+    if (!supportsAudioRecording && !SpeechRecognition) {
+      statusText.textContent = 'Nao suportado';
       btnMic.disabled = true;
+      btnMic.dataset.unsupported = 'true';
       if (liveText) {
-        liveText.textContent = 'A Web Speech API não é suportada neste navegador. Use o Chrome ou Edge.';
+        liveText.textContent = 'Este navegador nao permite gravacao ou reconhecimento de voz. Usa Chrome, Edge ou Opera com permissao de microfone.';
       }
       return;
     }
 
     statusText.textContent = 'Pronto';
+    if (supportsAudioRecording) {
+      initRecorderMode();
+      return;
+    }
+
     const recognition = new SpeechRecognition();
     recognition.lang = 'pt-PT';
     recognition.interimResults = true;
@@ -503,6 +607,8 @@
 
     let isListening = false;
     let finalTranscriptText = '';
+    let accumulatedFinalTranscript = '';
+    let lastRecognitionError = null;
 
     recognition.onstart = () => {
       isListening = true;
@@ -515,38 +621,47 @@
       }
       if (liveText) liveText.textContent = '';
       if (meetingForm) meetingForm.hidden = true;
+      if (btnConfirm) btnConfirm.disabled = true;
       finalTranscriptText = '';
+      accumulatedFinalTranscript = '';
+      lastRecognitionError = null;
     };
 
     recognition.onresult = (event) => {
       let interimTranscript = '';
-      let finalTranscript = '';
 
       for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
+          accumulatedFinalTranscript += `${transcript} `;
         } else {
-          interimTranscript += event.results[i][0].transcript;
+          interimTranscript += transcript;
         }
       }
 
-      finalTranscriptText = finalTranscript || interimTranscript;
+      finalTranscriptText = `${accumulatedFinalTranscript} ${interimTranscript}`.replace(/\s+/g, ' ').trim();
       if (liveText) {
         liveText.textContent = finalTranscriptText;
       }
     };
 
     recognition.onerror = (event) => {
-      console.error('Erro no reconhecimento de voz:', event.error);
-      statusText.textContent = `Erro: ${event.error}`;
+      lastRecognitionError = event.error || 'desconhecido';
+      console.error('Erro no reconhecimento de voz:', lastRecognitionError);
+      statusText.textContent = `Erro: ${lastRecognitionError}`;
+      showToast(`Erro no microfone: ${lastRecognitionError}`, 'error');
       stopMicUi();
     };
 
     recognition.onend = () => {
       stopMicUi();
+      if (lastRecognitionError) {
+        statusText.textContent = `Erro: ${lastRecognitionError}`;
+        return;
+      }
+
       if (finalTranscriptText.trim()) {
-        statusText.textContent = 'A processar...';
-        processCommand(finalTranscriptText);
+        void processCommand(finalTranscriptText);
       } else {
         statusText.textContent = 'Pronto';
       }
@@ -554,7 +669,7 @@
 
     function stopMicUi() {
       isListening = false;
-      if (btnMicText) btnMicText.textContent = 'Falar Comando';
+      if (btnMicText) btnMicText.textContent = 'Falar comando';
       btnMic.classList.remove('is-recording');
       if (micIcon) {
         micIcon.setAttribute('data-lucide', 'mic');
@@ -562,97 +677,321 @@
       }
     }
 
+    function setRecordingUi(isRecording) {
+      if (btnMicText) btnMicText.textContent = isRecording ? 'Parar gravacao' : 'Falar comando';
+      btnMic.classList.toggle('is-recording', isRecording);
+      if (micIcon) {
+        micIcon.setAttribute('data-lucide', isRecording ? 'mic-off' : 'mic');
+        refreshIcons();
+      }
+    }
+
+    function getRecorderMimeType() {
+      const candidates = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/ogg;codecs=opus',
+        'audio/wav'
+      ];
+      return candidates.find((mimeType) => window.MediaRecorder.isTypeSupported(mimeType)) || '';
+    }
+
+    function blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new window.FileReader();
+        reader.onload = () => {
+          const result = typeof reader.result === 'string' ? reader.result : '';
+          resolve(result.includes(',') ? result.split(',').pop() : result);
+        };
+        reader.onerror = () => reject(reader.error || new Error('Falha ao ler audio.'));
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function applyParsedCommand(text, parsed) {
+      if (inputTitle) inputTitle.value = parsed.summary || '';
+      if (inputDateTime) inputDateTime.value = toDatetimeLocalValue(parsed.startAt);
+      if (inputDesc) inputDesc.value = parsed.description || text;
+      if (liveText) {
+        const notes = Array.isArray(parsed.notes) && parsed.notes.length > 0
+          ? `\n\nNotas: ${parsed.notes.join(' ')}`
+          : '';
+        liveText.textContent = `${text}${notes}`;
+      }
+
+      if (meetingForm) meetingForm.hidden = false;
+      statusText.textContent = 'Confirma os detalhes';
+      if (btnConfirm) btnConfirm.disabled = false;
+    }
+
+    function normalizeAudioMimeType(mimeType) {
+      if (!mimeType || typeof mimeType !== 'string') {
+        return 'audio/webm';
+      }
+      return mimeType.split(';')[0].trim().toLowerCase() || 'audio/webm';
+    }
+
+    function initRecorderMode() {
+      let mediaRecorder = null;
+      let mediaStream = null;
+      let audioChunks = [];
+      let recordingTimer = null;
+      let recordingStartedAt = 0;
+      const MIN_RECORDING_MS = 900;
+      const RECORDING_TIMESLICE_MS = 250;
+
+      async function processAudioBlob(blob) {
+        if (!blob || blob.size < 1200) {
+          statusText.textContent = 'Pronto';
+          showToast('Gravacao demasiado curta. Fala durante pelo menos 1 segundo.', 'error');
+          return;
+        }
+
+        statusText.textContent = 'A transcrever...';
+        setBusy(liveText, true);
+        if (btnConfirm) btnConfirm.disabled = true;
+
+        try {
+          const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Lisbon';
+          const audioBase64 = await blobToBase64(blob);
+          const payload = await api('/api/calendar/voice/transcribe', {
+            method: 'POST',
+            body: JSON.stringify({
+              audioBase64,
+              mimeType: normalizeAudioMimeType(blob.type),
+              now: new Date().toISOString(),
+              timezone
+            })
+          });
+          applyParsedCommand(payload.data.transcript, payload.data.parsed);
+        } catch (err) {
+          console.error('Falha na transcricao:', err);
+          const fallbackWorked = await trySpeechFallback(err.message || 'Falha ao transcrever o audio.');
+          if (!fallbackWorked) {
+            statusText.textContent = 'Erro ao transcrever';
+            showToast(err.message || 'Falha ao transcrever o audio.', 'error');
+          }
+        } finally {
+          setBusy(liveText, false);
+        }
+      }
+
+      async function trySpeechFallback(reason) {
+        if (!SpeechRecognition) {
+          return false;
+        }
+
+        statusText.textContent = 'A usar reconhecimento do browser...';
+        if (liveText) {
+          liveText.textContent = 'Nao consegui transcrever no servidor. Fala outra vez — desta vez uso o microfone do browser.';
+        }
+        showToast(reason, 'error');
+
+        return new Promise((resolve) => {
+          const recognition = new SpeechRecognition();
+          recognition.lang = 'pt-PT';
+          recognition.interimResults = false;
+          recognition.continuous = false;
+          let settled = false;
+
+          const finish = (success) => {
+            if (settled) return;
+            settled = true;
+            window.clearTimeout(timeoutId);
+            resolve(success);
+          };
+
+          const timeoutId = window.setTimeout(() => {
+            try {
+              recognition.stop();
+            } catch {
+              // ignore
+            }
+            finish(false);
+          }, 12000);
+
+          recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+              .map((result) => result[0]?.transcript || '')
+              .join(' ')
+              .trim();
+            if (!transcript) {
+              finish(false);
+              return;
+            }
+            settled = true;
+            window.clearTimeout(timeoutId);
+            void processCommand(transcript).finally(() => finish(true));
+          };
+
+          recognition.onerror = () => finish(false);
+          recognition.onend = () => {
+            if (!settled) {
+              finish(false);
+            }
+          };
+
+          try {
+            recognition.start();
+          } catch {
+            finish(false);
+          }
+        });
+      }
+
+      function cleanupRecording() {
+        window.clearTimeout(recordingTimer);
+        recordingTimer = null;
+        if (mediaStream) {
+          mediaStream.getTracks().forEach((track) => track.stop());
+          mediaStream = null;
+        }
+        mediaRecorder = null;
+        setRecordingUi(false);
+      }
+
+      function stopRecording() {
+        if (!mediaRecorder || mediaRecorder.state !== 'recording') {
+          return;
+        }
+
+        const elapsed = Date.now() - recordingStartedAt;
+        const finalizeStop = () => {
+          try {
+            mediaRecorder.requestData();
+          } catch {
+            // ignore
+          }
+          window.setTimeout(() => {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+              mediaRecorder.stop();
+            }
+          }, 80);
+        };
+
+        if (elapsed < MIN_RECORDING_MS) {
+          window.setTimeout(finalizeStop, MIN_RECORDING_MS - elapsed);
+          return;
+        }
+
+        finalizeStop();
+      }
+
+      async function startRecording() {
+        try {
+          if (meetingForm) meetingForm.hidden = true;
+          if (liveText) liveText.textContent = 'A gravar... fala agora e carrega em parar quando terminares.';
+          if (btnConfirm) btnConfirm.disabled = true;
+          audioChunks = [];
+          const mimeType = getRecorderMimeType();
+          mediaStream = await window.navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true
+            }
+          });
+          mediaRecorder = new window.MediaRecorder(mediaStream, mimeType ? { mimeType } : undefined);
+
+          mediaRecorder.addEventListener('dataavailable', (event) => {
+            if (event.data && event.data.size > 0) {
+              audioChunks.push(event.data);
+            }
+          });
+
+          mediaRecorder.addEventListener('error', (event) => {
+            console.error('Erro na gravacao de voz:', event.error);
+            statusText.textContent = 'Erro no microfone';
+            showToast('Erro no microfone. Confirma a permissao do navegador.', 'error');
+            cleanupRecording();
+          });
+
+          mediaRecorder.addEventListener('stop', () => {
+            const finalMimeType = normalizeAudioMimeType(mediaRecorder?.mimeType || mimeType || 'audio/webm');
+            cleanupRecording();
+            if (audioChunks.length === 0) {
+              statusText.textContent = 'Pronto';
+              showToast('Nao apanhei audio. Tenta novamente e fala mais perto do microfone.', 'error');
+              return;
+            }
+            void processAudioBlob(new window.Blob(audioChunks, { type: finalMimeType }));
+          });
+
+          recordingStartedAt = Date.now();
+          mediaRecorder.start(RECORDING_TIMESLICE_MS);
+          setRecordingUi(true);
+          statusText.textContent = 'A gravar...';
+          recordingTimer = window.setTimeout(stopRecording, 25000);
+        } catch (err) {
+          console.error('Falha ao iniciar gravacao:', err);
+          cleanupRecording();
+          statusText.textContent = 'Erro no microfone';
+          showToast('Nao consegui aceder ao microfone. Confirma a permissao do navegador.', 'error');
+        }
+      }
+
+      btnMic.addEventListener('click', () => {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+          stopRecording();
+          return;
+        }
+        void startRecording();
+      });
+      if (btnCancel) btnCancel.addEventListener('click', discardMeeting);
+      if (btnConfirm) btnConfirm.addEventListener('click', submitMeeting);
+    }
+
     function toggleListening() {
       if (isListening) {
         recognition.stop();
-      } else {
-        try {
-          recognition.start();
-        } catch (err) {
-          console.error('Falha ao iniciar escuta:', err);
-        }
+        return;
+      }
+
+      try {
+        lastRecognitionError = null;
+        recognition.start();
+      } catch (err) {
+        console.error('Falha ao iniciar escuta:', err);
+        showToast('Nao consegui iniciar o microfone. Confirma a permissao do navegador.', 'error');
       }
     }
 
-    function processCommand(text) {
-      const parsed = parseVoiceInput(text);
-      
-      if (inputTitle) inputTitle.value = parsed.title;
-      if (inputDateTime) inputDateTime.value = parsed.datetime;
-      if (inputDesc) inputDesc.value = parsed.description;
-
-      if (meetingForm) meetingForm.hidden = false;
-      statusText.textContent = 'Confirme os detalhes';
+    function toDatetimeLocalValue(value) {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
 
-    function parseVoiceInput(text) {
-      const rawText = text.toLowerCase();
-      const now = new Date();
-      let targetDate = new Date(now);
-      
-      let title = 'Reunião Agendada por Voz';
-      let description = '';
+    async function processCommand(text) {
+      statusText.textContent = 'A interpretar...';
+      setBusy(liveText, true);
+      if (btnConfirm) btnConfirm.disabled = true;
 
-      // 1. Parsing de data relativa
-      if (rawText.includes('amanhã')) {
-        targetDate.setDate(now.getDate() + 1);
-      } else if (rawText.includes('depois de amanhã')) {
-        targetDate.setDate(now.getDate() + 2);
-      } else if (rawText.includes('hoje')) {
-        // mantém hoje
-      } else {
-        const weekdays = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
-        for (let i = 0; i < 7; i++) {
-          if (rawText.includes(weekdays[i])) {
-            const currentDay = now.getDay();
-            let daysToAdd = i - currentDay;
-            if (daysToAdd <= 0) daysToAdd += 7;
-            targetDate.setDate(now.getDate() + daysToAdd);
-            break;
-          }
-        }
+      try {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/Lisbon';
+        const payload = await api('/api/calendar/voice/parse', {
+          method: 'POST',
+          body: JSON.stringify({
+            transcript: text,
+            now: new Date().toISOString(),
+            timezone
+          })
+        });
+        const parsed = payload.data;
+
+        applyParsedCommand(text, parsed);
+      } catch (err) {
+        statusText.textContent = 'Erro ao interpretar';
+        showToast(err.message || 'Falha ao interpretar o comando de voz.', 'error');
+      } finally {
+        setBusy(liveText, false);
       }
-
-      // 2. Parsing de horário (ex: "às 14:30", "às 15h", "às 9 horas")
-      const timeRegex = /às\s+(\d{1,2})(?:h|:)(\d{2})?/i;
-      const matchTime = rawText.match(timeRegex);
-      if (matchTime) {
-        const hours = parseInt(matchTime[1], 10);
-        const matchMins = matchTime[2];
-        const minutes = matchMins ? parseInt(matchMins, 10) : 0;
-        targetDate.setHours(hours, minutes, 0, 0);
-      } else {
-        // Se não houver horário, agenda para a próxima hora
-        targetDate.setHours(now.getHours() + 1, 0, 0, 0);
-      }
-
-      // 3. Parsing de assunto/título (ex: "reunião sobre feedback", "assunto balanço")
-      const titleRegex = /(?:reunião sobre|assunto|tema|título)\s+([^,.\n]+)/i;
-      const matchTitle = rawText.match(titleRegex);
-      if (matchTitle) {
-        title = matchTitle[1].trim();
-      }
-
-      // 4. Parsing de descrição
-      const descRegex = /(?:com a descrição|descrição|detalhes)\s+([^,.\n]+)/i;
-      const matchDesc = rawText.match(descRegex);
-      if (matchDesc) {
-        description = matchDesc[1].trim();
-      }
-
-      // Format datetime-local value string (YYYY-MM-DDTHH:MM)
-      const year = targetDate.getFullYear();
-      const month = String(targetDate.getMonth() + 1).padStart(2, '0');
-      const day = String(targetDate.getDate()).padStart(2, '0');
-      const hours = String(targetDate.getHours()).padStart(2, '0');
-      const minutes = String(targetDate.getMinutes()).padStart(2, '0');
-      const datetimeStr = `${year}-${month}-${day}T${hours}:${minutes}`;
-
-      return {
-        title: title.charAt(0).toUpperCase() + title.slice(1),
-        description: description.charAt(0).toUpperCase() + description.slice(1),
-        datetime: datetimeStr
-      };
     }
 
     async function submitMeeting() {
@@ -662,15 +1001,21 @@
       const description = inputDesc ? inputDesc.value.trim() : '';
 
       if (!title || !datetimeVal) {
-        showToast('Preencha o Título e a Data/Hora.', 'error');
+        showToast('Preenche o titulo e a data/hora.', 'error');
         return;
       }
 
       const localDate = new Date(datetimeVal);
+      if (Number.isNaN(localDate.getTime())) {
+        showToast('A data/hora nao e valida.', 'error');
+        return;
+      }
+
       const startAt = localDate.toISOString();
       const endAt = new Date(localDate.getTime() + 30 * 60000).toISOString();
 
       if (btnConfirm) btnConfirm.disabled = true;
+      setBusy(meetingForm, true);
       statusText.textContent = 'A agendar...';
 
       try {
@@ -686,13 +1031,15 @@
         });
 
         statusText.textContent = 'Sucesso!';
-        showToast('Reunião agendada com Google Meet!', 'success');
+        showToast('Reuniao agendada com Google Meet!', 'success');
         discardMeeting();
       } catch (err) {
         console.error(err);
         statusText.textContent = 'Erro ao agendar';
         showToast(err.message || 'Falha ao agendar.', 'error');
         if (btnConfirm) btnConfirm.disabled = false;
+      } finally {
+        setBusy(meetingForm, false);
       }
     }
 
@@ -701,6 +1048,10 @@
       if (liveText) liveText.textContent = '';
       statusText.textContent = 'Pronto';
       finalTranscriptText = '';
+      accumulatedFinalTranscript = '';
+      lastRecognitionError = null;
+      setBusy(meetingForm, false);
+      setBusy(liveText, false);
       if (btnConfirm) btnConfirm.disabled = false;
     }
 

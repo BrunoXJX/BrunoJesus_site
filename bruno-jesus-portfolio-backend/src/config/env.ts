@@ -42,7 +42,7 @@ const envSchema = z
       message: "CONTACT_FROM_EMAIL must include an email address."
     }),
   CORS_ORIGINS: z.string().default(""),
-  REQUEST_BODY_LIMIT_BYTES: z.coerce.number().int().min(1024).max(262144).default(65536),
+  REQUEST_BODY_LIMIT_BYTES: z.coerce.number().int().min(1024).max(8_388_608).default(1_048_576),
   EMAIL_TIMEOUT_MS: z.coerce.number().int().min(1000).max(30000).default(5000),
   RATE_LIMIT_CONTACT_MAX: z.coerce.number().int().positive().default(5),
   RATE_LIMIT_CONTACT_WINDOW_MINUTES: z.coerce.number().int().positive().default(10),
@@ -55,7 +55,12 @@ const envSchema = z
   LAB_SESSION_SECRET: z.string().min(16).default("dev_lab_session_secret_replace_in_production"),
   TOKEN_ENCRYPTION_KEY: z.string().min(16).default("dev_token_encryption_key_replace_in_production"),
   OPENAI_API_KEY: z.string().default(""),
-  OPENAI_MODEL: z.string().min(1).default("gpt-5.5")
+  OPENAI_MODEL: z.string().min(1).default("gpt-5.5"),
+  OPENAI_TRANSCRIBE_MODEL: z.string().min(1).default("whisper-1"),
+  OPENAI_WEB_SEARCH_ENABLED: z
+    .enum(["true", "false"])
+    .default("true")
+    .transform((value) => value === "true")
 })
   .superRefine((values, ctx) => {
     try {
